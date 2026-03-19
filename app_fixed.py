@@ -16,10 +16,12 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.research_system import AutonomousResearchSystem
 from src.agents.custom_citation_formatter import CustomCitationFormatter
-from src.agents.literature_builder_agent import LiteratureBuilderAgent
 
 app = Flask(__name__)
-app.config['SECRET_KEY'] = 'research-system-secret-key'
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'research-system-secret-key')
+
+# Create output directory on startup
+Path("output").mkdir(exist_ok=True)
 
 # Global system instance
 research_system = None
@@ -473,12 +475,6 @@ def citations_page():
     return render_template('enhanced_citations.html')
 
 
-@app.route('/literature')
-def literature_page():
-    """Literature builder page."""
-    return render_template('literature_builder.html')
-
-
 @app.route('/corrections-details')
 def corrections_details():
     """Corrections details page."""
@@ -599,121 +595,55 @@ def run_reference_validation(content: str, file_format: str, options: dict):
             'validation_report': validation_report
         }
         
-        # Process corrections for display - avoid duplicates
+        # Build corrections by directly comparing original vs final for each reference
         corrections_by_ref = {}
         
-        # Group format corrections
-        for correction in result.format_corrections:
-            ref_key = correction['reference_key']
-            if ref_key not in corrections_by_ref:
-                corrections_by_ref[ref_key] = {
-                    'type': 'Format',
-                    'reference_key': ref_key,
-                    'details': [],
-                    'corrections_count': 0,
-                    'processed_fields': set()  # Track processed fields to avoid duplicates
-                }
-            
-            for corr_text in correction['corrections']:
-                # Parse correction text to extract before/after
-                if ' → ' in corr_text:
-                    field, change = corr_text.split(':', 1) if ':' in corr_text else ('Field', corr_text)
-                    field = field.strip()
-                    
-                    # Skip if this field was already processed
-                    if field in corrections_by_ref[ref_key]['processed_fields']:
-                        continue
-                        
-                    if ' → ' in change:
-                        before, after = change.split(' → ', 1)
-                        corrections_by_ref[ref_key]['details'].append({
-                            'field': field,
-                            'before': before.strip().strip("'\""),
-                            'after': after.strip().strip("'\"")
-                        })
-                        corrections_by_ref[ref_key]['corrections_count'] += 1
-                        corrections_by_ref[ref_key]['processed_fields'].add(field)
+        # Create a lookup of final corrected refs by key
+        final_refs = {ref.get('key', ''): ref for ref in result.corrected_references}
+        original_refs = getattr(result, 'original_references', {})
         
-        # Group spelling corrections
-        for correction in result.spelling_corrections:
-            ref_key = correction['reference_key']
-            if ref_key not in corrections_by_ref:
-                corrections_by_ref[ref_key] = {
-                    'type': 'Spelling',
-                    'reference_key': ref_key,
-                    'details': [],
-                    'corrections_count': 0,
-                    'processed_fields': set()
-                }
-            
-            for corr_text in correction['corrections']:
-                if ' → ' in corr_text:
-                    field, change = corr_text.split(':', 1) if ':' in corr_text else ('Spelling', corr_text)
-                    field = field.strip()
-                    
-                    if field in corrections_by_ref[ref_key]['processed_fields']:
-                        continue
-                        
-                    if ' → ' in change:
-                        before, after = change.split(' → ', 1)
-                        corrections_by_ref[ref_key]['details'].append({
-                            'field': field,
-                            'before': before.strip().strip("'\""),
-                            'after': after.strip().strip("'\"")
-                        })
-                        corrections_by_ref[ref_key]['corrections_count'] += 1
-                        corrections_by_ref[ref_key]['processed_fields'].add(field)
+        # Fields to compare and their display names
+        fields_to_check = [
+            ('key',     'Bibitem Key'),
+            ('authors', 'Authors'),
+            ('title',   'Title'),
+            ('journal', 'Journal'),
+            ('year',    'Year'),
+            ('volume',  'Volume'),
+            ('issue',   'Issue'),
+            ('pages',   'Pages'),
+            ('doi',     'DOI'),
+        ]
         
-        # Group paper verification corrections - only add unique corrections
-        for verification in result.verification_results:
-            ref_key = verification['reference_key']
-            ver_result = verification['verification']
+        for ref_key, original in original_refs.items():
+            final = final_refs.get(ref_key)
+            if not final:
+                continue
             
-            if ver_result.get('corrections_made'):
-                if ref_key not in corrections_by_ref:
-                    corrections_by_ref[ref_key] = {
-                        'type': 'Paper Data',
-                        'reference_key': ref_key,
-                        'details': [],
-                        'corrections_count': 0,
-                        'processed_fields': set()
-                    }
-                elif corrections_by_ref[ref_key]['type'] != 'Paper Data':
-                    corrections_by_ref[ref_key]['type'] = 'Format & Data'
+            details = []
+            for field, label in fields_to_check:
+                orig_val = str(original.get(field, '') or '').strip()
+                final_val = str(final.get(field, '') or '').strip()
                 
-                for corr_text in ver_result['corrections_made']:
-                    if 'corrected:' in corr_text or 'added:' in corr_text:
-                        # Parse correction text
-                        if 'corrected:' in corr_text:
-                            field, change = corr_text.split(' corrected:', 1)
-                        elif 'added:' in corr_text:
-                            field, change = corr_text.split(' added:', 1)
-                        else:
-                            continue
-                            
-                        field = field.strip()
-                        
-                        # Skip if this field was already processed
-                        if field in corrections_by_ref[ref_key]['processed_fields']:
-                            continue
-                            
-                        if ' → ' in change:
-                            before, after = change.split(' → ', 1)
-                        else:
-                            before = 'Not provided'
-                            after = change.strip()
-                        
-                        corrections_by_ref[ref_key]['details'].append({
-                            'field': field,
-                            'before': before.strip().strip("'\""),
-                            'after': after.strip().strip("'\"")
-                        })
-                        corrections_by_ref[ref_key]['corrections_count'] += 1
-                        corrections_by_ref[ref_key]['processed_fields'].add(field)
-        
-        # Clean up processed_fields from response and convert to list
-        for ref_key in corrections_by_ref:
-            del corrections_by_ref[ref_key]['processed_fields']
+                # Skip if both empty or identical
+                if not orig_val and not final_val:
+                    continue
+                if orig_val == final_val:
+                    continue
+                
+                details.append({
+                    'field': label,
+                    'before': orig_val if orig_val else 'Not provided',
+                    'after': final_val if final_val else 'Removed',
+                })
+            
+            if details:
+                corrections_by_ref[ref_key] = {
+                    'type': 'Corrected',
+                    'reference_key': ref_key,
+                    'details': details,
+                    'corrections_count': len(details),
+                }
         
         response['corrections'] = list(corrections_by_ref.values())
         
@@ -743,97 +673,6 @@ def run_reference_validation(content: str, file_format: str, options: dict):
         loop.close()
 
 
-@app.route('/generate-literature', methods=['POST'])
-def generate_literature():
-    """Generate structured literature from research results."""
-    try:
-        data = request.get_json()
-        topic = data.get('topic', '').strip()
-        filters = data.get('filters', {})
-        
-        if not topic:
-            return jsonify({'error': 'Topic is required'}), 400
-        
-        app.logger.info(f"Literature generation request for topic: {topic}")
-        
-        # Run research and literature generation in a separate thread
-        future = executor.submit(run_literature_generation, topic, filters)
-        results = future.result(timeout=300)  # 5 minute timeout
-        
-        app.logger.info(f"Literature generated successfully for topic: {topic}")
-        
-        return jsonify(results)
-        
-    except concurrent.futures.TimeoutError:
-        app.logger.error(f"Literature generation timed out for topic: {topic}")
-        return jsonify({'error': 'Literature generation timed out. Please try a more specific topic.'}), 500
-    except Exception as e:
-        app.logger.error(f"Error in literature generation for topic '{topic}': {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return jsonify({'error': f'Literature generation failed: {str(e)}'}), 500
-
-
-def run_literature_generation(topic: str, filters: dict):
-    """Run literature generation in a separate thread."""
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    
-    try:
-        # Get research system and run research
-        app.logger.info(f"Starting research for topic: {topic}")
-        system = get_system()
-        research_results = loop.run_until_complete(system.research(topic))
-        
-        app.logger.info(f"Research completed. Found {len(research_results.papers)} papers, {len(research_results.claims)} claims")
-        
-        # Generate literature
-        app.logger.info("Starting literature generation...")
-        literature_agent = LiteratureBuilderAgent()
-        literature_document = loop.run_until_complete(literature_agent.process(research_results))
-        
-        app.logger.info(f"Literature generation completed. Generated {len(literature_document.sections)} sections")
-        
-        # Get statistics
-        stats = literature_agent.get_literature_stats(literature_document)
-        
-        # Convert to JSON-serializable format
-        result = {
-            'topic': topic,
-            'outline': {
-                'title': literature_document.outline.title,
-                'sections': literature_document.outline.sections,
-                'total_papers': literature_document.outline.total_papers,
-                'total_claims': literature_document.outline.total_claims,
-                'date_range': literature_document.outline.date_range,
-                'estimated_word_count': getattr(literature_document.outline, 'estimated_word_count', 0)
-            },
-            'sections': [
-                {
-                    'section_type': section.section_type,
-                    'title': section.title,
-                    'content': section.content,
-                    'citations': section.citations,
-                    'claim_ids': section.claim_ids,
-                    'word_count': section.word_count
-                }
-                for section in literature_document.sections
-            ],
-            'bibliography': literature_document.bibliography,
-            'metadata': literature_document.metadata,
-            'stats': stats,
-            'generated_at': literature_document.generated_at.isoformat()
-        }
-        
-        app.logger.info(f"Literature generation result prepared successfully")
-        return result
-        
-    except Exception as e:
-        app.logger.error(f"Error in literature generation: {str(e)}")
-        raise e
-        
-    finally:
-        loop.close()
 
 
 @app.route('/generate-custom-citations', methods=['POST'])
@@ -884,7 +723,22 @@ def run_citation_generation(topic):
         
         return {
             'topic': topic,
-            'citations': custom_citations,
+            'citations': [
+                {
+                    'paper_id': c.get('paper_id', ''),
+                    'bibitem_key': c.get('bibitem_key', ''),
+                    'bibitem_citation': c.get('bibitem_citation', ''),
+                    'formatted_authors': c.get('formatted_authors', ''),
+                    'formatted_title': c.get('formatted_title', ''),
+                    'year': c.get('year', ''),
+                    'volume_info': c.get('volume_info', ''),
+                    'page_numbers': c.get('page_numbers', ''),
+                    'doi_link': c.get('doi_link', ''),
+                    'paper_url': c.get('paper_url', ''),
+                    'journal_name': c.get('journal_name', ''),
+                }
+                for c in custom_citations
+            ],
             'stats': stats,
             'total_papers': len(results.papers)
         }
@@ -917,12 +771,8 @@ def test():
 
 
 if __name__ == '__main__':
-    # Create output directory
     Path("output").mkdir(exist_ok=True)
-    
-    print("🌐 Starting Research System Web Interface (Fixed Version)")
-    print("📍 Open your browser to: http://localhost:5000")
-    print("🧪 Test endpoint: http://localhost:5000/test")
-    print("📖 Citations page: http://localhost:5000/citations")
-    
-    app.run(debug=True, host='0.0.0.0', port=5000, threaded=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug = os.environ.get('FLASK_ENV', 'production') != 'production'
+    print(f"Starting on port {port}")
+    app.run(debug=debug, host='0.0.0.0', port=port, threaded=True)

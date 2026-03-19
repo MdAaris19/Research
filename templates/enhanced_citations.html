@@ -93,9 +93,6 @@
                 <a href="/" class="btn btn-outline-light me-2">
                     <i class="fas fa-home"></i> Research System
                 </a>
-                <a href="/literature" class="btn btn-outline-light me-2">
-                    <i class="fas fa-book-open"></i> Literature Builder
-                </a>
                 <a href="/validator" class="btn btn-outline-light">
                     <i class="fas fa-check-double"></i> Reference Validator
                 </a>
@@ -398,37 +395,14 @@
         function getCitationText(citation, format) {
             switch(format) {
                 case 'bibtex':
-                    return citation.original_paper ? generateBibTeX(citation.original_paper, citation.bibitem_key) : citation.bibitem_citation;
+                    return citation.bibitem_citation;
                 case 'apa':
-                    return citation.original_paper ? generateAPA(citation.original_paper) : citation.bibitem_citation;
+                    return citation.bibitem_citation;
                 case 'ieee':
-                    return citation.original_paper ? generateIEEE(citation.original_paper) : citation.bibitem_citation;
+                    return citation.bibitem_citation;
                 default:
                     return citation.bibitem_citation;
             }
-        }
-
-        function generateBibTeX(paper, key) {
-            const authors = paper.authors.join(' and ');
-            return `@article{${key},
-  title={${paper.title}},
-  author={${authors}},
-  journal={${paper.venue}},
-  year={${paper.year}}${paper.doi ? `,
-  doi={${paper.doi}}` : ''}
-}`;
-        }
-
-        function generateAPA(paper) {
-            const authors = paper.authors.length === 1 ? paper.authors[0] :
-                           paper.authors.length === 2 ? `${paper.authors[0]} & ${paper.authors[1]}` :
-                           `${paper.authors[0]} et al.`;
-            return `${authors} (${paper.year}). ${paper.title}. ${paper.venue}.`;
-        }
-
-        function generateIEEE(paper) {
-            const authors = paper.authors.join(', ');
-            return `${authors}, "${paper.title}," ${paper.venue}, ${paper.year}.`;
         }
 
         function copyCitation(index) {

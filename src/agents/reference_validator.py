@@ -48,6 +48,7 @@ class ReferenceValidationResult:
     def __init__(self):
         self.original_count = 0
         self.corrected_references = []
+        self.original_references = {}  # key -> original parsed ref for accurate before/after
         self.duplicates_removed = []
         self.format_corrections = []
         self.spelling_corrections = []
@@ -166,6 +167,10 @@ class ReferenceValidator(BaseAgent):
             result.original_count = len(references)
             result.processing_log.append(f"Parsed {len(references)} references")
             
+            # Store original parsed references for accurate before/after comparison
+            import copy
+            result.original_references = {ref.get('key', f'ref_{i}'): copy.deepcopy(ref) for i, ref in enumerate(references)}
+            
             # Step 2: Detect and remove duplicates
             unique_references = await self._remove_duplicates(references, result)
             result.processing_log.append(f"Removed {len(references) - len(unique_references)} duplicates")
@@ -276,86 +281,54 @@ class ReferenceValidator(BaseAgent):
                 clean_text = re.sub(r'\b(?:pp?\.\s*)?[0-9]+(?:[-–—]+[0-9]+)?|e[0-9]+\b\s*\.?\s*$', '', clean_text).strip()
             
             # Step 5: Now parse Authors, Title, Journal from remaining text
-            # The format is: Authors, Title, Journal
-            # Authors can have multiple names separated by commas (e.g., "S. Zafar, A. Rafiq, M. Sindhu")
-            # We need to identify where authors end and title begins
+            # Format: Authors, Title, Journal
+            # Key insight: after removing year/volume/pages/doi, the structure is always:
+            #   [author1, author2, ...], Title words possibly with commas, Journal Name
+            # The journal is the LAST comma-segment that is NOT an author name.
+            # Authors are identified by having initials (e.g. "S. Zafar", "M.H. Schultz").
             
-            # Strategy: Find the title by looking for a longer phrase (usually title is longer)
-            # and journal names often contain specific keywords
-            
-            # Split by commas
             parts = [p.strip() for p in clean_text.split(',')]
+            parts = [p for p in parts if p]  # remove empty
             
             if len(parts) >= 3:
-                # We have at least 3 parts
-                # Try to identify which parts are authors vs title vs journal
-                
-                # Heuristic: Authors are usually short names (1-3 words each)
-                # Title is usually longer (4+ words)
-                # Journal contains keywords like "Journal", "Proceedings", "Conference", etc.
-                
-                author_parts = []
-                title_part = None
-                journal_parts = []
-                
-                in_authors = True
-                in_title = False
-                
+                # Identify author parts: segments that look like "X. Lastname" or "X.Y. Lastname"
+                author_end_idx = 0
                 for i, part in enumerate(parts):
-                    words = part.split()
-                    
-                    # Check if this looks like an author name (short, has initials or names)
-                    is_author_like = (
-                        len(words) <= 3 and
-                        any(len(w) <= 3 and '.' in w for w in words)  # Has initials
-                    ) or (
-                        len(words) == 2 and  # Two words (First Last)
-                        all(w[0].isupper() for w in words if w)
-                    )
-                    
-                    # Check if this looks like a journal name
-                    is_journal_like = any(keyword in part.lower() for keyword in [
-                        'journal', 'proceedings', 'conference', 'transactions', 'letters',
-                        'ieee', 'acm', 'springer', 'elsevier', 'science', 'nature',
-                        'mathematics', 'physics', 'computing', 'engineering'
-                    ])
-                    
-                    if in_authors and is_author_like and not is_journal_like:
-                        author_parts.append(part)
-                    elif in_authors and not is_author_like:
-                        # Transition to title
-                        in_authors = False
-                        in_title = True
-                        title_part = part
-                    elif in_title and not is_journal_like:
-                        # Continue title
-                        if title_part:
-                            title_part += ', ' + part
-                        else:
-                            title_part = part
+                    words = part.strip().split()
+                    # An author segment has 1-3 words where at least one word has a period (initial)
+                    has_initial = any('.' in w and len(w) <= 4 for w in words)
+                    is_short = len(words) <= 3
+                    if has_initial and is_short:
+                        author_end_idx = i
                     else:
-                        # This is journal
-                        in_title = False
-                        journal_parts.append(part)
+                        break  # first non-author segment ends the author list
                 
-                # Assign parsed components
-                if author_parts:
-                    ref_data['authors'] = ', '.join(author_parts)
-                if title_part:
-                    ref_data['title'] = title_part
-                if journal_parts:
-                    ref_data['journal'] = ', '.join(journal_parts)
+                author_parts = parts[:author_end_idx + 1]
+                remaining = parts[author_end_idx + 1:]
+                
+                if remaining:
+                    # The LAST segment is the journal name.
+                    # Everything in between is the title.
+                    journal_part = remaining[-1].strip()
+                    title_parts = remaining[:-1]
+                    title_part = ', '.join(title_parts).strip()
                     
+                    ref_data['authors'] = ', '.join(author_parts)
+                    if title_part:
+                        ref_data['title'] = title_part
+                    if journal_part:
+                        ref_data['journal'] = journal_part
+                else:
+                    # No remaining after authors — treat all as authors
+                    ref_data['authors'] = ', '.join(author_parts)
+
             elif len(parts) == 2:
-                # Only 2 parts - likely Authors, Title or Authors, Journal
                 ref_data['authors'] = parts[0].strip()
-                # Check if second part looks like a journal
                 if any(keyword in parts[1].lower() for keyword in ['journal', 'proceedings', 'conference']):
                     ref_data['journal'] = parts[1].strip()
                 else:
                     ref_data['title'] = parts[1].strip()
             elif len(parts) == 1:
-                # Only one part - treat as authors
                 ref_data['authors'] = parts[0].strip()
             
             # Clean up extracted fields
