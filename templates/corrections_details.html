@@ -158,14 +158,13 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Get corrections data from URL parameters or localStorage
+        // Get corrections data from sessionStorage (avoids URL size limits)
         function loadCorrections() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const correctionsData = urlParams.get('data');
+            const raw = sessionStorage.getItem('correctionsData');
             
-            if (correctionsData) {
+            if (raw) {
                 try {
-                    const corrections = JSON.parse(decodeURIComponent(correctionsData));
+                    const corrections = JSON.parse(raw);
                     displayCorrections(corrections);
                 } catch (e) {
                     console.error('Error parsing corrections data:', e);
@@ -174,7 +173,7 @@
                 }
             } else {
                 document.getElementById('correctionsContainer').innerHTML = 
-                    '<div class="alert alert-info">No corrections data available.</div>';
+                    '<div class="alert alert-info">No corrections data available. Please run validation first.</div>';
             }
         }
 

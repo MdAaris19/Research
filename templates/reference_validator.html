@@ -423,9 +423,6 @@
                     <a class="nav-link" href="/"><i class="fas fa-home"></i> Research System</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="/literature"><i class="fas fa-book"></i> Literature Builder</a>
-                </li>
-                <li class="nav-item">
                     <a class="nav-link active" href="/validator"><i class="fas fa-check-double"></i> Reference Validator</a>
                 </li>
                 <li class="nav-item">
@@ -821,8 +818,9 @@
 
         function viewCorrectionsDetails() {
             if (window.correctionsData) {
-                const dataParam = encodeURIComponent(JSON.stringify(window.correctionsData));
-                window.open(`/corrections-details?data=${dataParam}`, '_blank');
+                // Store in sessionStorage to avoid URL size limits
+                sessionStorage.setItem('correctionsData', JSON.stringify(window.correctionsData));
+                window.open('/corrections-details', '_blank');
             }
         }
 
