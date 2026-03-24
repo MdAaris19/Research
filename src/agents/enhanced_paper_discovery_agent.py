@@ -88,31 +88,40 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         if not self.session:
             self.session = aiohttp.ClientSession()
         
+        # Check if this is an author search
+        author_name = None
+        for area in topic_map.related_areas:
+            if area.startswith("__author__:"):
+                author_name = area.replace("__author__:", "").strip()
+                break
+        
         all_papers = []
         
-        # Search each enabled source
-        search_tasks = []
-        
-        if self.apis["arxiv"]["enabled"]:
-            search_tasks.append(self._search_arxiv(topic_map))
-        
-        if self.apis["semantic_scholar"]["enabled"]:
-            search_tasks.append(self._search_semantic_scholar(topic_map))
-        
-        if self.apis["crossref"]["enabled"]:
-            search_tasks.append(self._search_crossref(topic_map))
-        
-        if self.apis["pubmed"]["enabled"]:
-            search_tasks.append(self._search_pubmed(topic_map))
-        
-        if self.apis["springer"]["enabled"] and self.apis["springer"]["api_key"]:
-            search_tasks.append(self._search_springer(topic_map))
-        
-        if self.apis["elsevier"]["enabled"] and self.apis["elsevier"]["api_key"]:
-            search_tasks.append(self._search_elsevier(topic_map))
-        
-        if self.apis["wiley"]["enabled"] and self.apis["wiley"]["api_key"]:
-            search_tasks.append(self._search_wiley(topic_map))
+        if author_name:
+            # Author search — use dedicated author search methods
+            self.logger.info(f"Running author search for: {author_name}")
+            search_tasks = [
+                self._search_arxiv_by_author(author_name),
+                self._search_semantic_scholar_by_author(author_name),
+                self._search_crossref_by_author(author_name),
+            ]
+        else:
+            # Topic search — existing behaviour
+            search_tasks = []
+            if self.apis["arxiv"]["enabled"]:
+                search_tasks.append(self._search_arxiv(topic_map))
+            if self.apis["semantic_scholar"]["enabled"]:
+                search_tasks.append(self._search_semantic_scholar(topic_map))
+            if self.apis["crossref"]["enabled"]:
+                search_tasks.append(self._search_crossref(topic_map))
+            if self.apis["pubmed"]["enabled"]:
+                search_tasks.append(self._search_pubmed(topic_map))
+            if self.apis["springer"]["enabled"] and self.apis["springer"]["api_key"]:
+                search_tasks.append(self._search_springer(topic_map))
+            if self.apis["elsevier"]["enabled"] and self.apis["elsevier"]["api_key"]:
+                search_tasks.append(self._search_elsevier(topic_map))
+            if self.apis["wiley"]["enabled"] and self.apis["wiley"]["api_key"]:
+                search_tasks.append(self._search_wiley(topic_map))
         
         # Execute searches concurrently
         results = await asyncio.gather(*search_tasks, return_exceptions=True)
@@ -121,7 +130,6 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         source_counts = {}
         for i, result in enumerate(results):
             source_name = list(self.apis.keys())[i] if i < len(self.apis) else f"source_{i}"
-            
             if isinstance(result, list):
                 all_papers.extend(result)
                 source_counts[source_name] = len(result)
@@ -133,7 +141,6 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         unique_papers = self._remove_duplicates(all_papers)
         ranked_papers = self._rank_papers(unique_papers, topic_map)
         
-        # Store results
         await self.store_result("enhanced_discovered_papers", ranked_papers)
         
         self.log_operation("enhanced_paper_discovery_complete", {
@@ -144,6 +151,83 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         
         return ranked_papers
     
+    async def _search_arxiv_by_author(self, author_name: str) -> List[PaperMetadata]:
+        """Search ArXiv for papers by a specific author."""
+        papers = []
+        # ArXiv author search uses au: prefix
+        query = f'au:"{author_name}"'
+        url = self.apis["arxiv"]["base_url"]
+        params = {
+            "search_query": query,
+            "start": 0,
+            "max_results": self.max_papers_per_source,
+            "sortBy": "submittedDate",
+            "sortOrder": "descending"
+        }
+        try:
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    content = await response.text()
+                    papers = self._parse_arxiv_response(content)
+        except Exception as e:
+            self.logger.error(f"ArXiv author search error: {e}")
+        return papers
+
+    async def _search_semantic_scholar_by_author(self, author_name: str) -> List[PaperMetadata]:
+        """Search Semantic Scholar for papers by a specific author."""
+        papers = []
+        # First find the author ID
+        try:
+            author_url = "https://api.semanticscholar.org/graph/v1/author/search"
+            params = {"query": author_name, "fields": "authorId,name,paperCount"}
+            headers = {}
+            if self.apis["semantic_scholar"]["api_key"]:
+                headers["x-api-key"] = self.apis["semantic_scholar"]["api_key"]
+
+            async with self.session.get(author_url, params=params, headers=headers) as resp:
+                if resp.status == 200:
+                    data = await resp.json()
+                    authors = data.get("data", [])
+                    if not authors:
+                        return papers
+                    # Take the first (most relevant) author match
+                    author_id = authors[0].get("authorId")
+                    if not author_id:
+                        return papers
+
+                    # Now fetch their papers
+                    papers_url = f"https://api.semanticscholar.org/graph/v1/author/{author_id}/papers"
+                    paper_params = {
+                        "fields": "paperId,title,authors,year,venue,abstract,citationCount,externalIds,url",
+                        "limit": self.max_papers_per_source
+                    }
+                    async with self.session.get(papers_url, params=paper_params, headers=headers) as presp:
+                        if presp.status == 200:
+                            pdata = await presp.json()
+                            papers = self._parse_semantic_scholar_response(pdata)
+        except Exception as e:
+            self.logger.error(f"Semantic Scholar author search error: {e}")
+        return papers
+
+    async def _search_crossref_by_author(self, author_name: str) -> List[PaperMetadata]:
+        """Search CrossRef for papers by a specific author."""
+        papers = []
+        url = self.apis["crossref"]["base_url"]
+        params = {
+            "query.author": author_name,
+            "rows": self.max_papers_per_source,
+            "sort": "relevance",
+            "mailto": self.apis["crossref"]["email"]
+        }
+        try:
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    papers = self._parse_crossref_response(data)
+        except Exception as e:
+            self.logger.error(f"CrossRef author search error: {e}")
+        return papers
+
     async def _search_arxiv(self, topic_map: TopicMap) -> List[PaperMetadata]:
         """Search ArXiv (existing implementation)."""
         papers = []

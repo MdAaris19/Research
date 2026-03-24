@@ -52,10 +52,10 @@ class AutonomousResearchSystem:
     
     async def research(self, topic: str) -> ResearchResults:
         """
-        Perform autonomous research on a given topic.
+        Perform autonomous research on a given topic or author name.
         
         Args:
-            topic: Research topic or question
+            topic: Research topic, question, or author name
             
         Returns:
             ResearchResults: Comprehensive research findings
@@ -64,9 +64,21 @@ class AutonomousResearchSystem:
         start_time = datetime.now()
         
         try:
+            # Detect if query is an author name
+            is_author = self._is_author_query(topic)
+            
             # Stage 1: Topic Expansion
             self.logger.info("Stage 1: Topic Expansion")
             topic_map = await self.topic_expansion_agent.process(topic)
+            
+            # Tag topic_map with author flag so discovery agent knows
+            if is_author:
+                self.logger.info(f"Detected author query: {topic}")
+                topic_map.main_topic = topic  # keep original name
+                topic_map.keywords = [topic]  # use name as keyword
+                topic_map.subtopics = [f"papers by {topic}"]
+                # Store author flag in related_areas as a signal
+                topic_map.related_areas = [f"__author__:{topic}"]
             
             # Stage 2: Paper Discovery
             self.logger.info("Stage 2: Paper Discovery")
@@ -117,6 +129,36 @@ class AutonomousResearchSystem:
         except Exception as e:
             self.logger.error(f"Error during research: {e}")
             raise
+
+    def _is_author_query(self, query: str) -> bool:
+        """Detect if the query looks like an author name rather than a topic."""
+        query = query.strip()
+        parts = query.split()
+        
+        # Must be 2-4 words
+        if not (2 <= len(parts) <= 4):
+            return False
+        
+        # All parts should start with a capital letter
+        if not all(p[0].isupper() for p in parts if p):
+            return False
+        
+        # Should not contain common topic words
+        topic_words = {
+            'graph', 'network', 'learning', 'deep', 'neural', 'index',
+            'theory', 'analysis', 'detection', 'classification', 'model',
+            'algorithm', 'method', 'approach', 'system', 'based', 'using',
+            'wiener', 'polarity', 'metric', 'dimension', 'topological',
+            'machine', 'artificial', 'intelligence', 'data', 'science'
+        }
+        if any(p.lower() in topic_words for p in parts):
+            return False
+        
+        # No digits
+        if any(c.isdigit() for c in query):
+            return False
+        
+        return True
     
     async def get_memory_stats(self) -> Dict[str, Any]:
         """Get memory store statistics."""
