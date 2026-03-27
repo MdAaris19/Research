@@ -92,7 +92,7 @@ def run_reference_validation(content, file_format, options):
         corrections_by_ref = {}
         
         for ref in result.valid_references:
-            ref_key = ref.get('key', 'unknown')
+            ref_key = ref.get('original_key') or ref.get('key', 'unknown')
             
             if ref_key not in corrections_by_ref:
                 corrections_by_ref[ref_key] = {

@@ -42,6 +42,7 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
 class ReferenceValidationResult:
     """Result of reference validation process."""
     
@@ -137,6 +138,253 @@ class ReferenceValidator(BaseAgent):
             'iccv': 'IEEE International Conference on Computer Vision',
             'eccv': 'European Conference on Computer Vision'
         }
+
+    def _normalize_journal_name(self, journal: str) -> str:
+        """Normalize a journal name for robust matching."""
+        if not journal:
+            return ''
+
+        normalized = journal.lower().strip()
+        normalized = re.sub(r'[^a-z0-9&+\-/\s]', ' ', normalized)
+        normalized = re.sub(r'\s+', ' ', normalized)
+        return normalized.strip()
+
+    def _extract_embedded_journal_from_title(self, title: str) -> Tuple[str, str]:
+        """Split a trailing journal name accidentally captured inside the title."""
+        if not title:
+            return title, ''
+
+        stripped_title = title.strip().strip(' .,;')
+        lower_title = stripped_title.lower()
+
+        for known_journal, correct_name in sorted(self.journal_names.items(), key=lambda item: len(item[0]), reverse=True):
+            match = re.search(rf'(?P<sep>[,.;:]\s+)(?P<journal>{re.escape(known_journal)})$', lower_title)
+            if match:
+                title_prefix = stripped_title[:match.start()].rstrip(' ,.;:')
+                if title_prefix:
+                    return title_prefix, correct_name
+
+        generic_match = re.search(r'(?P<title>.+?),\s*(?P<journal>[^,]+)$', stripped_title)
+        if generic_match:
+            candidate_title = generic_match.group('title').strip()
+            candidate_journal = generic_match.group('journal').strip()
+            journal_words = candidate_journal.split()
+
+            if (
+                len(candidate_title.split()) >= 5
+                and 2 <= len(journal_words) <= 8
+                and all(
+                    word.lower() in {'and', 'of', 'the', 'in', 'on', 'for', 'with', 'an', 'a'}
+                    or word[:1].isupper()
+                    for word in journal_words
+                )
+            ):
+                return candidate_title, candidate_journal
+
+        return stripped_title, ''
+
+    def _normalize_text_for_match(self, text: str) -> str:
+        """Normalize free text for similarity checks."""
+        if not text:
+            return ''
+
+        normalized = text.lower()
+        normalized = re.sub(r'[^a-z0-9\s]', ' ', normalized)
+        normalized = re.sub(r'\s+', ' ', normalized)
+        return normalized.strip()
+
+    def _extract_author_surnames(self, authors: str) -> Set[str]:
+        """Extract author surnames from a reference author string."""
+        if not authors:
+            return set()
+
+        surnames = set()
+        for author in authors.split(','):
+            parts = [part for part in author.strip().split() if part]
+            if parts:
+                surnames.add(self._normalize_text_for_match(parts[-1]))
+        return {name for name in surnames if name}
+
+    def _extract_crossref_author_surnames(self, item: Dict[str, Any]) -> Set[str]:
+        """Extract author surnames from a CrossRef item."""
+        surnames = set()
+        for author in item.get('author', []) or []:
+            family = author.get('family', '')
+            normalized = self._normalize_text_for_match(family)
+            if normalized:
+                surnames.add(normalized)
+        return surnames
+
+    def _extract_bibliographic_tail(self, clean_text: str, ref_data: Dict[str, Any]) -> str:
+        """Extract volume/issue/year/pages or article number from the tail."""
+        tail_patterns = [
+            re.compile(
+                r'^(?P<body>.+?)\s+\\textbf\{(?P<volume>[^}]+)\}(?:\((?P<issue>[^)]+)\))?\s*(?:\((?P<year>\d{4})\))?\s*(?P<pages>[A-Za-z]?\d+(?:\s*[-–—]{1,2}\s*\d+)?)?\.?$'
+            ),
+            re.compile(
+                r'^(?P<body>.+?)\s+(?P<volume>\d+)(?:\((?P<issue>[^)]+)\))?\s*\((?P<year>\d{4})\)\s*(?P<pages>[A-Za-z]?\d+(?:\s*[-–—]{1,2}\s*\d+)?)?\.?$'
+            ),
+            re.compile(
+                r'^(?P<body>.+?)\s+\\textbf\{(?P<volume>[^}]+)\}(?:\((?P<issue>[^)]+)\))?\s+(?P<pages>[A-Za-z]?\d+(?:\s*[-–—]{1,2}\s*\d+)?)\.?$'
+            ),
+        ]
+
+        text = clean_text.strip().rstrip('.')
+        for pattern in tail_patterns:
+            match = pattern.match(text)
+            if not match:
+                continue
+
+            groups = match.groupdict()
+            if groups.get('volume'):
+                ref_data['volume'] = groups['volume'].strip()
+            if groups.get('issue'):
+                ref_data['issue'] = groups['issue'].strip()
+            if groups.get('year'):
+                ref_data['year'] = int(groups['year'])
+            if groups.get('pages'):
+                ref_data['pages'] = self._normalize_pages(groups['pages'])
+
+            return groups['body'].strip().rstrip(',. ;')
+
+        return clean_text
+
+    def _normalize_pages(self, pages: str) -> str:
+        """Normalize page ranges/article numbers for consistent output."""
+        if not pages:
+            return pages
+
+        normalized = re.sub(r'\s+', '', str(pages).strip())
+        normalized = re.sub(r'(?<=\d)-(?=\d)', '--', normalized)
+        normalized = re.sub(r'[–—]+', '--', normalized)
+        return normalized
+
+    def _score_crossref_candidate(self, ref: Dict[str, Any], item: Dict[str, Any]) -> Tuple[float, Dict[str, float]]:
+        """Score a CrossRef candidate against the parsed reference."""
+        crossref_title = ''
+        if item.get('title'):
+            crossref_title = item['title'][0] if isinstance(item['title'], list) else item['title']
+
+        ref_title = self._normalize_text_for_match(ref.get('title', ''))
+        normalized_crossref_title = self._normalize_text_for_match(crossref_title)
+        title_similarity = difflib.SequenceMatcher(None, ref_title, normalized_crossref_title).ratio() if ref_title and normalized_crossref_title else 0.0
+
+        ref_title_words = set(ref_title.split())
+        crossref_title_words = set(normalized_crossref_title.split())
+        title_overlap = len(ref_title_words & crossref_title_words) / max(len(ref_title_words), len(crossref_title_words), 1)
+
+        crossref_journal = ''
+        if item.get('container-title'):
+            crossref_journal = item['container-title'][0] if isinstance(item['container-title'], list) else item['container-title']
+        journal_similarity = difflib.SequenceMatcher(
+            None,
+            self._normalize_journal_name(ref.get('journal', '')),
+            self._normalize_journal_name(crossref_journal),
+        ).ratio() if ref.get('journal') and crossref_journal else 0.0
+
+        ref_year = int(ref['year']) if str(ref.get('year', '')).isdigit() else None
+        crossref_year = None
+        if 'published-print' in item and item['published-print'].get('date-parts'):
+            crossref_year = item['published-print']['date-parts'][0][0]
+        elif 'published-online' in item and item['published-online'].get('date-parts'):
+            crossref_year = item['published-online']['date-parts'][0][0]
+        year_score = 0.0
+        if ref_year and crossref_year:
+            if ref_year == crossref_year:
+                year_score = 1.0
+            elif abs(ref_year - crossref_year) == 1:
+                year_score = 0.5
+
+        ref_surnames = self._extract_author_surnames(ref.get('authors', ''))
+        crossref_surnames = self._extract_crossref_author_surnames(item)
+        author_overlap = len(ref_surnames & crossref_surnames) / max(len(ref_surnames), len(crossref_surnames), 1) if ref_surnames and crossref_surnames else 0.0
+
+        final_score = (title_similarity * 0.55) + (title_overlap * 0.15) + (author_overlap * 0.15) + (journal_similarity * 0.10) + (year_score * 0.05)
+        return final_score, {
+            'title_similarity': title_similarity,
+            'title_overlap': title_overlap,
+            'author_overlap': author_overlap,
+            'journal_similarity': journal_similarity,
+            'year_score': year_score,
+        }
+
+    def _is_crossref_candidate_acceptable(self, metrics: Dict[str, float]) -> bool:
+        """Require strong title match plus supporting metadata before applying corrections."""
+        title_similarity = metrics['title_similarity']
+        title_overlap = metrics['title_overlap']
+        author_overlap = metrics['author_overlap']
+        journal_similarity = metrics['journal_similarity']
+        year_score = metrics['year_score']
+
+        strong_title = title_similarity >= 0.88 or (title_similarity >= 0.80 and title_overlap >= 0.75)
+        support_signals = sum([
+            author_overlap >= 0.5,
+            journal_similarity >= 0.65,
+            year_score >= 0.5,
+        ])
+
+        return strong_title and (support_signals >= 1 or title_similarity >= 0.94)
+
+    def _split_authors_title_journal(self, clean_text: str, ref_data: Dict[str, Any]):
+        """Split the remaining text into authors, title, and journal."""
+        parts = [p.strip() for p in clean_text.split(',')]
+        parts = [p for p in parts if p]
+
+        if len(parts) >= 3:
+            author_end_idx = 0
+            for i, part in enumerate(parts):
+                words = part.strip().split()
+                has_initial = any('.' in w and len(w) <= 4 for w in words)
+                is_short = len(words) <= 3
+                if has_initial and is_short:
+                    author_end_idx = i
+                else:
+                    break
+
+            author_parts = parts[:author_end_idx + 1]
+            remaining = parts[author_end_idx + 1:]
+
+            if remaining:
+                journal_start = None
+                for idx in range(len(remaining) - 1, -1, -1):
+                    candidate = ', '.join(remaining[idx:]).strip()
+                    normalized_candidate = self._normalize_journal_name(candidate)
+                    if normalized_candidate in self.journal_names:
+                        journal_start = idx
+                        break
+
+                if journal_start is None:
+                    journal_part = remaining[-1].strip()
+                    title_parts = remaining[:-1]
+
+                    if len(remaining) >= 2 and re.match(r'^(an|a|the)\b', remaining[-1].strip(), re.IGNORECASE):
+                        prev_part = remaining[-2].strip()
+                        if prev_part and prev_part[0].isupper():
+                            journal_part = f"{prev_part}, {journal_part}"
+                            title_parts = remaining[:-2]
+                else:
+                    journal_part = ', '.join(remaining[journal_start:]).strip()
+                    title_parts = remaining[:journal_start]
+
+                title_part = ', '.join(title_parts).strip()
+                ref_data['authors'] = ', '.join(author_parts)
+                if title_part:
+                    ref_data['title'] = title_part
+                if journal_part:
+                    ref_data['journal'] = journal_part
+                return
+
+            ref_data['authors'] = ', '.join(author_parts)
+            return
+
+        if len(parts) == 2:
+            ref_data['authors'] = parts[0].strip()
+            if any(keyword in parts[1].lower() for keyword in ['journal', 'proceedings', 'conference']):
+                ref_data['journal'] = parts[1].strip()
+            else:
+                ref_data['title'] = parts[1].strip()
+        elif len(parts) == 1:
+            ref_data['authors'] = parts[0].strip()
     
     def _load_author_patterns(self) -> List[str]:
         """Load common author name patterns for validation."""
@@ -169,7 +417,10 @@ class ReferenceValidator(BaseAgent):
             
             # Store original parsed references for accurate before/after comparison
             import copy
-            result.original_references = {ref.get('key', f'ref_{i}'): copy.deepcopy(ref) for i, ref in enumerate(references)}
+            result.original_references = {
+                ref.get('original_key') or ref.get('key', f'ref_{i}'): copy.deepcopy(ref)
+                for i, ref in enumerate(references)
+            }
             
             # Step 2: Detect and remove duplicates
             unique_references = await self._remove_duplicates(references, result)
@@ -239,6 +490,7 @@ class ReferenceValidator(BaseAgent):
         try:
             ref_data = {
                 'key': key,
+                'original_key': key,
                 'original_text': ref_text,
                 'format': 'bibitem'
             }
@@ -252,91 +504,54 @@ class ReferenceValidator(BaseAgent):
                 ref_data['doi'] = doi_match.group(1)
                 clean_text = clean_text[:doi_match.start()].strip()
             
-            # Step 2: Extract year (in parentheses, usually near the end)
-            year_matches = re.findall(r'\((\d{4})\)', clean_text)
-            if year_matches:
-                # Take the last year found (most likely the publication year)
-                ref_data['year'] = int(year_matches[-1])
-                # Remove the year from text for further parsing
-                year_pattern = r'\(' + str(year_matches[-1]) + r'\)'
-                clean_text = re.sub(year_pattern, '', clean_text, count=1, flags=re.IGNORECASE)
-                clean_text = clean_text.strip()
-            
-            # Step 3: Extract volume and issue (pattern: \textbf{vol}(issue) or \textbf{vol})
-            volume_issue_match = re.search(r'\\textbf\{([^}]+)\}(?:\(([^)]+)\))?', clean_text)
-            if volume_issue_match:
-                ref_data['volume'] = volume_issue_match.group(1).strip()
-                if volume_issue_match.group(2):
-                    ref_data['issue'] = volume_issue_match.group(2).strip()
-                # Remove volume/issue from text
-                clean_text = re.sub(r'\\textbf\{[^}]+\}(?:\([^)]+\))?', '', clean_text).strip()
-            
-            # Step 4: Extract pages (remaining numbers/ranges after removing volume/issue/year)
-            # Look for page patterns like "123-456", "123--456", "123", "e123456"
-            # Be more specific about page patterns to avoid false matches
-            pages_match = re.search(r'\b(?:pp?\.\s*)?([0-9]+(?:[-–—]+[0-9]+)?|e[0-9]+)\b\s*\.?\s*$', clean_text)
-            if pages_match:
-                ref_data['pages'] = pages_match.group(1).strip()
-                # Remove pages from text
-                clean_text = re.sub(r'\b(?:pp?\.\s*)?[0-9]+(?:[-–—]+[0-9]+)?|e[0-9]+\b\s*\.?\s*$', '', clean_text).strip()
-            
-            # Step 5: Now parse Authors, Title, Journal from remaining text
+            # Step 2: Extract volume/issue/year/pages or article number from the bibliographic tail
+            clean_text = self._extract_bibliographic_tail(clean_text, ref_data)
+
+            # Step 3: Fallback year extraction when not captured in the tail
+            if 'year' not in ref_data:
+                year_matches = re.findall(r'\((\d{4})\)', clean_text)
+                if year_matches:
+                    ref_data['year'] = int(year_matches[-1])
+                    year_pattern = r'\(' + str(year_matches[-1]) + r'\)'
+                    clean_text = re.sub(year_pattern, '', clean_text, count=1, flags=re.IGNORECASE).strip()
+
+            # Step 4: Fallback volume/issue extraction for unmatched patterns
+            if 'volume' not in ref_data:
+                volume_issue_match = re.search(r'\\textbf\{([^}]+)\}(?:\(([^)]+)\))?', clean_text)
+                if volume_issue_match:
+                    ref_data['volume'] = volume_issue_match.group(1).strip()
+                    if volume_issue_match.group(2):
+                        ref_data['issue'] = volume_issue_match.group(2).strip()
+                    clean_text = re.sub(r'\\textbf\{[^}]+\}(?:\([^)]+\))?', '', clean_text).strip()
+
+            # Step 5: Fallback page/article-number extraction
+            if 'pages' not in ref_data:
+                pages_match = re.search(r'\b(?:pp?\.\s*)?([A-Za-z]?\d+(?:[-–—]+\d+)?)\b\s*\.?\s*$', clean_text)
+                if pages_match:
+                    ref_data['pages'] = self._normalize_pages(pages_match.group(1))
+                    clean_text = re.sub(r'\b(?:pp?\.\s*)?[A-Za-z]?\d+(?:[-–—]+\d+)?\b\s*\.?\s*$', '', clean_text).strip()
+
+            # Step 6: Now parse Authors, Title, Journal from remaining text
             # Format: Authors, Title, Journal
             # Key insight: after removing year/volume/pages/doi, the structure is always:
             #   [author1, author2, ...], Title words possibly with commas, Journal Name
             # The journal is the LAST comma-segment that is NOT an author name.
             # Authors are identified by having initials (e.g. "S. Zafar", "M.H. Schultz").
             
-            parts = [p.strip() for p in clean_text.split(',')]
-            parts = [p for p in parts if p]  # remove empty
-            
-            if len(parts) >= 3:
-                # Identify author parts: segments that look like "X. Lastname" or "X.Y. Lastname"
-                author_end_idx = 0
-                for i, part in enumerate(parts):
-                    words = part.strip().split()
-                    # An author segment has 1-3 words where at least one word has a period (initial)
-                    has_initial = any('.' in w and len(w) <= 4 for w in words)
-                    is_short = len(words) <= 3
-                    if has_initial and is_short:
-                        author_end_idx = i
-                    else:
-                        break  # first non-author segment ends the author list
-                
-                author_parts = parts[:author_end_idx + 1]
-                remaining = parts[author_end_idx + 1:]
-                
-                if remaining:
-                    # The LAST segment is the journal name.
-                    # Everything in between is the title.
-                    journal_part = remaining[-1].strip()
-                    title_parts = remaining[:-1]
-                    title_part = ', '.join(title_parts).strip()
-                    
-                    ref_data['authors'] = ', '.join(author_parts)
-                    if title_part:
-                        ref_data['title'] = title_part
-                    if journal_part:
-                        ref_data['journal'] = journal_part
-                else:
-                    # No remaining after authors — treat all as authors
-                    ref_data['authors'] = ', '.join(author_parts)
-
-            elif len(parts) == 2:
-                ref_data['authors'] = parts[0].strip()
-                if any(keyword in parts[1].lower() for keyword in ['journal', 'proceedings', 'conference']):
-                    ref_data['journal'] = parts[1].strip()
-                else:
-                    ref_data['title'] = parts[1].strip()
-            elif len(parts) == 1:
-                ref_data['authors'] = parts[0].strip()
+            self._split_authors_title_journal(clean_text, ref_data)
             
             # Clean up extracted fields
             for field in ['authors', 'title', 'journal']:
                 if field in ref_data:
                     # Remove extra whitespace and trailing punctuation
                     ref_data[field] = re.sub(r'\s+', ' ', ref_data[field]).strip(' .,;')
-            
+
+            if ref_data.get('title'):
+                extracted_title, extracted_journal = self._extract_embedded_journal_from_title(ref_data['title'])
+                ref_data['title'] = extracted_title
+                if extracted_journal and not ref_data.get('journal'):
+                    ref_data['journal'] = extracted_journal
+
             return ref_data
             
         except Exception as e:
@@ -348,6 +563,7 @@ class ReferenceValidator(BaseAgent):
         try:
             ref_data = {
                 'key': key,
+                'original_key': key,
                 'entry_type': entry_type.lower(),
                 'format': 'bibtex'
             }
@@ -393,6 +609,7 @@ class ReferenceValidator(BaseAgent):
         try:
             ref_data = {
                 'key': key,
+                'original_key': key,
                 'original_text': ref_text,
                 'format': 'plain'
             }
@@ -618,35 +835,55 @@ class ReferenceValidator(BaseAgent):
         return ', '.join(corrected_authors)
     
     def _correct_title_format(self, title: str) -> str:
-        """Correct title capitalization properly (preserve proper nouns and important words)."""
+        """Convert titles to sentence case while preserving proper names."""
         if not title:
             return title
         
         # Remove extra whitespace
         title = ' '.join(title.split())
-        
-        # Don't change case if title is already properly formatted
-        if title[0].isupper() and not title.isupper():
-            return title
-        
-        # Convert to title case but preserve certain patterns
-        words = title.split()
-        corrected_words = []
-        
-        for i, word in enumerate(words):
-            # First word is always capitalized
-            if i == 0:
-                corrected_words.append(word.capitalize())
-            # Don't change words that are already properly capitalized
-            elif word[0].isupper() and not word.isupper():
-                corrected_words.append(word)
-            # Small words stay lowercase unless they're the first word
-            elif word.lower() in ['of', 'the', 'and', 'in', 'on', 'for', 'with', 'by', 'from', 'to', 'at', 'a', 'an']:
-                corrected_words.append(word.lower())
-            # Capitalize other words
+
+        proper_nouns = {
+            'wiener': 'Wiener',
+            'sierpinski': 'Sierpinski',
+            'sierpiński': 'Sierpiński',
+            'plos': 'PLoS',
+            'gmres': 'GMRES',
+            'naacl': 'NAACL',
+            'bert': 'BERT',
+            'neurips': 'NeurIPS',
+            'ieee': 'IEEE',
+            'acm': 'ACM',
+        }
+
+        def fix_word(word: str, is_first: bool) -> str:
+            prefix_match = re.match(r'^[([{"\']*', word)
+            suffix_match = re.search(r'[\])}",;:.!?]*$', word)
+            prefix = prefix_match.group(0) if prefix_match else ''
+            suffix = suffix_match.group(0) if suffix_match else ''
+            core_start = len(prefix)
+            core_end = len(word) - len(suffix) if suffix else len(word)
+            core = word[core_start:core_end]
+
+            if not core:
+                return word
+
+            lower_core = core.lower()
+
+            if lower_core in proper_nouns:
+                fixed_core = proper_nouns[lower_core]
+            elif core.isupper() and len(core) > 1 and lower_core in {'plos', 'gmres', 'naacl', 'bert', 'neurips', 'ieee', 'acm'}:
+                fixed_core = core
+            elif '-' in core:
+                fixed_core = '-'.join(fix_word(part, is_first and idx == 0) for idx, part in enumerate(core.split('-')))
+            elif is_first:
+                fixed_core = lower_core.capitalize()
             else:
-                corrected_words.append(word.capitalize())
-        
+                fixed_core = lower_core
+
+            return f"{prefix}{fixed_core}{suffix}"
+
+        words = title.split()
+        corrected_words = [fix_word(word, i == 0) for i, word in enumerate(words)]
         return ' '.join(corrected_words)
     
     def _correct_journal_format(self, journal: str) -> str:
@@ -654,15 +891,17 @@ class ReferenceValidator(BaseAgent):
         if not journal:
             return journal
         
-        journal_lower = journal.lower().strip()
+        journal_lower = self._normalize_journal_name(journal)
         
         # Check against known journal names
         if journal_lower in self.journal_names:
             return self.journal_names[journal_lower]
         
-        # Check partial matches
+        # Check near-exact matches only; avoid broad substring matches like
+        # "Engineering Science and Technology" -> "Science".
         for known_journal_lower, correct_name in self.journal_names.items():
-            if known_journal_lower in journal_lower or journal_lower in known_journal_lower:
+            similarity = difflib.SequenceMatcher(None, journal_lower, known_journal_lower).ratio()
+            if similarity >= 0.92:
                 return correct_name
         
         # Basic capitalization correction
@@ -911,7 +1150,7 @@ class ReferenceValidator(BaseAgent):
         
         # Step 2: If DOI search failed, try title search
         if not crossref_data and 'title' in ref and ref['title']:
-            crossref_data = await self._search_by_title(ref['title'], verification)
+            crossref_data = await self._search_by_title(ref, verification)
         
         # Step 3: If paper found, validate and correct all information
         if crossref_data:
@@ -967,10 +1206,11 @@ class ReferenceValidator(BaseAgent):
         
         return None
     
-    async def _search_by_title(self, title: str, verification: Dict) -> Dict:
+    async def _search_by_title(self, ref: Dict[str, Any], verification: Dict) -> Dict:
         """Search for paper by title using CrossRef API with improved matching."""
         try:
             # Clean and prepare title for search
+            title = ref.get('title', '')
             clean_title = title.strip()
             # Remove common academic formatting
             clean_title = re.sub(r'[^\w\s]', ' ', clean_title)
@@ -1010,35 +1250,30 @@ class ReferenceValidator(BaseAgent):
                         # Find best match by title similarity
                         best_match = None
                         best_similarity = 0
+                        best_metrics = None
                         
                         for item in items:
                             if 'title' in item and item['title']:
-                                crossref_title = item['title'][0] if isinstance(item['title'], list) else item['title']
-                                
-                                # Calculate similarity with original title
-                                similarity = difflib.SequenceMatcher(None, 
-                                                                   clean_title.lower(), 
-                                                                   crossref_title.lower()).ratio()
-                                
-                                # Also check word overlap
-                                title_words = set(clean_title.lower().split())
-                                crossref_words = set(crossref_title.lower().split())
-                                word_overlap = len(title_words.intersection(crossref_words)) / max(len(title_words), len(crossref_words))
-                                
-                                # Combined score (similarity + word overlap)
-                                combined_score = (similarity * 0.7) + (word_overlap * 0.3)
-                                
-                                if combined_score > best_similarity and combined_score > 0.5:  # Lower threshold
+                                combined_score, metrics = self._score_crossref_candidate(ref, item)
+                                if combined_score > best_similarity:
                                     best_similarity = combined_score
                                     best_match = item
+                                    best_metrics = metrics
                         
-                        if best_match:
-                            verification['checks_performed'].append(f'Title search successful (similarity: {best_similarity:.2f})')
+                        if best_match and best_metrics and self._is_crossref_candidate_acceptable(best_metrics):
+                            verification['checks_performed'].append(
+                                f"Title search successful (score: {best_similarity:.2f}, title: {best_metrics['title_similarity']:.2f}, authors: {best_metrics['author_overlap']:.2f}, journal: {best_metrics['journal_similarity']:.2f})"
+                            )
                             verification['search_method'] = 'Title'
                             crossref_title = best_match['title'][0] if isinstance(best_match['title'], list) else best_match['title']
                             self.logger.info(f"Paper found by title: {crossref_title}")
                             return best_match
-                
+
+                        if best_match and best_metrics:
+                            verification['issues_found'].append(
+                                f"Best title match rejected (title={best_metrics['title_similarity']:.2f}, authors={best_metrics['author_overlap']:.2f}, journal={best_metrics['journal_similarity']:.2f}, year={best_metrics['year_score']:.2f})"
+                            )
+                 
                 # Small delay between queries
                 await asyncio.sleep(0.3)
             
@@ -1155,7 +1390,7 @@ class ReferenceValidator(BaseAgent):
         
         # Validate and correct pages/article number
         if 'page' in crossref_data and crossref_data['page']:
-            crossref_pages = str(crossref_data['page']).strip()
+            crossref_pages = self._normalize_pages(crossref_data['page'])
             verified_data['verified_pages'] = crossref_pages
             
             if 'pages' in ref and ref['pages']:
@@ -1164,7 +1399,7 @@ class ReferenceValidator(BaseAgent):
             else:
                 corrections.append(f"Pages added: {crossref_pages}")
         elif 'article-number' in crossref_data and crossref_data['article-number']:
-            crossref_article = str(crossref_data['article-number']).strip()
+            crossref_article = self._normalize_pages(crossref_data['article-number'])
             verified_data['verified_pages'] = crossref_article
             
             if 'pages' in ref and ref['pages']:

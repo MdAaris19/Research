@@ -598,8 +598,12 @@ def run_reference_validation(content: str, file_format: str, options: dict):
         # Build corrections by directly comparing original vs final for each reference
         corrections_by_ref = {}
         
-        # Create a lookup of final corrected refs by key
-        final_refs = {ref.get('key', ''): ref for ref in result.corrected_references}
+        # Create a lookup of final corrected refs by original key so key fixes do not
+        # break before/after comparisons.
+        final_refs = {
+            ref.get('original_key') or ref.get('key', ''): ref
+            for ref in result.corrected_references
+        }
         original_refs = getattr(result, 'original_references', {})
         
         # Fields to compare and their display names
