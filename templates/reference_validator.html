@@ -745,6 +745,9 @@
 
         function displayResults(data) {
             resultsSection.style.display = 'block';
+            localStorage.setItem('referenceValidatorLastResult', JSON.stringify(data));
+            localStorage.setItem('referenceValidatorLastInput', fileContent);
+            localStorage.setItem('referenceValidatorLastFormat', selectedFormat);
             
             displayStatistics(data.stats);
             displayProcessingLog(data.processing_log);
@@ -818,10 +821,18 @@
 
         function viewCorrectionsDetails() {
             if (window.correctionsData) {
-                // Store in sessionStorage to avoid URL size limits
-                sessionStorage.setItem('correctionsData', JSON.stringify(window.correctionsData));
-                window.open('/corrections-details', '_blank');
+                // Store in localStorage so the data is available on the details page.
+                localStorage.setItem('correctionsData', JSON.stringify(window.correctionsData));
+                localStorage.setItem('validatorResultsVisible', resultsSection.style.display === 'block' ? 'true' : 'false');
+                window.location.href = '/corrections-details';
             }
+        }
+
+        function toggleCorrections(issueId) {
+            const details = document.getElementById(issueId);
+            if (!details) return;
+
+            details.classList.toggle('show');
         }
 
         function displayIssues(issues) {
@@ -925,6 +936,40 @@
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }
+
+        function restorePreviousResults() {
+            const shouldRestore = localStorage.getItem('returnToValidatorResults') === 'true';
+            const rawResult = localStorage.getItem('referenceValidatorLastResult');
+            const savedInput = localStorage.getItem('referenceValidatorLastInput');
+            const savedFormat = localStorage.getItem('referenceValidatorLastFormat');
+
+            if (savedInput) {
+                fileContent = savedInput;
+                manualInput.value = savedInput;
+                validateBtn.disabled = !savedInput.trim();
+            }
+
+            if (savedFormat) {
+                selectedFormat = savedFormat;
+                document.querySelectorAll('.format-option').forEach(opt => {
+                    opt.classList.toggle('active', opt.dataset.format === savedFormat);
+                });
+                document.getElementById('outputFormat').value = savedFormat;
+            }
+
+            if (shouldRestore && rawResult) {
+                try {
+                    validationResult = JSON.parse(rawResult);
+                    displayResults(validationResult);
+                } catch (error) {
+                    console.error('Error restoring previous results:', error);
+                }
+            }
+
+            localStorage.removeItem('returnToValidatorResults');
+        }
+
+        document.addEventListener('DOMContentLoaded', restorePreviousResults);
     </script>
 </body>
 </html>

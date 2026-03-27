@@ -135,7 +135,7 @@
 
         <div class="content-section">
             <div class="d-flex justify-content-between align-items-center mb-4">
-                <a href="javascript:history.back()" class="back-btn">
+                <a href="/validator" class="back-btn" id="backToResultsBtn">
                     <i class="fas fa-arrow-left"></i> Back to Results
                 </a>
                 <div>
@@ -158,9 +158,9 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Get corrections data from sessionStorage (avoids URL size limits)
+        // Get corrections data from localStorage so it works after navigation.
         function loadCorrections() {
-            const raw = sessionStorage.getItem('correctionsData');
+            const raw = localStorage.getItem('correctionsData');
             
             if (raw) {
                 try {
@@ -176,6 +176,10 @@
                     '<div class="alert alert-info">No corrections data available. Please run validation first.</div>';
             }
         }
+
+        document.getElementById('backToResultsBtn').addEventListener('click', function() {
+            localStorage.setItem('returnToValidatorResults', 'true');
+        });
 
         function displayCorrections(corrections) {
             let totalCorrections = 0;
