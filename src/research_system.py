@@ -3,6 +3,7 @@ Main Autonomous Research Agent System orchestrator.
 """
 import asyncio
 import logging
+import re
 from typing import Dict, Any, List
 from datetime import datetime
 
@@ -64,8 +65,9 @@ class AutonomousResearchSystem:
         start_time = datetime.now()
         
         try:
-            # Detect if query is an author name
-            is_author = self._is_author_query(topic)
+            # Detect if query is an author name, metric, or exact paper title
+            query_intent = self._infer_query_intent(topic)
+            is_author = query_intent == "author"
             
             # Stage 1: Topic Expansion
             self.logger.info("Stage 1: Topic Expansion")
@@ -79,6 +81,20 @@ class AutonomousResearchSystem:
                 topic_map.subtopics = [f"papers by {topic}"]
                 # Store author flag in related_areas as a signal
                 topic_map.related_areas = [f"__author__:{topic}"]
+            elif query_intent == "paper_title":
+                self.logger.info(f"Detected paper title query: {topic}")
+                normalized_title = topic.strip().strip('"').strip("'")
+                topic_map.main_topic = normalized_title
+                topic_map.keywords = [normalized_title] + [word for word in re.findall(r'\b\w+\b', normalized_title) if len(word) > 3]
+                topic_map.subtopics = [f"exact paper match for {normalized_title}"]
+                topic_map.related_areas = [f"__paper_title__:{normalized_title}"]
+            elif query_intent == "metric":
+                self.logger.info(f"Detected metric query: {topic}")
+                normalized_metric = topic.strip()
+                topic_map.main_topic = normalized_metric
+                topic_map.keywords = [normalized_metric] + [word for word in re.findall(r'\b\w+\b', normalized_metric.lower()) if len(word) > 2]
+                topic_map.subtopics = [f"papers about {normalized_metric}"]
+                topic_map.related_areas = [f"__metric__:{normalized_metric}"]
             
             # Stage 2: Paper Discovery
             self.logger.info("Stage 2: Paper Discovery")
@@ -159,6 +175,78 @@ class AutonomousResearchSystem:
             return False
         
         return True
+
+    def _infer_query_intent(self, query: str) -> str:
+        """Infer whether the query is an author, metric, paper title, or general topic."""
+        stripped_query = query.strip()
+        lower_query = stripped_query.lower()
+
+        if self._is_author_query(stripped_query):
+            return "author"
+
+        if self._is_metric_query(lower_query):
+            return "metric"
+
+        if self._is_paper_title_query(stripped_query):
+            return "paper_title"
+
+        return "topic"
+
+    def _is_metric_query(self, lower_query: str) -> bool:
+        """Heuristic for metric-centric searches like Wiener index or average distance."""
+        metric_indicators = {
+            'index', 'distance', 'diameter', 'radius', 'centrality', 'coefficient',
+            'polynomial', 'metric', 'invariant', 'entropy', 'degree', 'connectivity',
+            'chromatic', 'wiener', 'szeged', 'randic', 'clustering', 'betweenness',
+            'pagerank', 'eigenvector', 'kirchhoff', 'energy'
+        }
+        topic_indicators = {
+            'using', 'based', 'application', 'applications', 'review', 'survey',
+            'analysis of', 'effect of', 'method', 'methods', 'framework', 'approach'
+        }
+
+        words = re.findall(r'\b\w+\b', lower_query)
+        if not words or len(words) > 6:
+            return False
+
+        if any(indicator in lower_query for indicator in topic_indicators):
+            return False
+
+        return any(word in metric_indicators for word in words)
+
+    def _is_paper_title_query(self, query: str) -> bool:
+        """Heuristic for exact or likely paper-title searches."""
+        stripped_query = query.strip()
+        lower_query = stripped_query.lower()
+
+        if (stripped_query.startswith('"') and stripped_query.endswith('"')) or (
+            stripped_query.startswith("'") and stripped_query.endswith("'")):
+            return True
+
+        words = re.findall(r'\b\w+\b', stripped_query)
+        if len(words) < 4:
+            return False
+
+        topic_phrases = {
+            'using', 'based', 'for', 'in', 'review', 'survey', 'analysis',
+            'classification', 'prediction', 'detection', 'framework', 'approach',
+            'method', 'methods', 'system'
+        }
+        title_markers = {':', ',', ';'}
+
+        has_title_marker = any(marker in stripped_query for marker in title_markers)
+        title_case_ratio = sum(1 for word in stripped_query.split() if word[:1].isupper()) / max(len(stripped_query.split()), 1)
+
+        if has_title_marker and len(words) >= 5:
+            return True
+
+        if title_case_ratio >= 0.75:
+            return True
+
+        if title_case_ratio >= 0.6 and not any(phrase in lower_query for phrase in topic_phrases):
+            return True
+
+        return False
     
     async def get_memory_stats(self) -> Dict[str, Any]:
         """Get memory store statistics."""

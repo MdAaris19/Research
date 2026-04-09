@@ -97,6 +97,122 @@
             text-align: center;
             margin: 10px 0;
         }
+        .topic-tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .topic-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cfd8e3;
+            background: #fff;
+            border-radius: 999px;
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .topic-tab.active {
+            background: #0d6efd;
+            color: #fff;
+            border-color: #0d6efd;
+            box-shadow: 0 10px 24px rgba(13,110,253,0.18);
+        }
+        .topic-tab-close {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            opacity: 0.75;
+            padding: 0;
+            line-height: 1;
+        }
+        .topic-tab-duplicate {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            opacity: 0.75;
+            padding: 0;
+            line-height: 1;
+        }
+        .topic-tab.active .topic-tab-close {
+            color: #fff;
+        }
+        .topic-tab.active .topic-tab-duplicate {
+            color: #fff;
+        }
+        .tab-status-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 999px;
+            background: #adb5bd;
+            flex-shrink: 0;
+        }
+        .tab-status-dot.loading {
+            background: #f59f00;
+        }
+        .tab-status-dot.ready {
+            background: #20c997;
+        }
+        .tab-status-dot.error {
+            background: #dc3545;
+        }
+        .tab-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            margin-top: 15px;
+        }
+        .search-helper {
+            background: #eef4ff;
+            border-radius: 12px;
+            padding: 12px 14px;
+            color: #375a8c;
+            font-size: 0.95rem;
+            margin-top: 14px;
+        }
+        .results-shell {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .venue-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        .venue-pill.journal {
+            background: #e7f5ff;
+            color: #1864ab;
+        }
+        .venue-pill.conference {
+            background: #fff3bf;
+            color: #8d6b00;
+        }
+        .venue-pill.preprint {
+            background: #f3f0ff;
+            color: #5f3dc4;
+        }
+        .venue-pill.other {
+            background: #f1f3f5;
+            color: #495057;
+        }
+        .results-empty {
+            background: linear-gradient(135deg, #ffffff 0%, #f1f6ff 100%);
+            border: 1px dashed #b6c8e6;
+            border-radius: 18px;
+            padding: 28px;
+            text-align: center;
+            color: #4c6483;
+        }
         .hidden {
             display: none !important;
         }
@@ -128,18 +244,36 @@
                         <h5 class="card-title">
                             <i class="fas fa-search"></i> Start New Research
                         </h5>
+                        <div id="topicTabs" class="topic-tab-bar"></div>
                         <form id="researchForm">
                             <div class="mb-3">
-                                <label for="topic" class="form-label">Research Topic</label>
+                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+                                    <label for="topic" class="form-label mb-0">Active Research Topic</label>
+                                    <span class="badge bg-light text-primary" id="tabCounter">1 / 3 tabs used</span>
+                                </div>
                                 <input type="text" class="form-control" id="topic" 
                                        placeholder="e.g., Machine Learning for Climate Change Prediction"
                                        required>
-                                <div class="form-text">Enter any research topic you want to explore</div>
+                                <div class="form-text">Open up to 3 topic tabs and run them together in parallel.</div>
                             </div>
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-rocket"></i> Start Research
-                            </button>
+                            <div class="tab-toolbar">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-rocket"></i> Search Active Tab
+                                </button>
+                                <button type="button" class="btn btn-outline-primary" id="searchAllTabsBtn">
+                                    <i class="fas fa-layer-group"></i> Search Open Tabs
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary" id="addTopicTabBtn">
+                                    <i class="fas fa-plus"></i> Add Topic Tab
+                                </button>
+                                <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn">
+                                    <i class="fas fa-times-circle"></i> Close Extra Tabs
+                                </button>
+                            </div>
                         </form>
+                        <div class="search-helper" id="searchHelper">
+                            Keep different topics in separate tabs. Search the current topic only, or launch all filled tabs together.
+                        </div>
                         
                         <!-- Loading Spinner -->
                         <div class="loading-spinner text-center mt-3">
@@ -188,6 +322,17 @@
 
         <!-- Results Section -->
         <div id="results" style="display: none;">
+            <div class="row mt-4">
+                <div class="col-12">
+                    <div class="results-shell">
+                        <div>
+                            <h4 class="mb-1"><i class="fas fa-browser"></i> Search Workspace</h4>
+                            <p class="text-muted mb-0" id="activeSearchMeta">Results appear in the active topic tab.</p>
+                        </div>
+                        <div id="resultVenueOverview"></div>
+                    </div>
+                </div>
+            </div>
             <!-- Comprehensive Filter Section -->
             <div class="row mt-4">
                 <div class="col-12">
@@ -214,7 +359,7 @@
                             <div class="col-md-3">
                                 <div class="filter-card">
                                     <label class="form-label fw-bold">
-                                        <i class="fas fa-journal-whills"></i> Journal Filter
+                                        <i class="fas fa-journal-whills"></i> Journal Results
                                     </label>
                                     <select class="form-select form-select-sm mb-2" id="journalFilter">
                                         <option value="">All Journals</option>
@@ -246,6 +391,18 @@
                                 </div>
                             </div>
                             
+                            <div class="col-md-3">
+                                <div class="filter-card">
+                                    <label class="form-label fw-bold">
+                                        <i class="fas fa-users"></i> Conference Results
+                                    </label>
+                                    <select class="form-select form-select-sm mb-2" id="conferenceFilter">
+                                        <option value="">All Conferences</option>
+                                    </select>
+                                    <div class="form-text">Conference venues stay in their own dropdown.</div>
+                                </div>
+                            </div>
+
                             <div class="col-md-3">
                                 <div class="filter-card">
                                     <label class="form-label fw-bold">
@@ -284,7 +441,7 @@
                                     </div>
                                 </div>
                             </div>
-                            
+
                             <div class="col-md-3">
                                 <div class="filter-card">
                                     <label class="form-label fw-bold">
@@ -457,80 +614,469 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        console.log('JavaScript loading...'); // Debug log
-        
-        let currentResults = null;
-        let allCitations = [];
-        let filteredCitations = [];
-        let allPapers = [];
-        let filteredPapers = [];
-        let allGaps = [];
-        let filteredGaps = [];
-        let selectedJournals = [];
-        let journalMode = 'include';
+        const MAX_SEARCH_TABS = 3;
+        const searchTabs = [];
+        let activeTabId = null;
+        let nextTabId = 1;
+        let activeRequests = 0;
 
-        console.log('Variables initialized'); // Debug log
+        function getDefaultFilters() {
+            return {
+                globalSearch: '',
+                journalFilter: '',
+                conferenceFilter: '',
+                yearFilter: '',
+                yearFrom: '',
+                yearTo: '',
+                formatFilter: 'custom',
+                showPapers: true,
+                showCitations: true,
+                showGaps: true,
+                showOnlyCitations: false,
+                journalMode: 'include'
+            };
+        }
 
-        document.getElementById('researchForm').addEventListener('submit', async function(e) {
-            console.log('Form submitted!'); // Debug log
-            e.preventDefault();
-            
-            const topic = document.getElementById('topic').value.trim();
-            console.log('Topic:', topic); // Debug log
-            if (!topic) return;
-            
-            console.log('Starting research request...'); // Debug log
-            
-            // Show loading
-            document.querySelector('.loading-spinner').style.display = 'block';
-            document.getElementById('results').style.display = 'none';
-            
+        function getActiveSearchTab() {
+            return searchTabs.find(tab => tab.id === activeTabId) || null;
+        }
+
+        function getVenueType(item) {
+            if (item.venue_type) {
+                return item.venue_type;
+            }
+
+            const venue = (item.venue || item.journal_name || '').toLowerCase();
+            if (item.arxiv_id || venue === 'arxiv') {
+                return 'preprint';
+            }
+
+            const conferenceIndicators = [
+                'conference', 'proceedings', 'workshop', 'symposium', 'iclr', 'neurips',
+                'nips', 'icml', 'aaai', 'ijcai', 'acl', 'emnlp', 'cvpr', 'iccv', 'eccv',
+                'sigir', 'www', 'kdd', 'icde', 'chi', 'uist', 'recsys'
+            ];
+
+            if (conferenceIndicators.some(indicator => venue.includes(indicator))) {
+                return 'conference';
+            }
+
+            return venue ? 'journal' : 'other';
+        }
+
+        function getVenueName(item) {
+            return item.venue || item.journal_name || 'Unknown venue';
+        }
+
+        function formatVenueLabel(venueType) {
+            if (venueType === 'conference') return 'Conference';
+            if (venueType === 'preprint') return 'Preprint';
+            if (venueType === 'journal') return 'Journal';
+            return 'Other';
+        }
+
+        function slugifyTopic(topic) {
+            return (topic || 'research')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '') || 'research';
+        }
+
+        function createSearchTab(topic = '', shouldActivate = true) {
+            if (searchTabs.length >= MAX_SEARCH_TABS) {
+                alert('You can open up to 3 research tabs at a time.');
+                return;
+            }
+
+            const tab = {
+                id: `topic-tab-${nextTabId++}`,
+                topic,
+                status: 'idle',
+                error: '',
+                results: null,
+                allPapers: [],
+                filteredPapers: [],
+                allCitations: [],
+                filteredCitations: [],
+                allGaps: [],
+                filteredGaps: [],
+                filters: getDefaultFilters()
+            };
+
+            searchTabs.push(tab);
+            renderSearchTabs();
+            updateTabCounter();
+
+            if (shouldActivate) {
+                setActiveSearchTab(tab.id);
+            }
+        }
+
+        function renderSearchTabs() {
+            const container = document.getElementById('topicTabs');
+            container.innerHTML = searchTabs.map((tab, index) => {
+                const isActive = tab.id === activeTabId;
+                const label = tab.topic.trim() ? tab.topic.trim() : `Topic ${index + 1}`;
+                const shortLabel = label.length > 28 ? `${label.slice(0, 28)}...` : label;
+                const canClose = searchTabs.length > 1;
+
+                return `
+                    <button type="button" class="topic-tab ${isActive ? 'active' : ''}" data-tab-id="${tab.id}">
+                        <span class="tab-status-dot ${tab.status}"></span>
+                        <span>${shortLabel}</span>
+                        <span class="topic-tab-duplicate" data-duplicate-id="${tab.id}" title="Duplicate tab"><i class="fas fa-copy"></i></span>
+                        ${canClose ? `<span class="topic-tab-close" data-close-id="${tab.id}"><i class="fas fa-times"></i></span>` : ''}
+                    </button>
+                `;
+            }).join('');
+
+            container.querySelectorAll('[data-tab-id]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const closeTarget = event.target.closest('[data-close-id]');
+                    const duplicateTarget = event.target.closest('[data-duplicate-id]');
+                    if (closeTarget) {
+                        event.stopPropagation();
+                        removeSearchTab(closeTarget.dataset.closeId);
+                        return;
+                    }
+
+                    if (duplicateTarget) {
+                        event.stopPropagation();
+                        duplicateSearchTab(duplicateTarget.dataset.duplicateId);
+                        return;
+                    }
+
+                    setActiveSearchTab(button.dataset.tabId);
+                });
+            });
+        }
+
+        function updateTabCounter() {
+            document.getElementById('tabCounter').textContent = `${searchTabs.length} / ${MAX_SEARCH_TABS} tabs used`;
+        }
+
+        function persistCurrentFilters() {
+            const tab = getActiveSearchTab();
+            if (!tab) return;
+
+            tab.filters = {
+                globalSearch: document.getElementById('globalSearch').value,
+                journalFilter: document.getElementById('journalFilter').value,
+                conferenceFilter: document.getElementById('conferenceFilter').value,
+                yearFilter: document.getElementById('yearFilter').value,
+                yearFrom: document.getElementById('yearFrom').value,
+                yearTo: document.getElementById('yearTo').value,
+                formatFilter: document.getElementById('formatFilter').value,
+                showPapers: document.getElementById('showPapers').checked,
+                showCitations: document.getElementById('showCitations').checked,
+                showGaps: document.getElementById('showGaps').checked,
+                showOnlyCitations: document.getElementById('showOnlyCitations').checked,
+                journalMode: document.querySelector('input[name="journalMode"]:checked')?.value || 'include'
+            };
+        }
+
+        function loadFiltersForActiveTab() {
+            const tab = getActiveSearchTab();
+            const filters = tab ? tab.filters : getDefaultFilters();
+
+            document.getElementById('globalSearch').value = filters.globalSearch;
+            document.getElementById('journalFilter').value = filters.journalFilter;
+            document.getElementById('conferenceFilter').value = filters.conferenceFilter;
+            document.getElementById('yearFilter').value = filters.yearFilter;
+            document.getElementById('yearFrom').value = filters.yearFrom;
+            document.getElementById('yearTo').value = filters.yearTo;
+            document.getElementById('formatFilter').value = filters.formatFilter;
+            document.getElementById('showPapers').checked = filters.showPapers;
+            document.getElementById('showCitations').checked = filters.showCitations;
+            document.getElementById('showGaps').checked = filters.showGaps;
+            document.getElementById('showOnlyCitations').checked = filters.showOnlyCitations;
+            const journalMode = document.querySelector(`input[name="journalMode"][value="${filters.journalMode}"]`);
+            if (journalMode) {
+                journalMode.checked = true;
+            }
+        }
+
+        function syncTopicInput() {
+            const tab = getActiveSearchTab();
+            document.getElementById('topic').value = tab ? tab.topic : '';
+        }
+
+        function removeSearchTab(tabId) {
+            const index = searchTabs.findIndex(tab => tab.id === tabId);
+            if (index === -1) return;
+
+            const wasActive = searchTabs[index].id === activeTabId;
+            searchTabs.splice(index, 1);
+
+            if (!searchTabs.length) {
+                createSearchTab('', true);
+                return;
+            }
+
+            if (wasActive) {
+                const nextTab = searchTabs[Math.max(0, index - 1)] || searchTabs[0];
+                activeTabId = nextTab.id;
+            }
+
+            renderSearchTabs();
+            updateTabCounter();
+            syncTopicInput();
+            displayActiveResults();
+        }
+
+        function duplicateSearchTab(tabId) {
+            const sourceTab = searchTabs.find(tab => tab.id === tabId);
+            if (!sourceTab) return;
+
+            if (searchTabs.length >= MAX_SEARCH_TABS) {
+                alert('You can open up to 3 research tabs at a time. Close one before duplicating.');
+                return;
+            }
+
+            const duplicatedTab = {
+                id: `topic-tab-${nextTabId++}`,
+                topic: sourceTab.topic,
+                status: sourceTab.results ? 'ready' : 'idle',
+                error: sourceTab.error,
+                results: sourceTab.results ? JSON.parse(JSON.stringify(sourceTab.results)) : null,
+                allPapers: JSON.parse(JSON.stringify(sourceTab.allPapers || [])),
+                filteredPapers: JSON.parse(JSON.stringify(sourceTab.filteredPapers || [])),
+                allCitations: JSON.parse(JSON.stringify(sourceTab.allCitations || [])),
+                filteredCitations: JSON.parse(JSON.stringify(sourceTab.filteredCitations || [])),
+                allGaps: JSON.parse(JSON.stringify(sourceTab.allGaps || [])),
+                filteredGaps: JSON.parse(JSON.stringify(sourceTab.filteredGaps || [])),
+                filters: JSON.parse(JSON.stringify(sourceTab.filters || getDefaultFilters()))
+            };
+
+            searchTabs.push(duplicatedTab);
+            renderSearchTabs();
+            updateTabCounter();
+            setActiveSearchTab(duplicatedTab.id);
+        }
+
+        function closeExtraTabs() {
+            const activeTab = getActiveSearchTab() || searchTabs[0];
+            if (!activeTab) return;
+
+            const activeId = activeTab.id;
+            const activeTopic = activeTab.topic;
+            const activeStatus = activeTab.status;
+            const activeError = activeTab.error;
+            const activeResults = activeTab.results ? JSON.parse(JSON.stringify(activeTab.results)) : null;
+            const activeAllPapers = JSON.parse(JSON.stringify(activeTab.allPapers || []));
+            const activeFilteredPapers = JSON.parse(JSON.stringify(activeTab.filteredPapers || []));
+            const activeAllCitations = JSON.parse(JSON.stringify(activeTab.allCitations || []));
+            const activeFilteredCitations = JSON.parse(JSON.stringify(activeTab.filteredCitations || []));
+            const activeAllGaps = JSON.parse(JSON.stringify(activeTab.allGaps || []));
+            const activeFilteredGaps = JSON.parse(JSON.stringify(activeTab.filteredGaps || []));
+            const activeFilters = JSON.parse(JSON.stringify(activeTab.filters || getDefaultFilters()));
+
+            searchTabs.length = 0;
+            searchTabs.push({
+                id: activeId,
+                topic: activeTopic,
+                status: activeStatus,
+                error: activeError,
+                results: activeResults,
+                allPapers: activeAllPapers,
+                filteredPapers: activeFilteredPapers,
+                allCitations: activeAllCitations,
+                filteredCitations: activeFilteredCitations,
+                allGaps: activeAllGaps,
+                filteredGaps: activeFilteredGaps,
+                filters: activeFilters
+            });
+
+            activeTabId = activeId;
+            renderSearchTabs();
+            updateTabCounter();
+            syncTopicInput();
+            displayActiveResults();
+        }
+
+        function setActiveSearchTab(tabId) {
+            if (activeTabId === tabId) return;
+
+            persistCurrentFilters();
+            activeTabId = tabId;
+            renderSearchTabs();
+            syncTopicInput();
+            displayActiveResults();
+        }
+
+        function showLoading(message) {
+            activeRequests += 1;
+            const spinner = document.querySelector('.loading-spinner');
+            spinner.style.display = 'block';
+            spinner.querySelector('p').textContent = message || 'Analyzing topic and searching for papers...';
+        }
+
+        function hideLoading() {
+            activeRequests = Math.max(0, activeRequests - 1);
+            if (activeRequests === 0) {
+                document.querySelector('.loading-spinner').style.display = 'none';
+            }
+        }
+
+        function hydrateTabResults(tab, data) {
+            tab.results = data;
+            tab.allPapers = data.papers || [];
+            tab.filteredPapers = [...tab.allPapers];
+            tab.allCitations = data.citations || [];
+            tab.filteredCitations = [...tab.allCitations];
+            tab.allGaps = data.research_gaps || [];
+            tab.filteredGaps = [...tab.allGaps];
+        }
+
+        async function searchTab(tab, suppressScroll = false) {
+            const topic = tab.topic.trim();
+            if (!topic) {
+                return null;
+            }
+
+            tab.status = 'loading';
+            tab.error = '';
+            renderSearchTabs();
+            showLoading(`Searching for "${topic}"...`);
+
             try {
-                console.log('Sending fetch request...'); // Debug log
                 const response = await fetch('/research', {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
+                        'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ topic: topic })
+                    body: JSON.stringify({ topic })
                 });
-                
-                console.log('Response received:', response.status); // Debug log
-                const data = await response.json();
-                console.log('Data parsed:', data); // Debug log
-                
-                if (response.ok) {
-                    console.log('Research successful, displaying results...'); // Debug log
-                    currentResults = data;
-                    allCitations = data.citations || [];
-                    allPapers = data.papers || [];
-                    allGaps = data.research_gaps || [];
-                    
-                    // Initialize filtered arrays
-                    filteredCitations = [...allCitations];
-                    filteredPapers = [...allPapers];
-                    filteredGaps = [...allGaps];
-                    
-                    displayResults(data);
-                    setupFilters();
-                } else {
-                    console.error('Research failed:', data.error); // Debug log
-                    alert('Error: ' + data.error);
-                }
-            } catch (error) {
-                console.error('Exception occurred:', error); // Debug log
-                alert('Error: ' + error.message);
-            } finally {
-                document.querySelector('.loading-spinner').style.display = 'none';
-            }
-        });
 
-        function displayResults(data) {
-            // Show results section
+                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Research failed');
+                }
+
+                hydrateTabResults(tab, data);
+                tab.status = 'ready';
+
+                if (tab.id === activeTabId) {
+                    displayActiveResults(suppressScroll);
+                }
+
+                return data;
+            } catch (error) {
+                tab.status = 'error';
+                tab.error = error.message;
+                if (tab.id === activeTabId) {
+                    document.getElementById('results').style.display = 'none';
+                }
+                alert(`Research failed for "${topic}": ${error.message}`);
+                return null;
+            } finally {
+                renderSearchTabs();
+                hideLoading();
+            }
+        }
+
+        async function searchActiveTab() {
+            const tab = getActiveSearchTab();
+            if (!tab) return;
+
+            tab.topic = document.getElementById('topic').value.trim();
+            renderSearchTabs();
+
+            if (!tab.topic) {
+                alert('Please enter a research topic.');
+                return;
+            }
+
+            await searchTab(tab);
+        }
+
+        async function searchOpenTabs() {
+            persistCurrentFilters();
+            const tabsToSearch = searchTabs.filter(tab => tab.topic.trim());
+
+            if (!tabsToSearch.length) {
+                alert('Add at least one topic before starting parallel search.');
+                return;
+            }
+
+            await Promise.allSettled(tabsToSearch.map((tab, index) => searchTab(tab, index > 0)));
+
+            const activeTab = getActiveSearchTab();
+            if ((!activeTab || !activeTab.results) && tabsToSearch[0]) {
+                activeTabId = tabsToSearch[0].id;
+                renderSearchTabs();
+            }
+
+            displayActiveResults();
+        }
+
+        function populateSelect(selectId, options, placeholder) {
+            const select = document.getElementById(selectId);
+            const currentValue = select.value;
+            select.innerHTML = `<option value="">${placeholder}</option>`;
+
+            options.forEach(optionValue => {
+                const option = document.createElement('option');
+                option.value = optionValue;
+                option.textContent = optionValue;
+                select.appendChild(option);
+            });
+
+            select.value = options.includes(currentValue) ? currentValue : '';
+        }
+
+        function populateFilterOptions(tab) {
+            const journals = [...new Set([
+                ...tab.allPapers.filter(paper => getVenueType(paper) === 'journal').map(getVenueName),
+                ...tab.allCitations.filter(citation => getVenueType(citation) === 'journal').map(getVenueName)
+            ])].filter(Boolean).sort();
+
+            const conferences = [...new Set([
+                ...tab.allPapers.filter(paper => getVenueType(paper) === 'conference').map(getVenueName),
+                ...tab.allCitations.filter(citation => getVenueType(citation) === 'conference').map(getVenueName)
+            ])].filter(Boolean).sort();
+
+            const years = [...new Set([
+                ...tab.allPapers.map(paper => paper.year),
+                ...tab.allCitations.map(citation => citation.year)
+            ])].filter(Boolean).sort((a, b) => b - a);
+
+            populateSelect('journalFilter', journals, 'All Journals');
+            populateSelect('conferenceFilter', conferences, 'All Conferences');
+            populateSelect('yearFilter', years.map(String), 'All Years');
+        }
+
+        function renderVenueOverview(tab) {
+            const summary = tab.results?.summary?.venue_breakdown || {};
+            const items = [
+                { key: 'journal', label: 'Journals' },
+                { key: 'conference', label: 'Conferences' },
+                { key: 'preprint', label: 'Preprints' }
+            ];
+
+            document.getElementById('resultVenueOverview').innerHTML = items.map(item => `
+                <span class="venue-pill ${item.key}">${item.label}: ${summary[item.key] || 0}</span>
+            `).join(' ');
+        }
+
+        function displayActiveResults(skipScroll = false) {
+            const tab = getActiveSearchTab();
+            syncTopicInput();
+
+            if (!tab || !tab.results) {
+                document.getElementById('results').style.display = 'none';
+                return;
+            }
+
+            populateFilterOptions(tab);
+            loadFiltersForActiveTab();
+
+            const data = tab.results;
             document.getElementById('results').style.display = 'block';
-            
-            // Summary stats
-            const summaryHtml = `
+            document.getElementById('activeSearchMeta').textContent = `Active tab: ${data.topic} | Open tabs: ${searchTabs.length}`;
+            renderVenueOverview(tab);
+
+            document.getElementById('summaryStats').innerHTML = `
                 <div class="col-md-3">
                     <div class="text-center">
                         <h3 class="text-primary">${data.summary.papers_analyzed}</h3>
@@ -556,330 +1102,129 @@
                     </div>
                 </div>
             `;
-            document.getElementById('summaryStats').innerHTML = summaryHtml;
-            
-            // Topic analysis
-            const topicHtml = `
+
+            document.getElementById('topicAnalysis').innerHTML = `
                 <h6><strong>Main Topic:</strong> ${data.topic_map.main_topic}</h6>
-                <p><strong>Subtopics:</strong> ${data.topic_map.subtopics.slice(0, 5).join(', ')}</p>
-                <p><strong>Methods:</strong> ${data.topic_map.methods.join(', ')}</p>
-                <p><strong>Keywords:</strong> ${data.topic_map.keywords.slice(0, 10).join(', ')}</p>
+                <p><strong>Subtopics:</strong> ${(data.topic_map.subtopics || []).slice(0, 5).join(', ') || 'None identified yet'}</p>
+                <p><strong>Methods:</strong> ${(data.topic_map.methods || []).join(', ') || 'No methods extracted'}</p>
+                <p><strong>Keywords:</strong> ${(data.topic_map.keywords || []).slice(0, 10).join(', ') || 'No keywords extracted'}</p>
             `;
-            document.getElementById('topicAnalysis').innerHTML = topicHtml;
-            
-            // Display all sections
-            displayPapers();
-            displayCitations();
-            displayResearchGaps();
-            
-            // Download link
+
             if (data.download_url) {
                 document.getElementById('downloadLink').href = data.download_url;
             }
-            
-            // Scroll to results
-            document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+
+            applyAllFilters();
+
+            if (!skipScroll) {
+                document.getElementById('results').scrollIntoView({ behavior: 'smooth' });
+            }
         }
 
-        function setupFilters() {
-            if (!currentResults) return;
-            
-            // Get unique values for filters
-            const journals = [...new Set([
-                ...allPapers.map(p => p.venue),
-                ...allCitations.map(c => c.journal_name)
-            ])].filter(j => j).sort();
-            
-            const years = [...new Set([
-                ...allPapers.map(p => p.year),
-                ...allCitations.map(c => c.year)
-            ])].filter(y => y).sort((a, b) => b - a);
-            
-            // Populate journal filter
-            const journalFilter = document.getElementById('journalFilter');
-            journalFilter.innerHTML = '<option value="">All Journals</option>';
-            journals.forEach(journal => {
-                const option = document.createElement('option');
-                option.value = journal;
-                option.textContent = journal;
-                journalFilter.appendChild(option);
-            });
-            
-            // Populate year filter
-            const yearFilter = document.getElementById('yearFilter');
-            yearFilter.innerHTML = '<option value="">All Years</option>';
-            years.forEach(year => {
-                const option = document.createElement('option');
-                option.value = year;
-                option.textContent = year;
-                yearFilter.appendChild(option);
-            });
-            
-            // Set up event listeners
-            document.getElementById('globalSearch').addEventListener('input', applyAllFilters);
-            document.getElementById('journalFilter').addEventListener('change', applyAllFilters);
-            document.getElementById('yearFilter').addEventListener('change', applyAllFilters);
-            document.getElementById('yearFrom').addEventListener('input', applyAllFilters);
-            document.getElementById('yearTo').addEventListener('input', applyAllFilters);
-            document.getElementById('formatFilter').addEventListener('change', displayCitations);
-            document.getElementById('showPapers').addEventListener('change', toggleContentVisibility);
-            document.getElementById('showCitations').addEventListener('change', toggleContentVisibility);
-            document.getElementById('showGaps').addEventListener('change', toggleContentVisibility);
-            document.getElementById('showOnlyCitations').addEventListener('change', toggleContentVisibility);
-            
-            // Journal mode radio buttons
-            document.querySelectorAll('input[name="journalMode"]').forEach(radio => {
-                radio.addEventListener('change', function() {
-                    journalMode = this.value;
-                    applyAllFilters();
-                });
-            });
-            
-            updateFilterStats();
+        function applyVenueFilters(item, selectedJournal, selectedConference, journalMode) {
+            const venueName = getVenueName(item);
+            const venueType = getVenueType(item);
+
+            if (selectedJournal) {
+                if (journalMode === 'include' && !(venueType === 'journal' && venueName === selectedJournal)) {
+                    return false;
+                }
+                if (journalMode === 'exclude' && venueType === 'journal' && venueName === selectedJournal) {
+                    return false;
+                }
+            }
+
+            if (selectedConference && !(venueType === 'conference' && venueName === selectedConference)) {
+                return false;
+            }
+
+            return true;
         }
 
         function applyAllFilters() {
-            const searchTerm = document.getElementById('globalSearch').value.toLowerCase();
-            const selectedJournal = document.getElementById('journalFilter').value;
-            const selectedYear = document.getElementById('yearFilter').value;
-            const yearFrom = parseInt(document.getElementById('yearFrom').value) || null;
-            const yearTo = parseInt(document.getElementById('yearTo').value) || null;
-            
-            // Filter papers
-            filteredPapers = allPapers.filter(paper => {
-                // Search filter
-                if (searchTerm) {
-                    const searchableText = [
-                        paper.title,
-                        paper.authors.join(' '),
-                        paper.venue,
-                        paper.abstract
-                    ].join(' ').toLowerCase();
-                    
-                    if (!searchableText.includes(searchTerm)) {
-                        return false;
-                    }
-                }
-                
-                // Journal filter
-                if (selectedJournal) {
-                    if (journalMode === 'include' && paper.venue !== selectedJournal) {
-                        return false;
-                    } else if (journalMode === 'exclude' && paper.venue === selectedJournal) {
-                        return false;
-                    }
-                }
-                
-                // Year filters
-                if (selectedYear && paper.year.toString() !== selectedYear) {
+            const tab = getActiveSearchTab();
+            if (!tab || !tab.results) return;
+
+            persistCurrentFilters();
+            const filters = tab.filters;
+            const searchTerm = filters.globalSearch.toLowerCase();
+            const selectedYear = filters.yearFilter;
+            const yearFrom = parseInt(filters.yearFrom, 10) || null;
+            const yearTo = parseInt(filters.yearTo, 10) || null;
+
+            tab.filteredPapers = tab.allPapers.filter(paper => {
+                const searchableText = [
+                    paper.title,
+                    (paper.authors || []).join(' '),
+                    getVenueName(paper),
+                    paper.abstract || ''
+                ].join(' ').toLowerCase();
+
+                if (searchTerm && !searchableText.includes(searchTerm)) {
                     return false;
                 }
-                
+
+                if (!applyVenueFilters(paper, filters.journalFilter, filters.conferenceFilter, filters.journalMode)) {
+                    return false;
+                }
+
+                if (selectedYear && String(paper.year) !== String(selectedYear)) {
+                    return false;
+                }
                 if (yearFrom && paper.year < yearFrom) {
                     return false;
                 }
-                
                 if (yearTo && paper.year > yearTo) {
                     return false;
                 }
-                
+
                 return true;
             });
-            
-            // Filter citations
-            filteredCitations = allCitations.filter(citation => {
-                // Search filter
-                if (searchTerm) {
-                    const searchableText = [
-                        citation.bibtex,
-                        citation.apa,
-                        citation.ieee,
-                        citation.custom_format,
-                        citation.journal_name
-                    ].join(' ').toLowerCase();
-                    
-                    if (!searchableText.includes(searchTerm)) {
-                        return false;
-                    }
-                }
-                
-                // Journal filter
-                if (selectedJournal) {
-                    if (journalMode === 'include' && citation.journal_name !== selectedJournal) {
-                        return false;
-                    } else if (journalMode === 'exclude' && citation.journal_name === selectedJournal) {
-                        return false;
-                    }
-                }
-                
-                // Year filters
-                if (selectedYear && citation.year.toString() !== selectedYear) {
+
+            tab.filteredCitations = tab.allCitations.filter(citation => {
+                const searchableText = [
+                    citation.bibtex,
+                    citation.apa,
+                    citation.ieee,
+                    citation.custom_format,
+                    citation.journal_name
+                ].join(' ').toLowerCase();
+
+                if (searchTerm && !searchableText.includes(searchTerm)) {
                     return false;
                 }
-                
+
+                if (!applyVenueFilters(citation, filters.journalFilter, filters.conferenceFilter, filters.journalMode)) {
+                    return false;
+                }
+
+                if (selectedYear && String(citation.year) !== String(selectedYear)) {
+                    return false;
+                }
                 if (yearFrom && citation.year < yearFrom) {
                     return false;
                 }
-                
                 if (yearTo && citation.year > yearTo) {
                     return false;
                 }
-                
+
                 return true;
             });
-            
-            // Filter research gaps
-            filteredGaps = allGaps.filter(gap => {
-                if (searchTerm) {
-                    const searchableText = [
-                        gap.description,
-                        gap.type,
-                        ...(gap.potential_questions || [])
-                    ].join(' ').toLowerCase();
-                    
-                    if (!searchableText.includes(searchTerm)) {
-                        return false;
-                    }
+
+            tab.filteredGaps = tab.allGaps.filter(gap => {
+                if (!searchTerm) {
+                    return true;
                 }
-                
-                return true;
+
+                const searchableText = [
+                    gap.description,
+                    gap.type,
+                    ...(gap.potential_questions || [])
+                ].join(' ').toLowerCase();
+
+                return searchableText.includes(searchTerm);
             });
-            
-            // Update displays
-            displayPapers();
-            displayCitations();
-            displayResearchGaps();
-            updateFilterStats();
-        }
 
-        function displayPapers() {
-            document.getElementById('papersCount').textContent = filteredPapers.length;
-            
-            if (filteredPapers.length === 0) {
-                document.getElementById('papersSection').innerHTML = '<p class="text-muted">No papers match the current filters.</p>';
-                return;
-            }
-            
-            const papersHtml = filteredPapers.map(paper => `
-                <div class="paper-card">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h6 class="mb-2">${paper.title}</h6>
-                            <p class="text-muted mb-1">
-                                <strong>Authors:</strong> ${paper.authors.join(', ')}
-                            </p>
-                            <p class="text-muted mb-2">
-                                <strong>Year:</strong> ${paper.year} | 
-                                <strong>Venue:</strong> ${paper.venue}
-                            </p>
-                            <p class="small">${paper.abstract}</p>
-                            ${paper.doi || paper.url ? `
-                                <div class="mt-2">
-                                    <a href="${paper.doi ? (paper.doi.startsWith('http') ? paper.doi : 'https://doi.org/' + paper.doi) : paper.url}" 
-                                       target="_blank" class="btn btn-sm btn-outline-primary">
-                                        <i class="fas fa-external-link-alt"></i> View Paper
-                                    </a>
-                                </div>
-                            ` : ''}
-                        </div>
-                        <span class="relevance-score ms-3">
-                            ${(paper.relevance_score * 100).toFixed(0)}%
-                        </span>
-                    </div>
-                </div>
-            `).join('');
-            document.getElementById('papersSection').innerHTML = papersHtml;
-        }
-
-        function displayResearchGaps() {
-            document.getElementById('gapsCount').textContent = filteredGaps.length;
-            
-            if (filteredGaps.length === 0) {
-                document.getElementById('gapsSection').innerHTML = '<p class="text-muted">No research gaps match the current filters.</p>';
-                return;
-            }
-            
-            const gapsHtml = filteredGaps.slice(0, 10).map(gap => `
-                <div class="mb-3 p-3 border rounded">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div class="flex-grow-1">
-                            <h6>${gap.description}</h6>
-                            <span class="badge bg-secondary gap-badge">${gap.type}</span>
-                        </div>
-                        <span class="badge bg-primary">
-                            Priority: ${(gap.priority * 100).toFixed(0)}%
-                        </span>
-                    </div>
-                    ${gap.potential_questions && gap.potential_questions.length > 0 ? 
-                        `<div class="mt-2">
-                            <small><strong>Potential Questions:</strong></small>
-                            <ul class="small mt-1">
-                                ${gap.potential_questions.slice(0, 2).map(q => `<li>${q}</li>`).join('')}
-                            </ul>
-                        </div>` : ''
-                    }
-                </div>
-            `).join('');
-            document.getElementById('gapsSection').innerHTML = gapsHtml;
-        }
-
-        function toggleContentVisibility() {
-            const showPapers = document.getElementById('showPapers').checked;
-            const showCitations = document.getElementById('showCitations').checked;
-            const showGaps = document.getElementById('showGaps').checked;
-            const showOnlyCitations = document.getElementById('showOnlyCitations').checked;
-            
-            // Toggle section visibility
-            document.getElementById('papersRow').style.display = showPapers && !showOnlyCitations ? 'block' : 'none';
-            document.getElementById('citationsRow').style.display = showCitations ? 'block' : 'none';
-            document.getElementById('gapsRow').style.display = showGaps && !showOnlyCitations ? 'block' : 'none';
-            
-            updateFilterStats();
-        }
-
-        function toggleJournalOptions() {
-            const options = document.getElementById('journalOptions');
-            options.classList.toggle('show');
-        }
-
-        function updateFilterStats() {
-            const totalPapers = allPapers.length;
-            const totalCitations = allCitations.length;
-            const totalGaps = allGaps.length;
-            
-            const filteredPapersCount = filteredPapers.length;
-            const filteredCitationsCount = filteredCitations.length;
-            const filteredGapsCount = filteredGaps.length;
-            
-            const statsText = `Showing ${filteredPapersCount}/${totalPapers} papers, ${filteredCitationsCount}/${totalCitations} citations, ${filteredGapsCount}/${totalGaps} gaps`;
-            document.getElementById('filterStats').textContent = statsText;
-        }
-
-        function clearAllFilters() {
-            // Clear all filter inputs
-            document.getElementById('globalSearch').value = '';
-            document.getElementById('journalFilter').value = '';
-            document.getElementById('yearFilter').value = '';
-            document.getElementById('yearFrom').value = '';
-            document.getElementById('yearTo').value = '';
-            document.getElementById('formatFilter').value = 'custom';
-            
-            // Reset checkboxes
-            document.getElementById('showPapers').checked = true;
-            document.getElementById('showCitations').checked = true;
-            document.getElementById('showGaps').checked = true;
-            document.getElementById('showOnlyCitations').checked = false;
-            
-            // Reset journal mode
-            document.getElementById('includeMode').checked = true;
-            journalMode = 'include';
-            
-            // Reset filtered arrays
-            filteredPapers = [...allPapers];
-            filteredCitations = [...allCitations];
-            filteredGaps = [...allGaps];
-            
-            // Update displays
             displayPapers();
             displayCitations();
             displayResearchGaps();
@@ -887,125 +1232,211 @@
             updateFilterStats();
         }
 
+        function displayPapers() {
+            const tab = getActiveSearchTab();
+            const papers = tab ? tab.filteredPapers : [];
+            document.getElementById('papersCount').textContent = papers.length;
+
+            if (!papers.length) {
+                document.getElementById('papersSection').innerHTML = '<p class="text-muted">No papers match the current filters.</p>';
+                return;
+            }
+
+            document.getElementById('papersSection').innerHTML = papers.map(paper => {
+                const venueType = getVenueType(paper);
+                const paperLink = paper.doi ? (paper.doi.startsWith('http') ? paper.doi : `https://doi.org/${paper.doi}`) : paper.url;
+
+                return `
+                    <div class="paper-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
+                                    <h6 class="mb-0">${paper.title}</h6>
+                                    <span class="venue-pill ${venueType}">${formatVenueLabel(venueType)}</span>
+                                </div>
+                                <p class="text-muted mb-1"><strong>Authors:</strong> ${(paper.authors || []).join(', ')}</p>
+                                <p class="text-muted mb-2"><strong>Year:</strong> ${paper.year} | <strong>Venue:</strong> ${getVenueName(paper)}</p>
+                                <p class="small">${paper.abstract || 'No abstract available.'}</p>
+                                ${paperLink ? `
+                                    <div class="mt-2">
+                                        <a href="${paperLink}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-external-link-alt"></i> View Paper
+                                        </a>
+                                    </div>
+                                ` : ''}
+                            </div>
+                            <span class="relevance-score ms-3">${((paper.relevance_score || 0) * 100).toFixed(0)}%</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayCitations() {
+            const tab = getActiveSearchTab();
+            const citations = tab ? tab.filteredCitations : [];
+            const format = document.getElementById('formatFilter').value;
+            document.getElementById('citationCount').textContent = citations.length;
+
+            if (!citations.length) {
+                document.getElementById('citationsSection').innerHTML = '<p class="text-muted">No citations match the current filters.</p>';
+                return;
+            }
+
+            document.getElementById('citationsSection').innerHTML = citations.map((citation, index) => {
+                const venueType = getVenueType(citation);
+                return `
+                    <div class="mb-4 p-3 border rounded">
+                        <div class="d-flex justify-content-between align-items-start mb-2 gap-2 flex-wrap">
+                            <div class="d-flex flex-wrap gap-2 align-items-center">
+                                <span class="badge bg-primary">${citation.journal_name || 'Unknown venue'}</span>
+                                <span class="venue-pill ${venueType}">${formatVenueLabel(venueType)}</span>
+                                <span class="badge bg-success">${citation.year}</span>
+                            </div>
+                            <div>
+                                ${citation.paper_url ? `
+                                    <a href="${citation.paper_url}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
+                                        <i class="fas fa-external-link-alt"></i> View Paper
+                                    </a>
+                                ` : ''}
+                                <button class="btn btn-sm btn-outline-secondary" onclick="copyCitation(${index}, event)">
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+                        <div class="citation-box">${getCitationText(citation, format)}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function displayResearchGaps() {
+            const tab = getActiveSearchTab();
+            const gaps = tab ? tab.filteredGaps : [];
+            document.getElementById('gapsCount').textContent = gaps.length;
+
+            if (!gaps.length) {
+                document.getElementById('gapsSection').innerHTML = '<p class="text-muted">No research gaps match the current filters.</p>';
+                return;
+            }
+
+            document.getElementById('gapsSection').innerHTML = gaps.slice(0, 10).map(gap => `
+                <div class="mb-3 p-3 border rounded">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div class="flex-grow-1">
+                            <h6>${gap.description}</h6>
+                            <span class="badge bg-secondary gap-badge">${gap.type}</span>
+                        </div>
+                        <span class="badge bg-primary">Priority: ${((gap.priority || 0) * 100).toFixed(0)}%</span>
+                    </div>
+                    ${gap.potential_questions && gap.potential_questions.length ? `
+                        <div class="mt-2">
+                            <small><strong>Potential Questions:</strong></small>
+                            <ul class="small mt-1">
+                                ${gap.potential_questions.slice(0, 2).map(question => `<li>${question}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        function toggleContentVisibility() {
+            const showPapers = document.getElementById('showPapers').checked;
+            const showCitations = document.getElementById('showCitations').checked;
+            const showGaps = document.getElementById('showGaps').checked;
+            const showOnlyCitations = document.getElementById('showOnlyCitations').checked;
+
+            document.getElementById('papersRow').style.display = showPapers && !showOnlyCitations ? 'block' : 'none';
+            document.getElementById('citationsRow').style.display = showCitations ? 'block' : 'none';
+            document.getElementById('gapsRow').style.display = showGaps && !showOnlyCitations ? 'block' : 'none';
+            updateFilterStats();
+        }
+
+        function toggleJournalOptions() {
+            document.getElementById('journalOptions').classList.toggle('show');
+        }
+
+        function updateFilterStats() {
+            const tab = getActiveSearchTab();
+            if (!tab) {
+                document.getElementById('filterStats').textContent = 'Showing all results';
+                return;
+            }
+
+            document.getElementById('filterStats').textContent = `Showing ${tab.filteredPapers.length}/${tab.allPapers.length} papers, ${tab.filteredCitations.length}/${tab.allCitations.length} citations, ${tab.filteredGaps.length}/${tab.allGaps.length} gaps`;
+        }
+
+        function clearAllFilters() {
+            const tab = getActiveSearchTab();
+            if (!tab) return;
+
+            tab.filters = getDefaultFilters();
+            loadFiltersForActiveTab();
+            applyAllFilters();
+        }
+
         function downloadFilteredResults() {
-            if (!currentResults) {
+            const tab = getActiveSearchTab();
+            if (!tab || !tab.results) {
                 alert('No results to download.');
                 return;
             }
-            
+
             const format = document.getElementById('formatFilter').value;
             const showOnlyCitations = document.getElementById('showOnlyCitations').checked;
-            
+            const dateStamp = new Date().toISOString().split('T')[0];
+            const topicSlug = slugifyTopic(tab.topic);
             let content = '';
             let filename = '';
-            
+
             if (showOnlyCitations) {
-                // Download only citations
-                if (filteredCitations.length === 0) {
+                if (!tab.filteredCitations.length) {
                     alert('No citations to download. Please adjust your filters.');
                     return;
                 }
-                
+
                 if (format === 'custom') {
                     content = '\\begin{thebibliography}{99}\n\n';
-                    filteredCitations.forEach(citation => {
-                        content += (citation.custom_format || citation.bibtex) + '\n\n';
+                    tab.filteredCitations.forEach(citation => {
+                        content += `${citation.custom_format || citation.bibtex}\n\n`;
                     });
                     content += '\\end{thebibliography}';
-                    filename = `citations_${format}_${new Date().toISOString().split('T')[0]}.tex`;
+                    filename = `${topicSlug}_citations_${dateStamp}.tex`;
                 } else {
-                    filteredCitations.forEach(citation => {
-                        content += getCitationText(citation, format) + '\n\n';
+                    tab.filteredCitations.forEach(citation => {
+                        content += `${getCitationText(citation, format)}\n\n`;
                     });
-                    filename = `citations_${format}_${new Date().toISOString().split('T')[0]}.txt`;
+                    filename = `${topicSlug}_citations_${format}_${dateStamp}.txt`;
                 }
             } else {
-                // Download complete filtered results
-                const filteredResults = {
-                    ...currentResults,
-                    papers: filteredPapers,
-                    citations: filteredCitations,
-                    research_gaps: filteredGaps,
-                    filter_applied: {
-                        search_term: document.getElementById('globalSearch').value,
-                        journal: document.getElementById('journalFilter').value,
-                        year: document.getElementById('yearFilter').value,
-                        year_range: {
-                            from: document.getElementById('yearFrom').value,
-                            to: document.getElementById('yearTo').value
-                        },
-                        journal_mode: journalMode
-                    }
-                };
-                
-                content = JSON.stringify(filteredResults, null, 2);
-                filename = `filtered_research_${new Date().toISOString().split('T')[0]}.json`;
+                content = JSON.stringify({
+                    ...tab.results,
+                    papers: tab.filteredPapers,
+                    citations: tab.filteredCitations,
+                    research_gaps: tab.filteredGaps,
+                    filter_applied: tab.filters
+                }, null, 2);
+                filename = `${topicSlug}_filtered_research_${dateStamp}.json`;
             }
-            
+
             downloadFile(content, filename);
         }
 
         function saveFilterPreset() {
-            const preset = {
-                search_term: document.getElementById('globalSearch').value,
-                journal: document.getElementById('journalFilter').value,
-                year: document.getElementById('yearFilter').value,
-                year_from: document.getElementById('yearFrom').value,
-                year_to: document.getElementById('yearTo').value,
-                format: document.getElementById('formatFilter').value,
-                show_papers: document.getElementById('showPapers').checked,
-                show_citations: document.getElementById('showCitations').checked,
-                show_gaps: document.getElementById('showGaps').checked,
-                show_only_citations: document.getElementById('showOnlyCitations').checked,
-                journal_mode: journalMode
-            };
-            
+            const tab = getActiveSearchTab();
+            if (!tab) return;
+
+            persistCurrentFilters();
             const presetName = prompt('Enter a name for this filter preset:');
             if (presetName) {
-                localStorage.setItem(`filter_preset_${presetName}`, JSON.stringify(preset));
-                alert(`Filter preset "${presetName}" saved successfully!`);
+                localStorage.setItem(`filter_preset_${presetName}`, JSON.stringify(tab.filters));
+                alert(`Filter preset "${presetName}" saved successfully.`);
             }
-        }
-
-        function displayCitations() {
-            const format = document.getElementById('formatFilter').value;
-            document.getElementById('citationCount').textContent = filteredCitations.length;
-            
-            if (filteredCitations.length === 0) {
-                document.getElementById('citationsSection').innerHTML = '<p class="text-muted">No citations match the current filters.</p>';
-                return;
-            }
-            
-            const citationsHtml = filteredCitations.map((citation, index) => `
-                <div class="mb-4 p-3 border rounded">
-                    <div class="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                            <span class="badge bg-primary me-2">${citation.journal_name}</span>
-                            <span class="badge bg-success">${citation.year}</span>
-                        </div>
-                        <div>
-                            ${citation.paper_url ? `
-                                <a href="${citation.paper_url}" target="_blank" class="btn btn-sm btn-outline-primary me-2">
-                                    <i class="fas fa-external-link-alt"></i> View Paper
-                                </a>
-                            ` : ''}
-                            <button class="btn btn-sm btn-outline-secondary" onclick="copyCitation(${index})">
-                                <i class="fas fa-copy"></i> Copy
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="citation-box">
-                        ${getCitationText(citation, format)}
-                    </div>
-                </div>
-            `).join('');
-            
-            document.getElementById('citationsSection').innerHTML = citationsHtml;
         }
 
         function getCitationText(citation, format) {
-            switch(format) {
+            switch (format) {
                 case 'bibtex':
                     return citation.bibtex;
                 case 'apa':
@@ -1019,19 +1450,21 @@
             }
         }
 
-        function copyCitation(index) {
-            const citation = filteredCitations[index];
+        function copyCitation(index, event) {
+            const tab = getActiveSearchTab();
+            const citation = tab?.filteredCitations?.[index];
+            if (!citation) return;
+
             const format = document.getElementById('formatFilter').value;
             const text = getCitationText(citation, format);
-            
+
             navigator.clipboard.writeText(text).then(() => {
-                // Show success feedback
                 const button = event.target.closest('button');
                 const originalText = button.innerHTML;
                 button.innerHTML = '<i class="fas fa-check"></i> Copied!';
                 button.classList.add('btn-success');
                 button.classList.remove('btn-outline-secondary');
-                
+
                 setTimeout(() => {
                     button.innerHTML = originalText;
                     button.classList.remove('btn-success');
@@ -1043,12 +1476,12 @@
         function downloadFile(content, filename) {
             const blob = new Blob([content], { type: 'text/plain' });
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = filename;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
             window.URL.revokeObjectURL(url);
         }
 
@@ -1056,21 +1489,18 @@
             try {
                 const response = await fetch('/history');
                 const files = await response.json();
-                
-                if (files.length === 0) {
+
+                if (!files.length) {
                     document.getElementById('historySection').innerHTML = '<p class="text-muted">No previous research found.</p>';
                     return;
                 }
-                
-                const historyHtml = files.map(file => `
+
+                document.getElementById('historySection').innerHTML = files.map(file => `
                     <div class="border rounded p-3 mb-2">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <h6 class="mb-1">${file.topic}</h6>
-                                <small class="text-muted">
-                                    ${new Date(file.generated_at).toLocaleString()} | 
-                                    ${file.papers_count} papers, ${file.claims_count} claims
-                                </small>
+                                <small class="text-muted">${new Date(file.generated_at).toLocaleString()} | ${file.papers_count} papers, ${file.claims_count} claims</small>
                             </div>
                             <a href="${file.download_url}" class="btn btn-sm btn-outline-primary" target="_blank">
                                 <i class="fas fa-download"></i> Download
@@ -1078,13 +1508,59 @@
                         </div>
                     </div>
                 `).join('');
-                
-                document.getElementById('historySection').innerHTML = historyHtml;
-                
             } catch (error) {
                 console.error('Error loading history:', error);
             }
         }
+
+        function initializeEventHandlers() {
+            document.getElementById('researchForm').addEventListener('submit', async function(event) {
+                event.preventDefault();
+                await searchActiveTab();
+            });
+
+            document.getElementById('topic').addEventListener('input', function(event) {
+                const tab = getActiveSearchTab();
+                if (!tab) return;
+                tab.topic = event.target.value;
+                renderSearchTabs();
+            });
+
+            document.getElementById('searchAllTabsBtn').addEventListener('click', searchOpenTabs);
+            document.getElementById('addTopicTabBtn').addEventListener('click', () => createSearchTab('', true));
+            document.getElementById('closeAllTabsBtn').addEventListener('click', closeExtraTabs);
+
+            document.getElementById('globalSearch').addEventListener('input', applyAllFilters);
+            document.getElementById('journalFilter').addEventListener('change', function() {
+                if (this.value) {
+                    document.getElementById('conferenceFilter').value = '';
+                }
+                applyAllFilters();
+            });
+            document.getElementById('conferenceFilter').addEventListener('change', function() {
+                if (this.value) {
+                    document.getElementById('journalFilter').value = '';
+                }
+                applyAllFilters();
+            });
+            document.getElementById('yearFilter').addEventListener('change', applyAllFilters);
+            document.getElementById('yearFrom').addEventListener('input', applyAllFilters);
+            document.getElementById('yearTo').addEventListener('input', applyAllFilters);
+            document.getElementById('formatFilter').addEventListener('change', displayCitations);
+            document.getElementById('showPapers').addEventListener('change', toggleContentVisibility);
+            document.getElementById('showCitations').addEventListener('change', toggleContentVisibility);
+            document.getElementById('showGaps').addEventListener('change', toggleContentVisibility);
+            document.getElementById('showOnlyCitations').addEventListener('change', toggleContentVisibility);
+
+            document.querySelectorAll('input[name="journalMode"]').forEach(radio => {
+                radio.addEventListener('change', applyAllFilters);
+            });
+        }
+
+        initializeEventHandlers();
+        createSearchTab('', true);
+        loadFiltersForActiveTab();
+        updateFilterStats();
     </script>
 </body>
 </html>

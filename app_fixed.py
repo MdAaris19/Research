@@ -10,6 +10,9 @@ from datetime import datetime
 from pathlib import Path
 import threading
 import concurrent.futures
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Add src to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
@@ -25,7 +28,7 @@ Path("output").mkdir(exist_ok=True)
 
 # Global system instance
 research_system = None
-executor = concurrent.futures.ThreadPoolExecutor(max_workers=2)
+executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
 
 def get_system():
     """Get or create research system instance."""
@@ -43,7 +46,7 @@ def run_research_in_thread(topic):
         asyncio.set_event_loop(loop)
         
         try:
-            system = get_system()
+            system = AutonomousResearchSystem()
             result = loop.run_until_complete(system.research(topic))
             return result
         except Exception as e:
@@ -52,6 +55,52 @@ def run_research_in_thread(topic):
             loop.close()
     
     return research_task()
+
+
+def _detect_venue_type(paper):
+    """Classify a paper venue for UI filtering."""
+    venue = (paper.venue or "").strip()
+    venue_lower = venue.lower()
+
+    if paper.arxiv_id or venue_lower == "arxiv":
+        return "preprint"
+
+    conference_indicators = [
+        "conference", "proceedings", "workshop", "symposium",
+        "summit", "congress", "forum", "meeting", "colloquium",
+        "iclr", "neurips", "nips", "icml", "aaai", "ijcai", "acl",
+        "emnlp", "naacl", "cvpr", "iccv", "eccv", "sigir", "www",
+        "kdd", "icde", "chi", "uist", "recsys", "icra", "iros", "cdc"
+    ]
+
+    journal_indicators = [
+        "journal", "transactions", "review", "letters", "magazine",
+        "annals", "reports"
+    ]
+
+    if any(indicator in venue_lower for indicator in conference_indicators):
+        return "conference"
+    if any(indicator in venue_lower for indicator in journal_indicators):
+        return "journal"
+    if venue:
+        return "journal"
+    return "other"
+
+
+def _build_venue_summary(papers):
+    """Create venue type counts for result summaries."""
+    summary = {
+        'journal': 0,
+        'conference': 0,
+        'preprint': 0,
+        'other': 0
+    }
+
+    for paper in papers:
+        venue_type = _detect_venue_type(paper)
+        summary[venue_type] = summary.get(venue_type, 0) + 1
+
+    return summary
 
 
 def _generate_custom_citation(paper):
@@ -329,6 +378,8 @@ def research():
         print(f"Research completed successfully")
         
         # Convert results to JSON-serializable format
+        venue_summary = _build_venue_summary(results.papers)
+
         response_data = {
             'topic': results.topic_map.main_topic,
             'generated_at': results.generated_at.isoformat(),
@@ -336,7 +387,8 @@ def research():
                 'papers_analyzed': results.total_papers_analyzed,
                 'claims_extracted': results.total_claims_extracted,
                 'contradictions_found': len(results.contradictions),
-                'research_gaps_identified': len(results.research_gaps)
+                'research_gaps_identified': len(results.research_gaps),
+                'venue_breakdown': venue_summary
             },
             'topic_map': {
                 'main_topic': results.topic_map.main_topic,
@@ -351,6 +403,7 @@ def research():
                     'authors': paper.authors,
                     'year': paper.year,
                     'venue': paper.venue,
+                    'venue_type': _detect_venue_type(paper),
                     'relevance_score': paper.relevance_score,
                     'abstract': paper.abstract[:300] + '...' if len(paper.abstract) > 300 else paper.abstract,
                     'doi': paper.doi,
@@ -396,6 +449,7 @@ def research():
                     'custom_format': _generate_custom_citation(paper),
                     'paper_url': _get_paper_url(paper),
                     'journal_name': paper.venue,
+                    'venue_type': _detect_venue_type(paper),
                     'year': paper.year
                 }
                 for citation, paper in zip(results.citations, results.papers)

@@ -8,26 +8,30 @@ class APIConfig:
     """Configuration for academic database APIs."""
     
     # Free APIs (no key required)
+    OPENALEX_ENABLED = True
     ARXIV_ENABLED = True
     SEMANTIC_SCHOLAR_ENABLED = True
     CROSSREF_ENABLED = True
     PUBMED_ENABLED = True
     
     # APIs requiring keys (set to True after adding keys)
-    SPRINGER_ENABLED = False
-    ELSEVIER_ENABLED = False
-    WILEY_ENABLED = False
+    SPRINGER_ENABLED = bool(os.getenv("SPRINGER_META_API_KEY") or os.getenv("SPRINGER_API_KEY"))
+    ELSEVIER_ENABLED = bool(os.getenv("ELSEVIER_API_KEY"))
+    WILEY_ENABLED = bool(os.getenv("WILEY_API_KEY"))
     
     # API Keys (get these from respective providers)
+    OPENALEX_EMAIL = os.getenv("OPENALEX_EMAIL")
     SEMANTIC_SCHOLAR_API_KEY = os.getenv("SEMANTIC_SCHOLAR_API_KEY")  # Optional, increases rate limits
-    SPRINGER_API_KEY = os.getenv("SPRINGER_API_KEY")  # Required for Springer
+    SPRINGER_API_KEY = os.getenv("SPRINGER_API_KEY")  # Backward compatible alias
+    SPRINGER_META_API_KEY = os.getenv("SPRINGER_META_API_KEY") or SPRINGER_API_KEY
+    SPRINGER_OPENACCESS_API_KEY = os.getenv("SPRINGER_OPENACCESS_API_KEY")
     ELSEVIER_API_KEY = os.getenv("ELSEVIER_API_KEY")  # Required for Elsevier
     ELSEVIER_INST_TOKEN = os.getenv("ELSEVIER_INST_TOKEN")  # Optional institution token
     WILEY_API_KEY = os.getenv("WILEY_API_KEY")  # Required for Wiley
     PUBMED_API_KEY = os.getenv("PUBMED_API_KEY")  # Optional, increases rate limits
     
     # Contact information (required for some APIs)
-    CONTACT_EMAIL = "your-email@example.com"  # Required for CrossRef polite pool
+    CONTACT_EMAIL = os.getenv("CROSSREF_EMAIL", "your-email@example.com")
     
     # Rate limiting
     MAX_PAPERS_PER_SOURCE = 50
@@ -38,6 +42,8 @@ class APIConfig:
         """Get list of enabled sources."""
         sources = []
         
+        if cls.OPENALEX_ENABLED:
+            sources.append("OpenAlex")
         if cls.ARXIV_ENABLED:
             sources.append("ArXiv")
         if cls.SEMANTIC_SCHOLAR_ENABLED:
@@ -60,7 +66,7 @@ class APIConfig:
         """Validate API configuration."""
         issues = []
         
-        if cls.SPRINGER_ENABLED and not cls.SPRINGER_API_KEY:
+        if cls.SPRINGER_ENABLED and not cls.SPRINGER_META_API_KEY:
             issues.append("Springer enabled but no API key provided")
         
         if cls.ELSEVIER_ENABLED and not cls.ELSEVIER_API_KEY:
@@ -111,7 +117,7 @@ def print_api_setup_guide():
     print("=" * 60)
     
     print("\n📚 Currently Enabled (Free APIs):")
-    free_sources = ["ArXiv", "Semantic Scholar", "CrossRef", "PubMed"]
+    free_sources = ["OpenAlex", "ArXiv", "Semantic Scholar", "CrossRef", "PubMed"]
     for source in free_sources:
         print(f"  ✅ {source}")
     
@@ -125,14 +131,15 @@ def print_api_setup_guide():
     print("\n⚙️ Setup Instructions:")
     print("1. Get API keys from the URLs above")
     print("2. Set environment variables:")
-    print("   export SPRINGER_API_KEY='your-key-here'")
+    print("   export SPRINGER_META_API_KEY='your-key-here'")
+    print("   export SPRINGER_OPENACCESS_API_KEY='your-key-here'")
     print("   export ELSEVIER_API_KEY='your-key-here'")
     print("   export WILEY_API_KEY='your-key-here'")
     print("3. Update api_config.py to enable the APIs")
     print("4. Restart the research system")
     
     print("\n💡 Pro Tips:")
-    print("- Start with free APIs (ArXiv, Semantic Scholar, CrossRef)")
+    print("- Start with free APIs (OpenAlex, ArXiv, Semantic Scholar, CrossRef)")
     print("- Institutional access often provides better API limits")
     print("- Some publishers require VPN/institutional network")
     print("- Always respect rate limits and terms of service")

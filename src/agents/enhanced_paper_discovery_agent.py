@@ -8,6 +8,11 @@ import xml.etree.ElementTree as ET
 from datetime import datetime
 import re
 import json
+import difflib
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
 
 from ..models.data_models import PaperMetadata, TopicMap
 from .base_agent import BaseAgent
@@ -20,9 +25,17 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         super().__init__("EnhancedPaperDiscoveryAgent", memory_store)
         self.max_papers_per_source = max_papers_per_source
         self.session = None
+        self.primary_source_target = max(10, min(self.max_papers_per_source, 25))
         
         # API configurations
         self.apis = {
+            "openalex": {
+                "enabled": True,
+                "requires_key": False,
+                "base_url": "https://api.openalex.org/works",
+                "author_url": "https://api.openalex.org/authors",
+                "email": os.getenv("OPENALEX_EMAIL") or os.getenv("CROSSREF_EMAIL") or ""
+            },
             "arxiv": {
                 "enabled": True,
                 "requires_key": False,
@@ -32,43 +45,45 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
                 "enabled": True,
                 "requires_key": False,  # Free tier available
                 "base_url": "https://api.semanticscholar.org/graph/v1/paper/search",
-                "api_key": None  # Set this if you have an API key
+                "api_key": os.getenv("SEMANTIC_SCHOLAR_API_KEY")
             },
             "crossref": {
                 "enabled": True,
                 "requires_key": False,  # Free but rate limited
                 "base_url": "https://api.crossref.org/works",
-                "email": "your-email@example.com"  # Required for polite pool
+                "email": os.getenv("CROSSREF_EMAIL", "your-email@example.com")
             },
             "pubmed": {
                 "enabled": True,
                 "requires_key": False,  # Free
                 "base_url": "https://eutils.ncbi.nlm.nih.gov/entrez/eutils/esearch.fcgi",
-                "api_key": None  # Optional, increases rate limits
+                "api_key": os.getenv("PUBMED_API_KEY")
             },
             "springer": {
-                "enabled": False,  # Requires API key
+                "enabled": bool(os.getenv("SPRINGER_META_API_KEY") or os.getenv("SPRINGER_API_KEY")),
                 "requires_key": True,
                 "base_url": "https://api.springernature.com/meta/v2/json",
-                "api_key": None  # Set your Springer API key here
+                "api_key": os.getenv("SPRINGER_META_API_KEY") or os.getenv("SPRINGER_API_KEY"),
+                "openaccess_api_key": os.getenv("SPRINGER_OPENACCESS_API_KEY")
             },
             "elsevier": {
-                "enabled": False,  # Requires API key
+                "enabled": bool(os.getenv("ELSEVIER_API_KEY")),
                 "requires_key": True,
                 "base_url": "https://api.elsevier.com/content/search/sciencedirect",
-                "api_key": None,  # Set your Elsevier API key here
-                "inst_token": None  # Institution token if available
+                "api_key": os.getenv("ELSEVIER_API_KEY"),
+                "inst_token": os.getenv("ELSEVIER_INST_TOKEN")
             },
             "wiley": {
-                "enabled": False,  # Requires API key
+                "enabled": bool(os.getenv("WILEY_API_KEY")),
                 "requires_key": True,
                 "base_url": "https://api.wiley.com/onlinelibrary/tdm/v1/articles",
-                "api_key": None  # Set your Wiley API key here
+                "api_key": os.getenv("WILEY_API_KEY")
             }
         }
     
     async def __aenter__(self):
-        self.session = aiohttp.ClientSession()
+        timeout = aiohttp.ClientTimeout(total=20)
+        self.session = aiohttp.ClientSession(timeout=timeout)
         return self
     
     async def __aexit__(self, exc_type, exc_val, exc_tb):
@@ -86,60 +101,90 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         })
         
         if not self.session:
-            self.session = aiohttp.ClientSession()
+            timeout = aiohttp.ClientTimeout(total=20)
+            self.session = aiohttp.ClientSession(timeout=timeout)
         
         # Check if this is an author search
         author_name = None
+        paper_title_query = None
+        metric_query = None
         for area in topic_map.related_areas:
             if area.startswith("__author__:"):
                 author_name = area.replace("__author__:", "").strip()
                 break
+            if area.startswith("__paper_title__:"):
+                paper_title_query = area.replace("__paper_title__:", "").strip()
+            if area.startswith("__metric__:"):
+                metric_query = area.replace("__metric__:", "").strip()
         
         all_papers = []
         
         if author_name:
             # Author search — use dedicated author search methods
             self.logger.info(f"Running author search for: {author_name}")
-            search_tasks = [
-                self._search_arxiv_by_author(author_name),
-                self._search_semantic_scholar_by_author(author_name),
-                self._search_crossref_by_author(author_name),
+            core_tasks = [
+                ("openalex", self._search_openalex_by_author(author_name)),
+                ("crossref", self._search_crossref_by_author(author_name)),
+            ]
+            supplemental_tasks = [
+                ("semantic_scholar", self._search_semantic_scholar_by_author(author_name)),
+                ("arxiv", self._search_arxiv_by_author(author_name)),
+            ]
+        elif paper_title_query:
+            self.logger.info(f"Running paper title search for: {paper_title_query}")
+            core_tasks = [
+                ("openalex", self._search_openalex_by_title(paper_title_query)),
+                ("crossref", self._search_crossref_by_title(paper_title_query)),
+            ]
+            supplemental_tasks = [
+                ("semantic_scholar", self._search_semantic_scholar_by_title(paper_title_query)),
+                ("pubmed", self._search_pubmed_by_title(paper_title_query)),
+                ("arxiv", self._search_arxiv_by_title(paper_title_query)),
             ]
         else:
-            # Topic search — existing behaviour
-            search_tasks = []
-            if self.apis["arxiv"]["enabled"]:
-                search_tasks.append(self._search_arxiv(topic_map))
-            if self.apis["semantic_scholar"]["enabled"]:
-                search_tasks.append(self._search_semantic_scholar(topic_map))
+            core_tasks = []
+            supplemental_tasks = []
+            if self.apis["openalex"]["enabled"]:
+                core_tasks.append(("openalex", self._search_openalex(topic_map)))
             if self.apis["crossref"]["enabled"]:
-                search_tasks.append(self._search_crossref(topic_map))
+                core_tasks.append(("crossref", self._search_crossref(topic_map)))
+            if self.apis["semantic_scholar"]["enabled"]:
+                supplemental_tasks.append(("semantic_scholar", self._search_semantic_scholar(topic_map)))
             if self.apis["pubmed"]["enabled"]:
-                search_tasks.append(self._search_pubmed(topic_map))
+                supplemental_tasks.append(("pubmed", self._search_pubmed(topic_map)))
             if self.apis["springer"]["enabled"] and self.apis["springer"]["api_key"]:
-                search_tasks.append(self._search_springer(topic_map))
+                supplemental_tasks.append(("springer", self._search_springer(topic_map)))
             if self.apis["elsevier"]["enabled"] and self.apis["elsevier"]["api_key"]:
-                search_tasks.append(self._search_elsevier(topic_map))
+                supplemental_tasks.append(("elsevier", self._search_elsevier(topic_map)))
             if self.apis["wiley"]["enabled"] and self.apis["wiley"]["api_key"]:
-                search_tasks.append(self._search_wiley(topic_map))
-        
-        # Execute searches concurrently
-        results = await asyncio.gather(*search_tasks, return_exceptions=True)
-        
-        # Collect results
+                supplemental_tasks.append(("wiley", self._search_wiley(topic_map)))
+            if self.apis["arxiv"]["enabled"]:
+                supplemental_tasks.append(("arxiv", self._search_arxiv(topic_map)))
+
         source_counts = {}
-        for i, result in enumerate(results):
-            source_name = list(self.apis.keys())[i] if i < len(self.apis) else f"source_{i}"
-            if isinstance(result, list):
-                all_papers.extend(result)
-                source_counts[source_name] = len(result)
-            elif isinstance(result, Exception):
-                self.logger.warning(f"Error searching {source_name}: {result}")
-                source_counts[source_name] = 0
+        core_papers, core_counts = await self._run_source_tasks(core_tasks)
+        all_papers.extend(core_papers)
+        source_counts.update(core_counts)
+
+        needs_supplemental = (
+            not core_papers or
+            len(core_papers) < (self.primary_source_target * 2) or
+            paper_title_query is not None or
+            author_name is not None
+        )
+
+        if needs_supplemental and supplemental_tasks:
+            supplemental_papers, supplemental_counts = await self._run_source_tasks(supplemental_tasks)
+            all_papers.extend(supplemental_papers)
+            source_counts.update(supplemental_counts)
         
         # Remove duplicates and rank papers
         unique_papers = self._remove_duplicates(all_papers)
         ranked_papers = self._rank_papers(unique_papers, topic_map)
+        if paper_title_query:
+            ranked_papers = self._filter_exact_title_matches(ranked_papers, paper_title_query)
+        elif metric_query:
+            ranked_papers = self._prioritize_metric_matches(ranked_papers, metric_query)
         
         await self.store_result("enhanced_discovered_papers", ranked_papers)
         
@@ -150,6 +195,158 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         })
         
         return ranked_papers
+
+    async def _run_source_tasks(self, named_tasks: List[Any]) -> tuple[List[PaperMetadata], Dict[str, int]]:
+        """Execute a list of source tasks and collect results."""
+        if not named_tasks:
+            return [], {}
+
+        results = await asyncio.gather(*(task for _, task in named_tasks), return_exceptions=True)
+        papers: List[PaperMetadata] = []
+        source_counts: Dict[str, int] = {}
+
+        for (source_name, _), result in zip(named_tasks, results):
+            if isinstance(result, list):
+                papers.extend(result)
+                source_counts[source_name] = len(result)
+            elif isinstance(result, Exception):
+                self.logger.warning(f"Error searching {source_name}: {result}")
+                source_counts[source_name] = 0
+
+        return papers, source_counts
+
+    async def _search_openalex(self, topic_map: TopicMap) -> List[PaperMetadata]:
+        """Search OpenAlex as the primary general source."""
+        metric_query = self._extract_marker_value(topic_map, "__metric__:")
+        query = metric_query if metric_query else topic_map.main_topic
+        return await self._search_openalex_works(query)
+
+    async def _search_openalex_by_title(self, title_query: str) -> List[PaperMetadata]:
+        """Search OpenAlex by paper title."""
+        return await self._search_openalex_works(title_query)
+
+    async def _search_openalex_by_author(self, author_name: str) -> List[PaperMetadata]:
+        """Search OpenAlex by author using the authors endpoint first."""
+        papers = []
+        headers = self._build_mailto_headers(self.apis["openalex"].get("email"))
+        try:
+            params = {"search": author_name, "per-page": 3}
+            async with self.session.get(self.apis["openalex"]["author_url"], params=params, headers=headers) as response:
+                if response.status != 200:
+                    return papers
+                data = await response.json()
+                authors = data.get("results", [])
+                if not authors:
+                    return papers
+                author_id = authors[0].get("id", "")
+                if not author_id:
+                    return papers
+
+            params = {
+                "filter": f"author.id:{author_id}",
+                "per-page": self.max_papers_per_source,
+                "sort": "relevance_score:desc"
+            }
+            async with self.session.get(self.apis["openalex"]["base_url"], params=params, headers=headers) as response:
+                if response.status == 200:
+                    papers = self._parse_openalex_response(await response.json())
+        except Exception as e:
+            self.logger.error(f"OpenAlex author search error: {e}")
+        return papers
+
+    async def _search_openalex_works(self, query: str) -> List[PaperMetadata]:
+        """Search OpenAlex works endpoint."""
+        papers = []
+        params = {
+            "search": query,
+            "per-page": self.max_papers_per_source,
+            "sort": "relevance_score:desc"
+        }
+        headers = self._build_mailto_headers(self.apis["openalex"].get("email"))
+        try:
+            async with self.session.get(self.apis["openalex"]["base_url"], params=params, headers=headers) as response:
+                if response.status == 200:
+                    papers = self._parse_openalex_response(await response.json())
+        except Exception as e:
+            self.logger.error(f"OpenAlex search error: {e}")
+        return papers
+
+    def _build_mailto_headers(self, email: str) -> Dict[str, str]:
+        """Build polite-pool headers when contact email is available."""
+        if not email or email == "your-email@example.com":
+            return {}
+        return {"User-Agent": f"AutonomousResearchSystem/1.0 ({email})"}
+
+    async def _search_arxiv_by_title(self, title_query: str) -> List[PaperMetadata]:
+        """Search ArXiv using an exact-title oriented query."""
+        papers = []
+        params = {
+            "search_query": f'ti:"{title_query}" OR all:"{title_query}"',
+            "start": 0,
+            "max_results": self.max_papers_per_source,
+            "sortBy": "relevance",
+            "sortOrder": "descending"
+        }
+        try:
+            async with self.session.get(self.apis["arxiv"]["base_url"], params=params) as response:
+                if response.status == 200:
+                    papers = self._parse_arxiv_response(await response.text())
+        except Exception as e:
+            self.logger.error(f"ArXiv title search error: {e}")
+        return papers
+
+    async def _search_semantic_scholar_by_title(self, title_query: str) -> List[PaperMetadata]:
+        """Search Semantic Scholar using an exact-title oriented query."""
+        papers = []
+        params = {
+            "query": f'"{title_query}"',
+            "limit": min(self.max_papers_per_source, 100),
+            "fields": "paperId,title,authors,year,venue,abstract,citationCount,url,externalIds"
+        }
+        headers = {}
+        if self.apis["semantic_scholar"]["api_key"]:
+            headers["x-api-key"] = self.apis["semantic_scholar"]["api_key"]
+        try:
+            async with self.session.get(self.apis["semantic_scholar"]["base_url"], params=params, headers=headers) as response:
+                if response.status == 200:
+                    papers = self._parse_semantic_scholar_response(await response.json())
+        except Exception as e:
+            self.logger.error(f"Semantic Scholar title search error: {e}")
+        return papers
+
+    async def _search_crossref_by_title(self, title_query: str) -> List[PaperMetadata]:
+        """Search CrossRef using title-specific fields."""
+        papers = []
+        params = {
+            "query.title": title_query,
+            "rows": self.max_papers_per_source,
+            "sort": "relevance",
+            "mailto": self.apis["crossref"]["email"]
+        }
+        try:
+            async with self.session.get(self.apis["crossref"]["base_url"], params=params) as response:
+                if response.status == 200:
+                    papers = self._parse_crossref_response(await response.json())
+        except Exception as e:
+            self.logger.error(f"CrossRef title search error: {e}")
+        return papers
+
+    async def _search_pubmed_by_title(self, title_query: str) -> List[PaperMetadata]:
+        """Search PubMed by title phrase."""
+        papers = []
+        params = {
+            "db": "pubmed",
+            "term": f'"{title_query}"[Title]',
+            "retmax": self.max_papers_per_source,
+            "retmode": "json"
+        }
+        try:
+            async with self.session.get(self.apis["pubmed"]["base_url"], params=params) as response:
+                if response.status == 200:
+                    papers = await self._parse_pubmed_response(await response.json())
+        except Exception as e:
+            self.logger.error(f"PubMed title search error: {e}")
+        return papers
     
     async def _search_arxiv_by_author(self, author_name: str) -> List[PaperMetadata]:
         """Search ArXiv for papers by a specific author."""
@@ -231,9 +428,13 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
     async def _search_arxiv(self, topic_map: TopicMap) -> List[PaperMetadata]:
         """Search ArXiv (existing implementation)."""
         papers = []
-        
-        query_terms = [topic_map.main_topic] + topic_map.keywords[:5]
-        query = " AND ".join([f'"{term}"' for term in query_terms])
+
+        metric_query = self._extract_marker_value(topic_map, "__metric__:")
+        if metric_query:
+            query = f'"{metric_query}"'
+        else:
+            query_terms = [topic_map.main_topic] + topic_map.keywords[:5]
+            query = " AND ".join([f'"{term}"' for term in query_terms])
         
         url = self.apis["arxiv"]["base_url"]
         params = {
@@ -257,8 +458,9 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
     async def _search_semantic_scholar(self, topic_map: TopicMap) -> List[PaperMetadata]:
         """Search Semantic Scholar API."""
         papers = []
-        
-        query = topic_map.main_topic
+
+        metric_query = self._extract_marker_value(topic_map, "__metric__:")
+        query = f'"{metric_query}"' if metric_query else topic_map.main_topic
         url = self.apis["semantic_scholar"]["base_url"]
         
         params = {
@@ -286,8 +488,9 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
     async def _search_crossref(self, topic_map: TopicMap) -> List[PaperMetadata]:
         """Search CrossRef API (covers many publishers)."""
         papers = []
-        
-        query = topic_map.main_topic
+
+        metric_query = self._extract_marker_value(topic_map, "__metric__:")
+        query = metric_query if metric_query else topic_map.main_topic
         url = self.apis["crossref"]["base_url"]
         
         params = {
@@ -310,8 +513,10 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
     async def _search_pubmed(self, topic_map: TopicMap) -> List[PaperMetadata]:
         """Search PubMed API."""
         papers = []
-        
-        query = topic_map.main_topic.replace(" ", "+")
+
+        metric_query = self._extract_marker_value(topic_map, "__metric__:")
+        query_text = f'"{metric_query}"' if metric_query else topic_map.main_topic
+        query = query_text.replace(" ", "+")
         url = self.apis["pubmed"]["base_url"]
         
         params = {
@@ -400,10 +605,28 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
         
         if not self.apis["wiley"]["api_key"]:
             return papers
-        
-        # Wiley API implementation would go here
-        # Note: Wiley's API structure may vary
-        
+
+        metric_query = self._extract_marker_value(topic_map, "__metric__:")
+        query = metric_query if metric_query else topic_map.main_topic
+        headers = {
+            "Wiley-TDM-Client-Token": self.apis["wiley"]["api_key"],
+            "Accept": "application/json"
+        }
+        params = {
+            "q": query,
+            "limit": self.max_papers_per_source
+        }
+
+        try:
+            async with self.session.get(self.apis["wiley"]["base_url"], params=params, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    papers = self._parse_wiley_response(data)
+                else:
+                    self.logger.warning(f"Wiley API returned {response.status}")
+        except Exception as e:
+            self.logger.error(f"Wiley search error: {e}")
+
         return papers
     
     def _parse_arxiv_response(self, xml_content: str) -> List[PaperMetadata]:
@@ -489,6 +712,54 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
                 self.logger.warning(f"Error parsing Semantic Scholar paper: {e}")
                 continue
         
+        return papers
+
+    def _parse_openalex_response(self, data: dict) -> List[PaperMetadata]:
+        """Parse OpenAlex API response."""
+        papers = []
+
+        for item in data.get("results", []):
+            try:
+                authors = [
+                    authorship.get("author", {}).get("display_name", "")
+                    for authorship in item.get("authorships", [])
+                    if authorship.get("author", {}).get("display_name")
+                ]
+
+                doi = item.get("doi")
+                if doi:
+                    doi = doi.replace("https://doi.org/", "")
+
+                source = (item.get("primary_location") or {}).get("source") or {}
+                venue = source.get("display_name") or "Unknown"
+
+                abstract = ""
+                abstract_index = item.get("abstract_inverted_index") or {}
+                if abstract_index:
+                    max_index = max((max(indexes) for indexes in abstract_index.values() if indexes), default=-1)
+                    if max_index >= 0:
+                        abstract_tokens = [""] * (max_index + 1)
+                        for word, indexes in abstract_index.items():
+                            for idx in indexes:
+                                if 0 <= idx < len(abstract_tokens):
+                                    abstract_tokens[idx] = word
+                        abstract = " ".join(token for token in abstract_tokens if token)
+
+                paper = PaperMetadata(
+                    title=item.get("title", ""),
+                    authors=authors,
+                    year=item.get("publication_year") or 2023,
+                    venue=venue,
+                    doi=doi,
+                    abstract=abstract,
+                    url=((item.get("primary_location") or {}).get("landing_page_url") or item.get("id", "")),
+                    impact_score=item.get("cited_by_count", 0)
+                )
+                papers.append(paper)
+            except Exception as e:
+                self.logger.warning(f"Error parsing OpenAlex paper: {e}")
+                continue
+
         return papers
     
     def _parse_crossref_response(self, data: dict) -> List[PaperMetadata]:
@@ -624,6 +895,37 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
                 continue
         
         return papers
+
+    def _parse_wiley_response(self, data: dict) -> List[PaperMetadata]:
+        """Parse Wiley API response."""
+        papers = []
+
+        items = data.get("articles") or data.get("results") or []
+        for item in items:
+            try:
+                authors = item.get("authors") or []
+                if authors and isinstance(authors[0], dict):
+                    authors = [author.get("displayName", "") or author.get("name", "") for author in authors]
+
+                publication_date = item.get("publicationDate", "2023")
+                year_match = re.search(r"(19|20)\d{2}", publication_date)
+                year = int(year_match.group(0)) if year_match else 2023
+
+                paper = PaperMetadata(
+                    title=item.get("title", ""),
+                    authors=[author for author in authors if author],
+                    year=year,
+                    venue=item.get("publicationTitle", "Wiley"),
+                    doi=item.get("doi", ""),
+                    abstract=item.get("abstract", ""),
+                    url=item.get("url") or item.get("link", "")
+                )
+                papers.append(paper)
+            except Exception as e:
+                self.logger.warning(f"Error parsing Wiley paper: {e}")
+                continue
+
+        return papers
     
     def _remove_duplicates(self, papers: List[PaperMetadata]) -> List[PaperMetadata]:
         """Remove duplicate papers based on title and DOI."""
@@ -650,6 +952,58 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
                 unique_papers.append(paper)
         
         return unique_papers
+
+    def _extract_marker_value(self, topic_map: TopicMap, prefix: str) -> Optional[str]:
+        """Read a query marker from related areas metadata."""
+        for area in topic_map.related_areas:
+            if area.startswith(prefix):
+                return area.replace(prefix, "", 1).strip()
+        return None
+
+    def _normalize_text(self, text: str) -> str:
+        """Normalize text for approximate matching."""
+        return re.sub(r'[^\w\s]', '', (text or '').lower()).strip()
+
+    def _title_similarity(self, left: str, right: str) -> float:
+        """Compute approximate title similarity."""
+        return difflib.SequenceMatcher(None, self._normalize_text(left), self._normalize_text(right)).ratio()
+
+    def _title_overlap(self, query: str, title: str) -> float:
+        """Compute token overlap between a query and title."""
+        query_tokens = set(self._normalize_text(query).split())
+        title_tokens = set(self._normalize_text(title).split())
+        if not query_tokens or not title_tokens:
+            return 0.0
+        return len(query_tokens & title_tokens) / max(len(query_tokens), 1)
+
+    def _filter_exact_title_matches(self, papers: List[PaperMetadata], title_query: str) -> List[PaperMetadata]:
+        """Keep only papers that closely match an exact title query."""
+        scored = []
+        for paper in papers:
+            similarity = self._title_similarity(title_query, paper.title)
+            overlap = self._title_overlap(title_query, paper.title)
+            if similarity >= 0.72 or overlap >= 0.8:
+                paper.relevance_score = max(paper.relevance_score, min(1.0, (similarity * 0.75) + (overlap * 0.25)))
+                scored.append((similarity, overlap, paper))
+
+        if not scored:
+            return papers[:10]
+
+        scored.sort(key=lambda item: (item[0], item[1], item[2].relevance_score), reverse=True)
+        return [paper for _, _, paper in scored[:10]]
+
+    def _prioritize_metric_matches(self, papers: List[PaperMetadata], metric_query: str) -> List[PaperMetadata]:
+        """Boost papers that explicitly mention the requested metric or index."""
+        boosted = []
+        for paper in papers:
+            overlap = self._title_overlap(metric_query, f"{paper.title} {paper.abstract}")
+            phrase_hit = self._normalize_text(metric_query) in self._normalize_text(f"{paper.title} {paper.abstract}")
+            bonus = 0.25 if phrase_hit else 0.0
+            paper.relevance_score = min(1.0, max(paper.relevance_score, overlap) + bonus)
+            boosted.append(paper)
+
+        boosted.sort(key=lambda paper: paper.relevance_score, reverse=True)
+        return boosted
     
     def _rank_papers(self, papers: List[PaperMetadata], topic_map: TopicMap) -> List[PaperMetadata]:
         """Rank papers by relevance, impact, and recency."""
@@ -658,6 +1012,20 @@ class EnhancedPaperDiscoveryAgent(BaseAgent):
             score = 0.0
             title_lower = paper.title.lower()
             abstract_lower = paper.abstract.lower()
+            paper_title_query = self._extract_marker_value(topic_map, "__paper_title__:")
+            metric_query = self._extract_marker_value(topic_map, "__metric__:")
+
+            if paper_title_query:
+                title_similarity = self._title_similarity(paper_title_query, paper.title)
+                title_overlap = self._title_overlap(paper_title_query, paper.title)
+                score += min((title_similarity * 0.7) + (title_overlap * 0.3), 0.9)
+                return min(score, 1.0)
+
+            if metric_query:
+                metric_text = self._normalize_text(metric_query)
+                searchable = self._normalize_text(f"{paper.title} {paper.abstract}")
+                if metric_text and metric_text in searchable:
+                    score += 0.45
             
             # Main topic match
             if topic_map.main_topic.lower() in title_lower:
