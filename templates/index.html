@@ -213,12 +213,62 @@
             text-align: center;
             color: #4c6483;
         }
+        .notification-stack {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 1080;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 360px;
+        }
+        .site-notification {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            background: #ffffff;
+            border: 1px solid #d7e3f7;
+            border-left: 4px solid #0d6efd;
+            border-radius: 14px;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.14);
+            padding: 12px 14px;
+            color: #29415f;
+            animation: slideInToast 0.22s ease;
+        }
+        .site-notification.success {
+            border-left-color: #20c997;
+        }
+        .site-notification.error {
+            border-left-color: #dc3545;
+        }
+        .site-notification.warning {
+            border-left-color: #f59f00;
+        }
+        .site-notification button {
+            border: 0;
+            background: transparent;
+            color: #6c7b8e;
+            margin-left: auto;
+            line-height: 1;
+        }
+        @keyframes slideInToast {
+            from {
+                opacity: 0;
+                transform: translateY(-8px) translateX(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) translateX(0);
+            }
+        }
         .hidden {
             display: none !important;
         }
     </style>
 </head>
 <body class="bg-light">
+    <div id="notificationStack" class="notification-stack" aria-live="polite" aria-atomic="true"></div>
     <nav class="navbar navbar-dark bg-primary">
         <div class="container">
             <span class="navbar-brand mb-0 h1">
@@ -263,10 +313,10 @@
                                 <button type="button" class="btn btn-outline-primary" id="searchAllTabsBtn">
                                     <i class="fas fa-layer-group"></i> Search Open Tabs
                                 </button>
-                                <button type="button" class="btn btn-outline-secondary" id="addTopicTabBtn">
+                                <button type="button" class="btn btn-outline-secondary" id="addTopicTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new research tab (Alt+T)">
                                     <i class="fas fa-plus"></i> Add Topic Tab
                                 </button>
-                                <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn">
+                                <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Close the active tab (Alt+W)">
                                     <i class="fas fa-times-circle"></i> Close Extra Tabs
                                 </button>
                             </div>
@@ -619,6 +669,7 @@
         let activeTabId = null;
         let nextTabId = 1;
         let activeRequests = 0;
+        let audioContext = null;
 
         function getDefaultFilters() {
             return {
@@ -682,9 +733,112 @@
                 .replace(/^_+|_+$/g, '') || 'research';
         }
 
-        function createSearchTab(topic = '', shouldActivate = true) {
+        function showNotification(message, type = 'info', duration = 3200) {
+            const stack = document.getElementById('notificationStack');
+            const notice = document.createElement('div');
+            notice.className = `site-notification ${type}`;
+            notice.innerHTML = `
+                <div>
+                    <div class="fw-semibold">${message}</div>
+                </div>
+                <button type="button" aria-label="Close notification"><i class="fas fa-times"></i></button>
+            `;
+
+            const dismiss = () => {
+                if (notice.parentNode) {
+                    notice.remove();
+                }
+            };
+
+            notice.querySelector('button').addEventListener('click', dismiss);
+            stack.appendChild(notice);
+            window.setTimeout(dismiss, duration);
+
+            triggerSystemNotification(message, type);
+            playNotificationSound(type);
+        }
+
+        function getNotificationTitle(type) {
+            if (type === 'success') return 'Research Complete';
+            if (type === 'error') return 'Research Error';
+            if (type === 'warning') return 'Research Warning';
+            return 'Research Update';
+        }
+
+        function requestNotificationPermission() {
+            if (!('Notification' in window) || Notification.permission !== 'default') {
+                return;
+            }
+
+            Notification.requestPermission().catch(() => null);
+        }
+
+        function triggerSystemNotification(message, type) {
+            if (!('Notification' in window) || Notification.permission !== 'granted') {
+                return;
+            }
+
+            const notification = new Notification(getNotificationTitle(type), {
+                body: message,
+                tag: `research-${type}`,
+                renotify: true,
+                requireInteraction: type === 'success' || type === 'error'
+            });
+
+            notification.onclick = () => {
+                window.focus();
+                notification.close();
+            };
+        }
+
+        function playNotificationSound(type) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) {
+                return;
+            }
+
+            try {
+                if (!audioContext) {
+                    audioContext = new AudioContextClass();
+                }
+
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume().catch(() => null);
+                }
+
+                const now = audioContext.currentTime;
+                const tones = {
+                    success: [740, 988, 1175],
+                    warning: [554, 440, 659],
+                    error: [392, 311, 262],
+                    info: [659, 784, 988]
+                };
+                const selected = tones[type] || tones.info;
+                selected.forEach((frequency, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    const startTime = now + (index * 0.12);
+                    const endTime = startTime + 0.24;
+
+                    oscillator.type = type === 'error' ? 'sawtooth' : 'triangle';
+                    oscillator.frequency.setValueAtTime(frequency, startTime);
+                    gainNode.gain.setValueAtTime(0.0001, startTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.14, startTime + 0.03);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, endTime);
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.start(startTime);
+                    oscillator.stop(endTime + 0.02);
+                });
+            } catch (error) {
+                console.warn('Notification sound unavailable:', error);
+            }
+        }
+
+        function createSearchTab(topic = '', shouldActivate = true, notify = true) {
             if (searchTabs.length >= MAX_SEARCH_TABS) {
-                alert('You can open up to 3 research tabs at a time.');
+                showNotification('You can open up to 3 research tabs at a time.', 'warning');
                 return;
             }
 
@@ -710,6 +864,10 @@
             if (shouldActivate) {
                 setActiveSearchTab(tab.id);
             }
+
+            if (notify) {
+                showNotification('New topic tab opened.', 'info', 2200);
+            }
         }
 
         function renderSearchTabs() {
@@ -725,7 +883,7 @@
                         <span class="tab-status-dot ${tab.status}"></span>
                         <span>${shortLabel}</span>
                         <span class="topic-tab-duplicate" data-duplicate-id="${tab.id}" title="Duplicate tab"><i class="fas fa-copy"></i></span>
-                        ${canClose ? `<span class="topic-tab-close" data-close-id="${tab.id}"><i class="fas fa-times"></i></span>` : ''}
+                        ${canClose ? `<span class="topic-tab-close" data-close-id="${tab.id}" title="Close tab (Alt+W)"><i class="fas fa-times"></i></span>` : ''}
                     </button>
                 `;
             }).join('');
@@ -809,7 +967,7 @@
             searchTabs.splice(index, 1);
 
             if (!searchTabs.length) {
-                createSearchTab('', true);
+                createSearchTab('', true, false);
                 return;
             }
 
@@ -829,7 +987,7 @@
             if (!sourceTab) return;
 
             if (searchTabs.length >= MAX_SEARCH_TABS) {
-                alert('You can open up to 3 research tabs at a time. Close one before duplicating.');
+                showNotification('You can open up to 3 research tabs at a time. Close one before duplicating.', 'warning');
                 return;
             }
 
@@ -852,6 +1010,7 @@
             renderSearchTabs();
             updateTabCounter();
             setActiveSearchTab(duplicatedTab.id);
+            showNotification('Tab duplicated successfully.', 'success', 2200);
         }
 
         function closeExtraTabs() {
@@ -892,6 +1051,22 @@
             updateTabCounter();
             syncTopicInput();
             displayActiveResults();
+            showNotification('Extra tabs closed.', 'info', 2200);
+        }
+
+        function closeActiveTab() {
+            const activeTab = getActiveSearchTab();
+            if (!activeTab) {
+                return;
+            }
+
+            if (searchTabs.length <= 1) {
+                showNotification('At least one topic tab must stay open.', 'warning');
+                return;
+            }
+
+            removeSearchTab(activeTab.id);
+            showNotification('Active tab closed.', 'info', 2200);
         }
 
         function setActiveSearchTab(tabId) {
@@ -960,6 +1135,9 @@
                     displayActiveResults(suppressScroll);
                 }
 
+                const paperCount = (data.summary && data.summary.papers_analyzed) || (data.papers || []).length || 0;
+                showNotification(`Research finished for "${topic}". ${paperCount} papers are ready in your workspace.`, 'success');
+
                 return data;
             } catch (error) {
                 tab.status = 'error';
@@ -967,7 +1145,7 @@
                 if (tab.id === activeTabId) {
                     document.getElementById('results').style.display = 'none';
                 }
-                alert(`Research failed for "${topic}": ${error.message}`);
+                showNotification(`Research failed for "${topic}": ${error.message}`, 'error', 5000);
                 return null;
             } finally {
                 renderSearchTabs();
@@ -983,7 +1161,7 @@
             renderSearchTabs();
 
             if (!tab.topic) {
-                alert('Please enter a research topic.');
+                showNotification('Please enter a research topic.', 'warning');
                 return;
             }
 
@@ -995,7 +1173,7 @@
             const tabsToSearch = searchTabs.filter(tab => tab.topic.trim());
 
             if (!tabsToSearch.length) {
-                alert('Add at least one topic before starting parallel search.');
+                showNotification('Add at least one topic before starting parallel search.', 'warning');
                 return;
             }
 
@@ -1379,7 +1557,7 @@
         function downloadFilteredResults() {
             const tab = getActiveSearchTab();
             if (!tab || !tab.results) {
-                alert('No results to download.');
+                showNotification('No results to download.', 'warning');
                 return;
             }
 
@@ -1392,7 +1570,7 @@
 
             if (showOnlyCitations) {
                 if (!tab.filteredCitations.length) {
-                    alert('No citations to download. Please adjust your filters.');
+                    showNotification('No citations to download. Please adjust your filters.', 'warning');
                     return;
                 }
 
@@ -1431,7 +1609,7 @@
             const presetName = prompt('Enter a name for this filter preset:');
             if (presetName) {
                 localStorage.setItem(`filter_preset_${presetName}`, JSON.stringify(tab.filters));
-                alert(`Filter preset "${presetName}" saved successfully.`);
+                showNotification(`Filter preset "${presetName}" saved successfully.`, 'success');
             }
         }
 
@@ -1514,6 +1692,10 @@
         }
 
         function initializeEventHandlers() {
+            document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
+                new bootstrap.Tooltip(element);
+            });
+
             document.getElementById('researchForm').addEventListener('submit', async function(event) {
                 event.preventDefault();
                 await searchActiveTab();
@@ -1529,6 +1711,29 @@
             document.getElementById('searchAllTabsBtn').addEventListener('click', searchOpenTabs);
             document.getElementById('addTopicTabBtn').addEventListener('click', () => createSearchTab('', true));
             document.getElementById('closeAllTabsBtn').addEventListener('click', closeExtraTabs);
+
+            ['click', 'keydown'].forEach(eventName => {
+                document.addEventListener(eventName, requestNotificationPermission, { once: true });
+            });
+
+            document.addEventListener('keydown', function(event) {
+                const target = event.target;
+                const isTypingTarget = target && (
+                    target.tagName === 'INPUT' ||
+                    target.tagName === 'TEXTAREA' ||
+                    target.isContentEditable
+                );
+
+                if (event.altKey && event.key.toLowerCase() === 't' && !isTypingTarget) {
+                    event.preventDefault();
+                    createSearchTab('', true);
+                }
+
+                if (event.altKey && event.key.toLowerCase() === 'w' && !isTypingTarget) {
+                    event.preventDefault();
+                    closeActiveTab();
+                }
+            });
 
             document.getElementById('globalSearch').addEventListener('input', applyAllFilters);
             document.getElementById('journalFilter').addEventListener('change', function() {
@@ -1558,7 +1763,7 @@
         }
 
         initializeEventHandlers();
-        createSearchTab('', true);
+        createSearchTab('', true, false);
         loadFiltersForActiveTab();
         updateFilterStats();
     </script>

@@ -3421,3 +3421,212 @@ year
 2026-04-09 18:54:37,155 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
 2026-04-09 18:54:37,155 - AutonomousResearchSystem - INFO - Research completed in 5.05 seconds
 2026-04-09 18:55:54,685 - werkzeug - INFO - 127.0.0.1 - - [09/Apr/2026 18:55:54] "POST /research HTTP/1.1" 200 -
+2026-04-10 20:07:28,468 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-10 20:07:28,470 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: wiener index
+2026-04-10 20:07:28,471 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-10 20:07:28,471 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'wiener index'}}
+2026-04-10 20:07:28,475 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 2}}
+2026-04-10 20:07:28,476 - AutonomousResearchSystem - INFO - Detected metric query: wiener index
+2026-04-10 20:07:28,476 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-10 20:07:28,478 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'wiener index', 'keywords_count': 3, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-10 20:07:31,339 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 87, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 87}}
+2026-04-10 20:07:31,349 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-10 20:07:31,352 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 87}}
+2026-04-10 20:07:31,386 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 3, 'papers_processed': 87}}
+2026-04-10 20:07:31,387 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-10 20:07:31,387 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 3}}
+2026-04-10 20:07:31,394 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_ci00011a023_abstract_150_1775831851.366663: list index out of range
+2026-04-10 20:07:31,394 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_ci00011a023_title_48_1775831851.369968: list index out of range
+2026-04-10 20:07:31,395 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_ci000086f_abstract_207_1775831851.375014: list index out of range
+2026-04-10 20:07:31,397 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 3, 'avg_confidence': 0.3}}
+2026-04-10 20:07:31,398 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-10 20:07:31,398 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 3}}
+2026-04-10 20:07:31,402 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 3}}
+2026-04-10 20:07:31,403 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-10 20:07:31,403 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 3}}
+2026-04-10 20:07:31,406 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-10 20:07:31,407 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-10 20:07:31,407 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 87}}
+2026-04-10 20:07:31,421 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 87}}
+2026-04-10 20:07:31,422 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-10 20:07:31,433 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-10 20:07:31,433 - AutonomousResearchSystem - INFO - Research completed in 2.96 seconds
+2026-04-10 20:08:48,269 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 20:08:48] "POST /research HTTP/1.1" 200 -
+2026-04-10 20:10:08,103 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-10 20:10:08,104 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: average distance
+2026-04-10 20:10:08,105 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-10 20:10:08,105 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'average distance'}}
+2026-04-10 20:10:08,109 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 2}}
+2026-04-10 20:10:08,109 - AutonomousResearchSystem - INFO - Detected metric query: average distance
+2026-04-10 20:10:08,110 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-10 20:10:08,110 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'average distance', 'keywords_count': 3, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-10 20:10:11,444 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 96, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 96}}
+2026-04-10 20:10:11,446 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-10 20:10:11,447 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 96}}
+2026-04-10 20:10:11,494 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 11, 'papers_processed': 96}}
+2026-04-10 20:10:11,495 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-10 20:10:11,495 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 11}}
+2026-04-10 20:10:11,497 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_acs_iecr_1c01413_abstract_156_1775832011.454579: list index out of range
+2026-04-10 20:10:11,498 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_acs_iecr_1c01413_abstract_95_1775832011.454579: list index out of range
+2026-04-10 20:10:11,500 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_ci0000981_abstract_143_1775832011.46022: list index out of range
+2026-04-10 20:10:11,502 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_3233_jifs-141219_abstract_109_1775832011.465227: list index out of range
+2026-04-10 20:10:11,503 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1137_1020073_abstract_282_1775832011.469229: list index out of range
+2026-04-10 20:10:11,504 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1177_0042098008099357_abstract_351_1775832011.471227: list index out of range
+2026-04-10 20:10:11,505 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1109_tevc_2011_2161872_abstract_218_1775832011.486195: list index out of range
+2026-04-10 20:10:11,509 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 11, 'avg_confidence': 0.41999999999999993}}
+2026-04-10 20:10:11,510 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-10 20:10:11,511 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 11}}
+2026-04-10 20:10:11,516 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 55}}
+2026-04-10 20:10:11,517 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-10 20:10:11,517 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 11}}
+2026-04-10 20:10:11,520 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-10 20:10:11,520 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-10 20:10:11,521 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 96}}
+2026-04-10 20:10:11,532 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 96}}
+2026-04-10 20:10:11,533 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-10 20:10:11,544 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-10 20:10:11,544 - AutonomousResearchSystem - INFO - Research completed in 3.44 seconds
+2026-04-10 20:11:47,265 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 20:11:47] "POST /research HTTP/1.1" 200 -
+2026-04-10 21:27:50,728 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-10 21:27:50,729 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: wiener polarity index
+2026-04-10 21:27:50,730 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-10 21:27:50,731 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'wiener polarity index'}}
+2026-04-10 21:27:50,732 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 3}}
+2026-04-10 21:27:50,733 - AutonomousResearchSystem - INFO - Detected metric query: wiener polarity index
+2026-04-10 21:27:50,733 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-10 21:27:50,734 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'wiener polarity index', 'keywords_count': 4, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-10 21:27:55,083 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 68, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 68}}
+2026-04-10 21:27:55,094 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-10 21:27:55,095 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 68}}
+2026-04-10 21:27:55,134 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 6, 'papers_processed': 68}}
+2026-04-10 21:27:55,134 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-10 21:27:55,134 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 6}}
+2026-04-10 21:27:55,144 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1371_journal_pone_0167075_abstract_94_1775836675.103805: list index out of range
+2026-04-10 21:27:55,145 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1155_2016_3873597_abstract_172_1775836675.11402: list index out of range
+2026-04-10 21:27:55,147 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1080_02522667_2021_1896652_abstract_121_1775836675.119976: list index out of range
+2026-04-10 21:27:55,148 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1080_02522667_2021_1896652_abstract_150_1775836675.121078: list index out of range
+2026-04-10 21:27:55,149 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1155_2021_1052927_abstract_107_1775836675.125969: list index out of range
+2026-04-10 21:27:55,151 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 6, 'avg_confidence': 0.35000000000000003}}
+2026-04-10 21:27:55,151 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-10 21:27:55,153 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 6}}
+2026-04-10 21:27:55,154 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 15}}
+2026-04-10 21:27:55,155 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-10 21:27:55,155 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 6}}
+2026-04-10 21:27:55,160 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-10 21:27:55,160 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-10 21:27:55,160 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 68}}
+2026-04-10 21:27:55,171 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 68}}
+2026-04-10 21:27:55,171 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-10 21:27:55,182 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-10 21:27:55,183 - AutonomousResearchSystem - INFO - Research completed in 4.45 seconds
+2026-04-10 21:28:52,074 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 21:28:52] "POST /research HTTP/1.1" 200 -
+2026-04-10 21:28:53,067 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 21:28:53] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-10 21:32:03,641 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-10 21:32:03,642 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: wiener polarity index
+2026-04-10 21:32:03,642 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-10 21:32:03,643 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'wiener polarity index'}}
+2026-04-10 21:32:03,644 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 3}}
+2026-04-10 21:32:03,645 - AutonomousResearchSystem - INFO - Detected metric query: wiener polarity index
+2026-04-10 21:32:03,645 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-10 21:32:03,646 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'wiener polarity index', 'keywords_count': 4, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-10 21:32:10,575 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 21:32:10] "GET / HTTP/1.1" 200 -
+2026-04-10 21:32:17,431 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-10 21:32:17,432 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: edge metric basis
+2026-04-10 21:32:17,432 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-10 21:32:17,433 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'edge metric basis'}}
+2026-04-10 21:32:17,434 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 3}}
+2026-04-10 21:32:17,435 - AutonomousResearchSystem - INFO - Detected metric query: edge metric basis
+2026-04-10 21:32:17,435 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-10 21:32:17,436 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'edge metric basis', 'keywords_count': 4, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-10 21:32:19,064 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 68, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 68}}
+2026-04-10 21:32:19,067 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-10 21:32:19,067 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 68}}
+2026-04-10 21:32:19,098 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 6, 'papers_processed': 68}}
+2026-04-10 21:32:19,099 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-10 21:32:19,099 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 6}}
+2026-04-10 21:32:19,100 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1371_journal_pone_0167075_abstract_94_1775836939.07183: list index out of range
+2026-04-10 21:32:19,101 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1155_2016_3873597_abstract_172_1775836939.081553: list index out of range
+2026-04-10 21:32:19,102 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1080_02522667_2021_1896652_abstract_121_1775836939.086851: list index out of range
+2026-04-10 21:32:19,103 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1080_02522667_2021_1896652_abstract_150_1775836939.086851: list index out of range
+2026-04-10 21:32:19,103 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1155_2021_1052927_abstract_107_1775836939.088864: list index out of range
+2026-04-10 21:32:19,105 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 6, 'avg_confidence': 0.35000000000000003}}
+2026-04-10 21:32:19,107 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-10 21:32:19,107 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 6}}
+2026-04-10 21:32:19,109 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 15}}
+2026-04-10 21:32:19,110 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-10 21:32:19,110 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 6}}
+2026-04-10 21:32:19,111 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-10 21:32:19,112 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-10 21:32:19,114 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 68}}
+2026-04-10 21:32:19,122 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 68}}
+2026-04-10 21:32:19,123 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-10 21:32:19,133 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-10 21:32:19,133 - AutonomousResearchSystem - INFO - Research completed in 15.49 seconds
+2026-04-10 21:32:33,763 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 46, 'source_counts': {'openalex': 0, 'crossref': 50}, 'unique_papers': 46}}
+2026-04-10 21:32:33,771 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-10 21:32:33,772 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 46}}
+2026-04-10 21:32:33,786 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 1, 'papers_processed': 46}}
+2026-04-10 21:32:33,786 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-10 21:32:33,787 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 1}}
+2026-04-10 21:32:33,788 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 1, 'avg_confidence': 0.6}}
+2026-04-10 21:32:33,789 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-10 21:32:33,789 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 1}}
+2026-04-10 21:32:33,791 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 0}}
+2026-04-10 21:32:33,791 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-10 21:32:33,791 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 1}}
+2026-04-10 21:32:33,793 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-10 21:32:33,794 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-10 21:32:33,794 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 46}}
+2026-04-10 21:32:33,800 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 46}}
+2026-04-10 21:32:33,800 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-10 21:32:33,810 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-10 21:32:33,813 - AutonomousResearchSystem - INFO - Research completed in 16.38 seconds
+2026-04-10 21:33:23,305 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 21:33:23] "POST /research HTTP/1.1" 200 -
+2026-04-10 21:33:24,110 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 21:33:24] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-10 21:33:26,928 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 21:33:26] "POST /research HTTP/1.1" 200 -
+2026-04-10 22:38:49,368 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-10 22:38:49,373 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: edge metric basis
+2026-04-10 22:38:49,374 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-10 22:38:49,375 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'edge metric basis'}}
+2026-04-10 22:38:49,382 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 3}}
+2026-04-10 22:38:49,383 - AutonomousResearchSystem - INFO - Detected metric query: edge metric basis
+2026-04-10 22:38:49,384 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-10 22:38:49,386 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'edge metric basis', 'keywords_count': 4, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-10 22:38:53,669 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 94, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 94}}
+2026-04-10 22:38:53,683 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-10 22:38:53,683 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 94}}
+2026-04-10 22:38:53,784 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 18, 'papers_processed': 94}}
+2026-04-10 22:38:53,786 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-10 22:38:53,787 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 18}}
+2026-04-10 22:38:53,797 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1080_00268976_2023_2259508_abstract_191_1775840933.699588: list index out of range
+2026-04-10 22:38:53,798 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1109_tgrs_2022_3169479_abstract_86_1775840933.70755: list index out of range
+2026-04-10 22:38:53,800 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1109_tgrs_2022_3169479_abstract_206_1775840933.708494: list index out of range
+2026-04-10 22:38:53,802 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1089_cmb_2012_0084_abstract_103_1775840933.721596: list index out of range
+2026-04-10 22:38:53,803 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1089_cmb_2012_0084_abstract_87_1775840933.72259: list index out of range
+2026-04-10 22:38:53,804 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1201_9781420027822_abstract_41_1775840933.733586: list index out of range
+2026-04-10 22:38:53,805 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1080_13645570902864145_abstract_128_1775840933.739582: list index out of range
+2026-04-10 22:38:53,806 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1162_neco_a_00914_abstract_177_1775840933.742601: list index out of range
+2026-04-10 22:38:53,808 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1162_neco_a_00914_abstract_238_1775840933.742601: list index out of range
+2026-04-10 22:38:53,809 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1162_neco_a_00914_abstract_238_1775840933.742601: list index out of range
+2026-04-10 22:38:53,810 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1109_tip_2018_2878283_abstract_143_1775840933.747586: list index out of range
+2026-04-10 22:38:53,812 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_3390_en17071662_abstract_106_1775840933.760589: list index out of range
+2026-04-10 22:38:53,813 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1126_science_aad4998_abstract_269_1775840933.763583: list index out of range
+2026-04-10 22:38:53,815 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1109_access_2016_2612242_abstract_281_1775840933.765493: list index out of range
+2026-04-10 22:38:53,816 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_48550_arxiv_1506_01497_abstract_111_1775840933.770493: list index out of range
+2026-04-10 22:38:53,818 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_48550_arxiv_1506_01497_abstract_249_1775840933.771571: list index out of range
+2026-04-10 22:38:53,820 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1002_1097-0266(200010_11)21:10_11<1105::aid-smj133>3_0_co;2-e_abstract_187_1775840933.777607: list index out of range
+2026-04-10 22:38:53,824 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 18, 'avg_confidence': 0.31944444444444436}}
+2026-04-10 22:38:53,825 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-10 22:38:53,825 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 18}}
+2026-04-10 22:38:53,837 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 153}}
+2026-04-10 22:38:53,838 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-10 22:38:53,838 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 18}}
+2026-04-10 22:38:53,842 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-10 22:38:53,843 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-10 22:38:53,843 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 94}}
+2026-04-10 22:38:53,864 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 94}}
+2026-04-10 22:38:53,865 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-10 22:38:53,880 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-10 22:38:53,881 - AutonomousResearchSystem - INFO - Research completed in 4.51 seconds
+2026-04-10 22:38:54,533 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 22:38:54] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-10 22:41:15,606 - werkzeug - INFO - 127.0.0.1 - - [10/Apr/2026 22:41:15] "POST /research HTTP/1.1" 200 -
