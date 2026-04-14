@@ -1443,36 +1443,28 @@
                     id: item.id,
                     topic: item.topic,
                     status: item.status,
-                    papers: (item.filteredPapers || []).map(paper => ({
-                        title: paper.title,
-                        year: paper.year,
-                        venue: getVenueName(paper),
-                        venue_type: getVenueType(paper),
-                        doi: paper.doi,
-                        url: paper.url
-                    }))
+                    error: item.error,
+                    results: item.results ? JSON.parse(JSON.stringify(item.results)) : null,
+                    allPapers: JSON.parse(JSON.stringify(item.allPapers || [])),
+                    filteredPapers: JSON.parse(JSON.stringify(item.filteredPapers || [])),
+                    allCitations: JSON.parse(JSON.stringify(item.allCitations || [])),
+                    filteredCitations: JSON.parse(JSON.stringify(item.filteredCitations || [])),
+                    allGaps: JSON.parse(JSON.stringify(item.allGaps || [])),
+                    filteredGaps: JSON.parse(JSON.stringify(item.filteredGaps || [])),
+                    filters: JSON.parse(JSON.stringify(item.filters || getDefaultFilters()))
                 })),
                 current: tab ? {
                     topic: tab.topic,
-                    summary: tab.results?.summary || null,
-                    papers: (tab.filteredPapers || []).map(paper => ({
-                        title: paper.title,
-                        year: paper.year,
-                        venue: getVenueName(paper),
-                        venue_type: getVenueType(paper),
-                        doi: paper.doi,
-                        url: paper.url
-                    })),
-                    citations: (tab.filteredCitations || []).map(citation => ({
-                        bibtex: citation.bibtex,
-                        apa: citation.apa,
-                        ieee: citation.ieee,
-                        custom_format: citation.custom_format,
-                        journal_name: citation.journal_name,
-                        year: citation.year
-                    })),
-                    gaps: tab.filteredGaps || [],
-                    filters: tab.filters
+                    status: tab.status,
+                    error: tab.error,
+                    results: tab.results ? JSON.parse(JSON.stringify(tab.results)) : null,
+                    allPapers: JSON.parse(JSON.stringify(tab.allPapers || [])),
+                    filteredPapers: JSON.parse(JSON.stringify(tab.filteredPapers || [])),
+                    allCitations: JSON.parse(JSON.stringify(tab.allCitations || [])),
+                    filteredCitations: JSON.parse(JSON.stringify(tab.filteredCitations || [])),
+                    allGaps: JSON.parse(JSON.stringify(tab.allGaps || [])),
+                    filteredGaps: JSON.parse(JSON.stringify(tab.filteredGaps || [])),
+                    filters: JSON.parse(JSON.stringify(tab.filters || getDefaultFilters()))
                 } : null
             };
         }
@@ -1504,22 +1496,40 @@
                 year: citation.year || ''
             });
 
+            const normalizeGap = (gap) => ({
+                ...gap,
+            });
+
             searchTabs.length = 0;
             payload.tabs.slice(0, MAX_SEARCH_TABS).forEach((tabData, index) => {
-                const papers = (tabData.papers || []).map(normalizePaper);
-                const citations = (tabData.citations || []).map(normalizeCitation);
+                const allPapers = (tabData.allPapers || tabData.papers || []).map(normalizePaper);
+                const filteredPapers = (tabData.filteredPapers || tabData.papers || []).map(normalizePaper);
+                const allCitations = (tabData.allCitations || tabData.citations || []).map(normalizeCitation);
+                const filteredCitations = (tabData.filteredCitations || tabData.citations || []).map(normalizeCitation);
+                const allGaps = (tabData.allGaps || tabData.gaps || []).map(normalizeGap);
+                const filteredGaps = (tabData.filteredGaps || tabData.gaps || []).map(normalizeGap);
                 const tab = {
                     id: tabData.id || `topic-tab-${index + 1}`,
                     topic: tabData.topic || '',
                     status: tabData.status || 'ready',
-                    error: '',
-                    results: tabData.results || { topic: tabData.topic || '', summary: { papers_analyzed: (tabData.papers || []).length, claims_extracted: 0, contradictions_found: 0, research_gaps_identified: 0 }, topic_map: { main_topic: tabData.topic || '', subtopics: [], methods: [], keywords: [] }, download_url: null },
-                    allPapers: papers,
-                    filteredPapers: papers,
-                    allCitations: citations,
-                    filteredCitations: citations,
-                    allGaps: tabData.gaps || [],
-                    filteredGaps: tabData.gaps || [],
+                    error: tabData.error || '',
+                    results: tabData.results || {
+                        topic: tabData.topic || '',
+                        summary: {
+                            papers_analyzed: allPapers.length,
+                            claims_extracted: 0,
+                            contradictions_found: 0,
+                            research_gaps_identified: 0
+                        },
+                        topic_map: { main_topic: tabData.topic || '', subtopics: [], methods: [], keywords: [] },
+                        download_url: null
+                    },
+                    allPapers,
+                    filteredPapers,
+                    allCitations,
+                    filteredCitations,
+                    allGaps,
+                    filteredGaps,
                     filters: tabData.filters || getDefaultFilters()
                 };
                 searchTabs.push(tab);

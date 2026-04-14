@@ -827,14 +827,26 @@
                     id: item.id,
                     name: item.name,
                     format: item.format,
-                    hasResult: !!item.result
+                    input: item.input,
+                    options: JSON.parse(JSON.stringify(item.options || {
+                        checkFormat: true,
+                        checkSpelling: true,
+                        checkDuplicates: true,
+                        verifyPapers: true
+                    })),
+                    result: item.result ? JSON.parse(JSON.stringify(item.result)) : null
                 })),
                 current: tab ? {
                     name: tab.name,
                     format: tab.format,
                     input: tab.input,
-                    options: tab.options,
-                    hasResult: !!tab.result
+                    options: JSON.parse(JSON.stringify(tab.options || {
+                        checkFormat: true,
+                        checkSpelling: true,
+                        checkDuplicates: true,
+                        verifyPapers: true
+                    })),
+                    result: tab.result ? JSON.parse(JSON.stringify(tab.result)) : null
                 } : null
             };
         }
