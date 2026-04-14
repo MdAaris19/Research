@@ -495,6 +495,24 @@
         .site-notification.error { border-left-color: var(--danger-color); }
         .site-notification.warning { border-left-color: var(--warning-color); }
         .site-notification button { border: 0; background: transparent; color: inherit; margin-left: auto; padding: 0; }
+        .share-panel {
+            background: linear-gradient(135deg, var(--light-bg) 0%, var(--content-bg) 100%);
+            border: 1px solid rgba(125, 146, 255, 0.22);
+            border-radius: 18px;
+            padding: 16px;
+            margin-bottom: 18px;
+            box-shadow: var(--card-shadow);
+        }
+        .share-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .share-url {
+            flex: 1;
+            min-width: 240px;
+        }
         body[data-theme="dark"] .nav-link,
         body[data-theme="dark"] .form-control,
         body[data-theme="dark"] .btn-outline-primary,
@@ -564,6 +582,17 @@
                 <button type="button" class="btn btn-outline-primary" id="addValidatorTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new validator tab (Alt+T)">
                     <i class="fas fa-plus"></i> Add Tab
                 </button>
+                <button type="button" class="btn btn-outline-info" id="shareValidatorBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Generate a shareable validation link">
+                    <i class="fas fa-share-nodes"></i> Share Link
+                </button>
+            </div>
+            <div class="share-panel d-none" id="validatorSharePanel">
+                <div class="fw-semibold mb-2"><i class="fas fa-link"></i> Shareable Reference List</div>
+                <p class="text-muted mb-3">Generate a link to share your current validation workspace with collaborators.</p>
+                <div class="share-input-group">
+                    <input type="text" class="form-control share-url" id="validatorShareUrlField" readonly placeholder="Your share link will appear here">
+                    <button type="button" class="btn btn-primary" id="copyValidatorShareLinkBtn"><i class="fas fa-copy"></i> Copy Link</button>
+                </div>
             </div>
             <!-- Upload Section -->
             <div class="upload-card" id="uploadArea">
@@ -788,6 +817,45 @@
             localStorage.setItem('siteTheme', theme);
             const icon = document.querySelector('#themeToggleBtn i');
             if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function buildValidatorSharePayload() {
+            const tab = getActiveValidatorTab();
+            return {
+                activeTabId: activeValidatorTabId,
+                tabs: validatorTabs.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    format: item.format,
+                    hasResult: !!item.result
+                })),
+                current: tab ? {
+                    name: tab.name,
+                    format: tab.format,
+                    input: tab.input,
+                    options: tab.options,
+                    hasResult: !!tab.result
+                } : null
+            };
+        }
+
+        async function generateValidatorShareLink(page = 'validator') {
+            try {
+                const response = await fetch('/share-snapshot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ page, payload: buildValidatorSharePayload() })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not create share link');
+                document.getElementById('validatorSharePanel').classList.remove('d-none');
+                document.getElementById('validatorShareUrlField').value = data.share_url;
+                showNotification('Shareable validation link created.', 'success');
+                return data.share_url;
+            } catch (error) {
+                showNotification(`Share link failed: ${error.message}`, 'error', 5000);
+                return '';
+            }
         }
 
         function toggleTheme() {
@@ -1303,6 +1371,13 @@
 
         document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
         document.getElementById('addValidatorTabBtn').addEventListener('click', () => createValidatorTab(true));
+        document.getElementById('shareValidatorBtn').addEventListener('click', () => generateValidatorShareLink('validator'));
+        document.getElementById('copyValidatorShareLinkBtn').addEventListener('click', async () => {
+            const value = document.getElementById('validatorShareUrlField').value;
+            if (!value) return;
+            await navigator.clipboard.writeText(value);
+            showNotification('Share link copied to clipboard.', 'success', 2200);
+        });
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
         ['click', 'keydown'].forEach(eventName => document.addEventListener(eventName, requestNotificationPermission, { once: true }));
         document.addEventListener('keydown', function(event) {

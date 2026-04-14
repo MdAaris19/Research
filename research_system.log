@@ -3709,3 +3709,258 @@ year
 2026-04-14 11:22:24,787 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
 2026-04-14 11:22:24,787 - AutonomousResearchSystem - INFO - Research completed in 3.51 seconds
 2026-04-14 11:23:51,434 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:23:51] "POST /research HTTP/1.1" 200 -
+2026-04-14 11:54:40,034 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-14 11:54:40,039 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: Möbius ladder
+2026-04-14 11:54:40,041 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-14 11:54:40,041 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'Möbius ladder'}}
+2026-04-14 11:54:40,050 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 2}}
+2026-04-14 11:54:40,055 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-14 11:54:40,058 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'Möbius ladder', 'keywords_count': 2, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-14 11:54:43,753 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 84, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 84}}
+2026-04-14 11:54:43,761 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-14 11:54:43,761 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 84}}
+2026-04-14 11:54:43,780 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 4, 'papers_processed': 84}}
+2026-04-14 11:54:43,780 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-14 11:54:43,780 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 4}}
+2026-04-14 11:54:43,788 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 4, 'avg_confidence': 0.615}}
+2026-04-14 11:54:43,788 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-14 11:54:43,789 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 4}}
+2026-04-14 11:54:43,790 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 6}}
+2026-04-14 11:54:43,790 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-14 11:54:43,791 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 0, 'claims': 4}}
+2026-04-14 11:54:43,792 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 12, 'coverage_gaps': 0, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-14 11:54:43,792 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-14 11:54:43,793 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 84}}
+2026-04-14 11:54:43,799 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 84}}
+2026-04-14 11:54:43,799 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-14 11:54:43,806 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-14 11:54:43,806 - AutonomousResearchSystem - INFO - Research completed in 3.77 seconds
+2026-04-14 11:56:03,331 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:56:03] "POST /research HTTP/1.1" 200 -
+2026-04-14 11:58:15,554 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:15] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-14 11:58:27,534 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:27] "GET /validator HTTP/1.1" 200 -
+2026-04-14 11:58:29,599 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:29] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-14 11:58:40,006 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:40] "GET /citations HTTP/1.1" 200 -
+2026-04-14 11:58:50,363 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:50] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-14 11:58:55,690 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:55] "GET / HTTP/1.1" 200 -
+2026-04-14 11:58:57,918 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:58:57] "GET /citations HTTP/1.1" 200 -
+2026-04-14 11:59:03,715 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:59:03] "GET / HTTP/1.1" 200 -
+2026-04-14 11:59:06,904 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:59:06] "GET /citations HTTP/1.1" 200 -
+2026-04-14 11:59:28,448 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 11:59:28] "GET / HTTP/1.1" 200 -
+2026-04-14 12:02:09,794 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:02:09] "GET /citations HTTP/1.1" 200 -
+2026-04-14 12:34:25,861 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-14 12:34:25,862 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: Möbius strip
+2026-04-14 12:34:25,863 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-14 12:34:25,864 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'Möbius strip'}}
+2026-04-14 12:34:25,866 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 2}}
+2026-04-14 12:34:25,867 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-14 12:34:25,867 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'Möbius strip', 'keywords_count': 2, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-14 12:34:29,892 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 91, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 91}}
+2026-04-14 12:34:29,902 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-14 12:34:29,904 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 91}}
+2026-04-14 12:34:29,944 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 7, 'papers_processed': 91}}
+2026-04-14 12:34:29,944 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-14 12:34:29,946 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 7}}
+2026-04-14 12:34:29,957 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1515_9780804767354_abstract_190_1776150269.915199: list index out of range
+2026-04-14 12:34:29,958 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1364_oe_27_011516_abstract_248_1776150269.919278: list index out of range
+2026-04-14 12:34:29,958 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_acsphotonics_7b00002_abstract_237_1776150269.919787: list index out of range
+2026-04-14 12:34:29,960 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1063_1_3489982_abstract_144_1776150269.921796: list index out of range
+2026-04-14 12:34:29,962 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 7, 'avg_confidence': 0.42}}
+2026-04-14 12:34:29,964 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-14 12:34:29,964 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 7}}
+2026-04-14 12:34:29,969 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 21}}
+2026-04-14 12:34:29,969 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-14 12:34:29,970 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 0, 'claims': 7}}
+2026-04-14 12:34:29,972 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 12, 'coverage_gaps': 0, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-14 12:34:29,972 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-14 12:34:29,973 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 91}}
+2026-04-14 12:34:29,987 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 91}}
+2026-04-14 12:34:29,987 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-14 12:34:29,998 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-14 12:34:29,998 - AutonomousResearchSystem - INFO - Research completed in 4.13 seconds
+2026-04-14 12:34:29,999 - agent.CustomCitationFormatter - INFO - Agent operation: {'agent': 'CustomCitationFormatter', 'operation': 'custom_citation_start', 'details': {'paper_count': 91}}
+2026-04-14 12:34:30,005 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1126/science.1260635
+2026-04-14 12:34:30,884 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=347, issue=6225, pages=964-966
+2026-04-14 12:34:31,914 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/s41467-021-22644-9
+2026-04-14 12:34:32,787 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=12, issue=1, pages=2334
+2026-04-14 12:34:33,744 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physrevlett.117.013601
+2026-04-14 12:34:34,585 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=117, issue=1, pages=013601
+2026-04-14 12:34:35,523 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/s41467-020-19683-z
+2026-04-14 12:34:36,457 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=11, issue=1, pages=5910
+2026-04-14 12:34:37,525 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1002/anie.200460211
+2026-04-14 12:34:38,393 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=43, issue=39, pages=5196-5200
+2026-04-14 12:34:39,343 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/ol.35.000148
+2026-04-14 12:34:40,231 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=35, issue=2, pages=148
+2026-04-14 12:34:41,237 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1177/08944865080210030104
+2026-04-14 12:34:42,174 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=21, issue=3, pages=217-236
+2026-04-14 12:34:43,098 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1515/9780804767354
+2026-04-14 12:34:43,973 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:34:45,054 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/oe.27.011516
+2026-04-14 12:34:45,922 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=27, issue=8, pages=11516
+2026-04-14 12:34:46,909 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1021/acsphotonics.7b00002
+2026-04-14 12:34:47,757 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=4, issue=5, pages=1159-1164
+2026-04-14 12:34:48,703 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1021/ja9507325
+2026-04-14 12:34:49,576 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=118, issue=4, pages=899-900
+2026-04-14 12:34:50,524 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1063/1.3489982
+2026-04-14 12:34:51,406 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=97, issue=12, pages=123103
+2026-04-14 12:34:52,458 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physreve.63.026107
+2026-04-14 12:34:53,319 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=63, issue=2, pages=026107
+2026-04-14 12:34:54,281 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1073/pnas.1015997107
+2026-04-14 12:34:55,184 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=107, issue=51, pages=21979-21984
+2026-04-14 12:34:56,241 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physrevlett.86.2134
+2026-04-14 12:34:57,322 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=86, issue=10, pages=2134-2137
+2026-04-14 12:34:58,500 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1090/s0002-9939-1983-0715878-1
+2026-04-14 12:34:59,623 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=89, issue=3, pages=519-522
+2026-04-14 12:35:00,594 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physrevlett.127.203901
+2026-04-14 12:35:01,839 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=127, issue=20, pages=203901
+2026-04-14 12:35:02,901 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/s41567-022-01851-1
+2026-04-14 12:35:03,800 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=19, issue=3, pages=451-459
+2026-04-14 12:35:04,811 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1002/qua.1415
+2026-04-14 12:35:05,784 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=84, issue=6, pages=607-616
+2026-04-14 12:35:06,777 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1126/sciadv.adf3486
+2026-04-14 12:35:07,590 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=9, issue=12, pages=eadf3486
+2026-04-14 12:35:08,608 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/ol.39.000727
+2026-04-14 12:35:09,485 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=39, issue=4, pages=727
+2026-04-14 12:35:10,477 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/ol.36.004506
+2026-04-14 12:35:11,380 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=36, issue=23, pages=4506
+2026-04-14 12:35:12,338 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1007/s13162-020-00191-8
+2026-04-14 12:35:13,536 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=11, issue=1-2, pages=40-59
+2026-04-14 12:35:14,783 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/ol.392331
+2026-04-14 12:35:15,688 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=45, issue=12, pages=3333
+2026-04-14 12:35:16,637 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1002/asi.20336
+2026-04-14 12:35:17,513 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=57, issue=12, pages=1629-1643
+2026-04-14 12:35:18,570 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1063/5.0056333
+2026-04-14 12:35:19,501 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=33, issue=7, pages=077122
+2026-04-14 12:35:20,477 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/oe.27.029685
+2026-04-14 12:35:21,402 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=27, issue=21, pages=29685
+2026-04-14 12:35:22,397 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1002/pamm.200700858
+2026-04-14 12:35:23,220 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=7, issue=1, pages=2020115-2020116
+2026-04-14 12:35:24,145 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/s41566-022-01107-7
+2026-04-14 12:35:24,946 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=17, issue=1, pages=120-125
+2026-04-14 12:35:25,863 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1364/cleo_at.2025.jps200_73
+2026-04-14 12:35:26,715 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=JPS200_73
+2026-04-14 12:35:27,665 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/nmat1929
+2026-04-14 12:35:28,455 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=6, issue=8, pages=563-567
+2026-04-14 12:35:29,322 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/417397a
+2026-04-14 12:35:30,145 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=417, issue=6887, pages=397-398
+2026-04-14 12:35:31,043 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.33112/nm.19.2.3
+2026-04-14 12:35:31,815 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=19, issue=2, pages=None
+2026-04-14 12:35:32,961 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.16995/ee.9063
+2026-04-14 12:35:33,766 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=53, issue=1, pages=None
+2026-04-14 12:35:34,754 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1177/089124302236987
+2026-04-14 12:35:35,573 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=16, issue=5, pages=585-602
+2026-04-14 12:35:36,441 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1021/bi047837h
+2026-04-14 12:35:37,210 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=44, issue=3, pages=851-860
+2026-04-14 12:35:38,200 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physrevb.67.125319
+2026-04-14 12:35:38,953 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=67, issue=12, pages=125319
+2026-04-14 12:35:39,831 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1109/ms.2008.24
+2026-04-14 12:35:40,771 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=25, issue=1, pages=54-59
+2026-04-14 12:35:41,664 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1143/jpsj.70.3495
+2026-04-14 12:35:42,436 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=70, issue=12, pages=3495-3498
+2026-04-14 12:35:43,472 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/d41586-022-03570-2
+2026-04-14 12:35:44,289 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=611, issue=7936, pages=428-428
+2026-04-14 12:35:45,279 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/d41586-022-01450-3
+2026-04-14 12:35:46,162 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=606, issue=7912, pages=10-10
+2026-04-14 12:35:47,068 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.optcom.2004.12.052
+2026-04-14 12:35:47,948 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=249, issue=1-3, pages=7-22
+2026-04-14 12:35:48,833 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/s0375-9601(99)00420-x
+2026-04-14 12:35:49,592 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=259, issue=2, pages=108-114
+2026-04-14 12:35:50,495 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.optcom.2009.09.042
+2026-04-14 12:35:51,341 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=283, issue=1, pages=1-15
+2026-04-14 12:35:52,283 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.optcom.2009.09.037
+2026-04-14 12:35:53,132 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=283, issue=1, pages=16-28
+2026-04-14 12:35:54,050 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/s0375-9601(99)00611-8
+2026-04-14 12:35:54,848 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=261, issue=1-2, pages=57-62
+2026-04-14 12:35:55,767 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.geomphys.2005.08.001
+2026-04-14 12:35:56,560 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=56, issue=9, pages=1506-1515
+2026-04-14 12:35:57,471 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1021/ja304371j
+2026-04-14 12:35:58,365 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=134, issue=28, pages=11376-11379
+2026-04-14 12:35:59,289 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.jmmm.2004.11.159
+2026-04-14 12:36:00,086 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=290-291, issue=None, pages=55-60
+2026-04-14 12:36:00,997 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.optcom.2011.04.032
+2026-04-14 12:36:01,804 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=284, issue=16-17, pages=3816-3845
+2026-04-14 12:36:02,748 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.carbon.2014.01.023
+2026-04-14 12:36:03,513 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=71, issue=None, pages=150-158
+2026-04-14 12:36:04,364 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1038/news070709-16
+2026-04-14 12:36:05,127 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:06,124 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1007/s10659-014-9501-6
+2026-04-14 12:36:06,965 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=119, issue=1-2, pages=113-136
+2026-04-14 12:36:07,957 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/0550-3213(93)90419-p
+2026-04-14 12:36:08,759 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=400, issue=1-3, pages=633-652
+2026-04-14 12:36:09,696 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1007/978-3-031-70786-5_1
+2026-04-14 12:36:10,503 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=3-12
+2026-04-14 12:36:11,423 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.mehy.2024.111448
+2026-04-14 12:36:12,204 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=191, issue=None, pages=111448
+2026-04-14 12:36:13,167 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.3840/003149
+2026-04-14 12:36:13,933 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:14,926 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.3840/08004325
+2026-04-14 12:36:15,751 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:16,747 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.2139/ssrn.6092506
+2026-04-14 12:36:17,536 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:18,583 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.2139/ssrn.5616966
+2026-04-14 12:36:19,360 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:20,337 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-7
+2026-04-14 12:36:21,138 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=561-670
+2026-04-14 12:36:22,034 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-8
+2026-04-14 12:36:22,887 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=671-716
+2026-04-14 12:36:23,805 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-9
+2026-04-14 12:36:24,610 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=717-870
+2026-04-14 12:36:25,548 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-5
+2026-04-14 12:36:26,307 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=243-349
+2026-04-14 12:36:27,234 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298
+2026-04-14 12:36:28,129 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:29,163 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physics.15.165
+2026-04-14 12:36:29,954 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=15, issue=None, pages=165
+2026-04-14 12:36:30,831 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.7202/1097525ar
+2026-04-14 12:36:31,688 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=26, issue=2, pages=117-125
+2026-04-14 12:36:32,675 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.4324/9780429329173-20
+2026-04-14 12:36:33,457 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=269-285
+2026-04-14 12:36:34,340 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.33675/978-3-8253-7656-7
+2026-04-14 12:36:35,115 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:36,142 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.2307/jj.11374749.15
+2026-04-14 12:36:36,927 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=58-61
+2026-04-14 12:36:37,869 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.5040/9781350043800.0018
+2026-04-14 12:36:38,636 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:39,637 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1103/physreva.82.062118
+2026-04-14 12:36:40,434 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=82, issue=6, pages=062118
+2026-04-14 12:36:41,339 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.3138/9781442663503-006
+2026-04-14 12:36:42,186 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=None
+2026-04-14 12:36:43,254 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1063/pt.5.021295
+2026-04-14 12:36:44,080 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=2007, issue=07, pages=20667
+2026-04-14 12:36:45,010 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1007/978-3-642-04833-3_29
+2026-04-14 12:36:45,967 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=123-126
+2026-04-14 12:36:47,069 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/s0262-4079(15)60248-2
+2026-04-14 12:36:47,996 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=225, issue=3007, pages=17
+2026-04-14 12:36:48,978 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1021/cen-v060n028.p021
+2026-04-14 12:36:49,845 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=60, issue=28, pages=21-23
+2026-04-14 12:36:50,831 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.55016/ojs/ajer.v49i4.55025
+2026-04-14 12:36:51,722 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=49, issue=4, pages=None
+2026-04-14 12:36:52,822 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1176/ajp.139.12.1637-a
+2026-04-14 12:36:53,689 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=139, issue=12, pages=1637-a-1638
+2026-04-14 12:36:54,673 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1016/j.jcat.2017.08.021
+2026-04-14 12:36:55,534 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=354, issue=None, pages=258-269
+2026-04-14 12:36:56,485 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-6
+2026-04-14 12:36:57,341 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=351-559
+2026-04-14 12:36:58,377 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-3
+2026-04-14 12:36:59,233 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=115-195
+2026-04-14 12:37:00,188 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-2
+2026-04-14 12:37:01,057 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=73-113
+2026-04-14 12:37:02,013 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.5040/9798400661686.0021
+2026-04-14 12:37:02,919 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=57-60
+2026-04-14 12:37:03,829 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-1
+2026-04-14 12:37:04,699 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=1-72
+2026-04-14 12:37:05,676 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1201/9781003256298-4
+2026-04-14 12:37:06,507 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=197-241
+2026-04-14 12:37:07,482 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1515/9780804767354-004
+2026-04-14 12:37:08,447 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=xv-xviii
+2026-04-14 12:37:09,398 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1515/9780804767354-019
+2026-04-14 12:37:10,245 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=557-568
+2026-04-14 12:37:11,195 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1515/9780804767354-toc
+2026-04-14 12:37:12,103 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=vii-viii
+2026-04-14 12:37:13,149 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1515/9780804767354-fm
+2026-04-14 12:37:14,015 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=i-vi
+2026-04-14 12:37:14,966 - agent.CustomCitationFormatter - INFO - Fetching bibliographic data for DOI: 10.1515/9780804767354-021
+2026-04-14 12:37:15,814 - agent.CustomCitationFormatter - INFO - Successfully extracted: vol=None, issue=None, pages=611-662
+2026-04-14 12:37:16,770 - agent.CustomCitationFormatter - INFO - Agent operation: {'agent': 'CustomCitationFormatter', 'operation': 'custom_citation_complete', 'details': {'citations_generated': 91}}
+2026-04-14 12:37:16,774 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:37:16] "POST /generate-custom-citations HTTP/1.1" 200 -
+2026-04-14 12:37:17,679 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:37:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-14 12:37:33,095 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:37:33] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -

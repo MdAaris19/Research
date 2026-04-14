@@ -178,6 +178,24 @@
             border-bottom: 1px solid rgba(146,169,255,0.18);
             backdrop-filter: blur(14px);
         }
+        .share-panel {
+            background: linear-gradient(135deg, var(--soft-bg) 0%, var(--card-bg) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 16px;
+            margin-top: 18px;
+            box-shadow: var(--panel-shadow), var(--panel-glow);
+        }
+        .share-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .share-url {
+            flex: 1;
+            min-width: 240px;
+        }
         body[data-theme="dark"] .form-control,
         body[data-theme="dark"] .form-select,
         body[data-theme="dark"] .btn-outline-secondary,
@@ -248,6 +266,9 @@
                 <a href="/validator" class="btn btn-outline-light">
                     <i class="fas fa-check-double"></i> Reference Validator
                 </a>
+                <button class="btn btn-outline-light ms-2" id="shareSnapshotBtn" type="button">
+                    <i class="fas fa-link"></i> Share List
+                </button>
             </div>
         </div>
     </nav>
@@ -276,8 +297,19 @@
                                 <button type="button" class="btn btn-outline-secondary" id="addCitationTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new citation tab (Alt+T)">
                                     <i class="fas fa-plus"></i> Add Tab
                                 </button>
+                                <button type="button" class="btn btn-outline-info" id="shareCurrentCitationBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Generate a shareable reference link">
+                                    <i class="fas fa-share-nodes"></i> Share Link
+                                </button>
                             </div>
                         </form>
+                        <div class="share-panel mt-3 d-none" id="sharePanel">
+                            <div class="fw-semibold mb-2"><i class="fas fa-link"></i> Shareable Reference List</div>
+                            <p class="text-muted mb-3">Generate a link to share your current search, citation, or validation workspace with your group.</p>
+                            <div class="share-input-group">
+                                <input type="text" class="form-control share-url" id="shareUrlField" readonly placeholder="Your share link will appear here">
+                                <button type="button" class="btn btn-primary" id="copyShareLinkBtn"><i class="fas fa-copy"></i> Copy Link</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -418,6 +450,90 @@
             const icon = document.querySelector('#themeToggleBtn i');
             if (icon) {
                 icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        function buildSharePayload() {
+            const tab = getActiveCitationTab();
+            return {
+                activeTabId: activeCitationTabId,
+                tabs: citationTabs.map(item => ({
+                    id: item.id,
+                    topic: item.topic,
+                    totalCitations: item.allCitations.length,
+                    citations: item.filteredCitations
+                })),
+                current: tab ? {
+                    topic: tab.topic,
+                    citations: tab.filteredCitations,
+                    totalCitations: tab.allCitations.length,
+                    filters: {
+                        journalFilter: document.getElementById('journalFilter').value,
+                        yearFilter: document.getElementById('yearFilter').value,
+                        formatFilter: document.getElementById('formatFilter').value
+                    }
+                } : null
+            };
+        }
+
+        async function generateShareLink(page = 'citations') {
+            try {
+                const response = await fetch('/share-snapshot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ page, payload: buildSharePayload() })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not create share link');
+                document.getElementById('sharePanel').classList.remove('d-none');
+                document.getElementById('shareUrlField').value = data.share_url;
+                showNotification('Shareable reference link created.', 'success');
+                return data.share_url;
+            } catch (error) {
+                showNotification(`Share link failed: ${error.message}`, 'error', 5000);
+                return '';
+            }
+        }
+
+        function buildSharePayload() {
+            const tab = getActiveCitationTab();
+            return {
+                activeTabId: activeCitationTabId,
+                tabs: citationTabs.map(item => ({
+                    id: item.id,
+                    topic: item.topic,
+                    totalCitations: item.allCitations.length,
+                    citations: item.filteredCitations
+                })),
+                current: tab ? {
+                    topic: tab.topic,
+                    citations: tab.filteredCitations,
+                    totalCitations: tab.allCitations.length,
+                    filters: {
+                        journalFilter: document.getElementById('journalFilter').value,
+                        yearFilter: document.getElementById('yearFilter').value,
+                        formatFilter: document.getElementById('formatFilter').value
+                    }
+                } : null
+            };
+        }
+
+        async function generateShareLink(page = 'citations') {
+            try {
+                const response = await fetch('/share-snapshot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ page, payload: buildSharePayload() })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not create share link');
+                document.getElementById('sharePanel').classList.remove('d-none');
+                document.getElementById('shareUrlField').value = data.share_url;
+                showNotification('Shareable reference link created.', 'success');
+                return data.share_url;
+            } catch (error) {
+                showNotification(`Share link failed: ${error.message}`, 'error', 5000);
+                return '';
             }
         }
 
@@ -819,6 +935,14 @@
         });
 
         document.getElementById('addCitationTabBtn').addEventListener('click', () => createCitationTab(true));
+        document.getElementById('shareCurrentCitationBtn').addEventListener('click', () => generateShareLink('citations'));
+        document.getElementById('shareSnapshotBtn').addEventListener('click', () => generateShareLink('citations'));
+        document.getElementById('copyShareLinkBtn').addEventListener('click', async () => {
+            const value = document.getElementById('shareUrlField').value;
+            if (!value) return;
+            await navigator.clipboard.writeText(value);
+            showNotification('Share link copied to clipboard.', 'success', 2200);
+        });
         document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
         document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
         ['click', 'keydown'].forEach(eventName => document.addEventListener(eventName, requestNotificationPermission, { once: true }));

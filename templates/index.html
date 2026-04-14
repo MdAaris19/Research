@@ -395,6 +395,24 @@
             margin-left: auto;
             line-height: 1;
         }
+        .share-panel {
+            background: linear-gradient(135deg, var(--soft-bg) 0%, var(--card-bg) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 18px;
+            padding: 16px;
+            margin-top: 16px;
+            box-shadow: var(--panel-shadow), var(--panel-glow);
+        }
+        .share-input-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .share-url {
+            flex: 1;
+            min-width: 240px;
+        }
         @keyframes slideInToast {
             from {
                 opacity: 0;
@@ -465,10 +483,21 @@
                                 <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Keep the active tab and close the others">
                                     <i class="fas fa-times-circle"></i> Close Extra Tabs
                                 </button>
+                                <button type="button" class="btn btn-outline-info" id="shareResearchBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Generate a shareable search link">
+                                    <i class="fas fa-share-nodes"></i> Share Link
+                                </button>
                             </div>
                         </form>
                         <div class="search-helper" id="searchHelper">
                             Keep different topics in separate tabs. Search the current topic only, or launch all filled tabs together.
+                        </div>
+                        <div class="share-panel d-none" id="sharePanel">
+                            <div class="fw-semibold mb-2"><i class="fas fa-link"></i> Shareable Reference List</div>
+                            <p class="text-muted mb-3">Generate a link to share your current search, citation, or validation workspace with your group.</p>
+                            <div class="share-input-group">
+                                <input type="text" class="form-control share-url" id="shareUrlField" readonly placeholder="Your share link will appear here">
+                                <button type="button" class="btn btn-primary" id="copyShareLinkBtn"><i class="fas fa-copy"></i> Copy Link</button>
+                            </div>
                         </div>
                         
                         <!-- Loading Spinner -->
@@ -1396,6 +1425,67 @@
             `).join(' ');
         }
 
+        function buildResearchSharePayload() {
+            const tab = getActiveSearchTab();
+            return {
+                activeTabId: activeTabId,
+                tabs: searchTabs.map(item => ({
+                    id: item.id,
+                    topic: item.topic,
+                    status: item.status,
+                    papers: (item.filteredPapers || []).map(paper => ({
+                        title: paper.title,
+                        year: paper.year,
+                        venue: getVenueName(paper),
+                        venue_type: getVenueType(paper),
+                        doi: paper.doi,
+                        url: paper.url
+                    }))
+                })),
+                current: tab ? {
+                    topic: tab.topic,
+                    summary: tab.results?.summary || null,
+                    papers: (tab.filteredPapers || []).map(paper => ({
+                        title: paper.title,
+                        year: paper.year,
+                        venue: getVenueName(paper),
+                        venue_type: getVenueType(paper),
+                        doi: paper.doi,
+                        url: paper.url
+                    })),
+                    citations: (tab.filteredCitations || []).map(citation => ({
+                        bibtex: citation.bibtex,
+                        apa: citation.apa,
+                        ieee: citation.ieee,
+                        custom_format: citation.custom_format,
+                        journal_name: citation.journal_name,
+                        year: citation.year
+                    })),
+                    gaps: tab.filteredGaps || [],
+                    filters: tab.filters
+                } : null
+            };
+        }
+
+        async function generateResearchShareLink(page = 'research') {
+            try {
+                const response = await fetch('/share-snapshot', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ page, payload: buildResearchSharePayload() })
+                });
+                const data = await response.json();
+                if (!response.ok) throw new Error(data.error || 'Could not create share link');
+                document.getElementById('sharePanel').classList.remove('d-none');
+                document.getElementById('shareUrlField').value = data.share_url;
+                showNotification('Shareable research link created.', 'success');
+                return data.share_url;
+            } catch (error) {
+                showNotification(`Share link failed: ${error.message}`, 'error', 5000);
+                return '';
+            }
+        }
+
         function displayActiveResults(skipScroll = false) {
             const tab = getActiveSearchTab();
             syncTopicInput();
@@ -1852,6 +1942,13 @@
 
         function initializeEventHandlers() {
             document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+            document.getElementById('shareResearchBtn').addEventListener('click', () => generateResearchShareLink('research'));
+            document.getElementById('copyShareLinkBtn').addEventListener('click', async () => {
+                const value = document.getElementById('shareUrlField').value;
+                if (!value) return;
+                await navigator.clipboard.writeText(value);
+                showNotification('Share link copied to clipboard.', 'success', 2200);
+            });
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
                 new bootstrap.Tooltip(element);
             });

@@ -10,6 +10,7 @@ from datetime import datetime
 from pathlib import Path
 import threading
 import concurrent.futures
+import uuid
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,10 +26,38 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'research-system-secret-
 
 # Create output directory on startup
 Path("output").mkdir(exist_ok=True)
+Path("output") / "share_snapshots"
+(Path("output") / "share_snapshots").mkdir(exist_ok=True)
 
 # Global system instance
 research_system = None
 executor = concurrent.futures.ThreadPoolExecutor(max_workers=4)
+
+
+def _share_snapshot_path(token: str) -> Path:
+    return Path("output") / "share_snapshots" / f"{token}.json"
+
+
+def save_share_snapshot(page: str, payload: dict) -> dict:
+    token = uuid.uuid4().hex
+    snapshot = {
+        'token': token,
+        'page': page,
+        'created_at': datetime.utcnow().isoformat() + 'Z',
+        'payload': payload,
+    }
+    _share_snapshot_path(token).write_text(json.dumps(snapshot, indent=2), encoding='utf-8')
+    return snapshot
+
+
+def load_share_snapshot(token: str) -> dict | None:
+    path = _share_snapshot_path(token)
+    if not path.exists():
+        return None
+    try:
+        return json.loads(path.read_text(encoding='utf-8'))
+    except Exception:
+        return None
 
 def get_system():
     """Get or create research system instance."""
@@ -760,6 +789,37 @@ def generate_custom_citations():
         import traceback
         traceback.print_exc()
         return jsonify({'error': f'Citation generation failed: {str(e)}'}), 500
+
+
+@app.route('/share-snapshot', methods=['POST'])
+def create_share_snapshot():
+    """Create a shareable snapshot of the current workspace."""
+    try:
+        data = request.get_json() or {}
+        page = data.get('page', 'research')
+        payload = data.get('payload', {})
+        snapshot = save_share_snapshot(page, payload)
+        page_routes = {
+            'research': '/',
+            'citations': '/citations',
+            'validator': '/validator'
+        }
+        route = page_routes.get(page, '/')
+        return jsonify({
+            'share_url': f"{request.host_url.rstrip('/')}{route}?share={snapshot['token']}",
+            'token': snapshot['token']
+        })
+    except Exception as e:
+        return jsonify({'error': f'Could not create share link: {str(e)}'}), 500
+
+
+@app.route('/share/<token>')
+def load_shareable_snapshot(token):
+    """Load a previously shared snapshot."""
+    snapshot = load_share_snapshot(token)
+    if not snapshot:
+        return jsonify({'error': 'Shared snapshot not found'}), 404
+    return jsonify(snapshot)
 
 
 def run_citation_generation(topic):
