@@ -28,6 +28,13 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'research-system-secret-
 Path("output").mkdir(exist_ok=True)
 Path("output") / "share_snapshots"
 (Path("output") / "share_snapshots").mkdir(exist_ok=True)
+Path("static").mkdir(exist_ok=True)
+
+
+@app.route('/sw.js')
+def service_worker():
+    """Serve the web notification service worker."""
+    return send_file(Path('static') / 'sw.js', mimetype='application/javascript')
 
 # Global system instance
 research_system = None

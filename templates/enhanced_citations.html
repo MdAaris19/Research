@@ -476,6 +476,56 @@
             };
         }
 
+        function applySharedCitationSnapshot(snapshot) {
+            if (!snapshot || !snapshot.payload) return false;
+            const payload = snapshot.payload;
+            if (!payload.tabs || !payload.tabs.length) return false;
+
+            const normalizeCitation = (citation) => ({
+                bibitem_key: citation.bibitem_key || '',
+                bibitem_citation: citation.bibitem_citation || citation.custom_format || '',
+                formatted_authors: citation.formatted_authors || '',
+                formatted_title: citation.formatted_title || '',
+                year: citation.year || '',
+                journal_name: citation.journal_name || '',
+                paper_url: citation.paper_url || ''
+            });
+
+            citationTabs.length = 0;
+            payload.tabs.slice(0, MAX_CITATION_TABS).forEach((tabData, index) => {
+                const citations = (tabData.citations || []).map(normalizeCitation);
+                const tab = {
+                    id: tabData.id || `citation-tab-${index + 1}`,
+                    topic: tabData.topic || '',
+                    results: { topic: tabData.topic || '', stats: { total_citations: (tabData.citations || []).length, unique_journals: 0, year_range: '-' } },
+                    allCitations: citations,
+                    filteredCitations: citations
+                };
+                citationTabs.push(tab);
+            });
+
+            activeCitationTabId = payload.activeTabId && citationTabs.find(tab => tab.id === payload.activeTabId)?.id ? payload.activeTabId : citationTabs[0].id;
+            renderCitationTabs();
+            syncCitationForm();
+            displayResultsForActiveTab(false);
+            showNotification('Shared citation workspace loaded.', 'success');
+            return true;
+        }
+
+        async function loadSharedCitationSnapshot() {
+            const token = new URLSearchParams(window.location.search).get('share');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/share/${token}`);
+                const snapshot = await response.json();
+                if (!response.ok) throw new Error(snapshot.error || 'Unable to load shared citations workspace');
+                applySharedCitationSnapshot(snapshot);
+            } catch (error) {
+                showNotification(`Shared link could not be loaded: ${error.message}`, 'error', 5000);
+            }
+        }
+
         async function generateShareLink(page = 'citations') {
             try {
                 const response = await fetch('/share-snapshot', {
@@ -574,7 +624,27 @@
             }
         }
 
-        function showNotification(message, type = 'info', duration = 3200) {
+        async function ensureNotificationChannel() {
+            if (!('serviceWorker' in navigator)) return null;
+            try {
+                return await navigator.serviceWorker.register('/sw.js');
+            } catch (error) {
+                console.warn('Service worker registration failed:', error);
+                return null;
+            }
+        }
+
+        async function ensureNotificationChannel() {
+            if (!('serviceWorker' in navigator)) return null;
+            try {
+                return await navigator.serviceWorker.register('/sw.js');
+            } catch (error) {
+                console.warn('Service worker registration failed:', error);
+                return null;
+            }
+        }
+
+        async function showNotification(message, type = 'info', duration = 3200) {
             const stack = document.getElementById('notificationStack');
             const notice = document.createElement('div');
             notice.className = `site-notification ${type}`;
@@ -584,8 +654,10 @@
             stack.appendChild(notice);
             setTimeout(dismiss, duration);
             if ('Notification' in window && Notification.permission === 'granted') {
-                const n = new Notification(type === 'success' ? 'Citation Ready' : 'Citation Update', { body: message, tag: `citation-${type}`, renotify: true });
-                n.onclick = () => { window.focus(); n.close(); };
+                const sw = await ensureNotificationChannel();
+                if (sw && sw.showNotification) {
+                    await sw.showNotification(type === 'success' ? 'Citation Ready' : 'Citation Update', { body: message, tag: `citation-${type}`, renotify: true });
+                }
             }
             playNotificationSound(type);
         }
@@ -965,6 +1037,7 @@
         let filteredCitations = [];
         applyTheme(localStorage.getItem('siteTheme') || 'light');
         createCitationTab(false);
+        loadSharedCitationSnapshot();
     </script>
 </body>
 </html>

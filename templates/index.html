@@ -942,7 +942,7 @@
             stack.appendChild(notice);
             window.setTimeout(dismiss, duration);
 
-            triggerSystemNotification(message, type);
+            triggerSystemNotification(message, type).catch(() => null);
             playNotificationSound(type);
         }
 
@@ -961,22 +961,32 @@
             Notification.requestPermission().catch(() => null);
         }
 
-        function triggerSystemNotification(message, type) {
+        async function ensureNotificationChannel() {
+            if (!('serviceWorker' in navigator)) return null;
+            try {
+                return await navigator.serviceWorker.register('/sw.js');
+            } catch (error) {
+                console.warn('Service worker registration failed:', error);
+                return null;
+            }
+        }
+
+        async function triggerSystemNotification(message, type) {
             if (!('Notification' in window) || Notification.permission !== 'granted') {
                 return;
             }
 
-            const notification = new Notification(getNotificationTitle(type), {
+            const options = {
                 body: message,
                 tag: `research-${type}`,
                 renotify: true,
                 requireInteraction: type === 'success' || type === 'error'
-            });
-
-            notification.onclick = () => {
-                window.focus();
-                notification.close();
             };
+
+            const sw = await ensureNotificationChannel();
+            if (sw && sw.showNotification) {
+                await sw.showNotification(getNotificationTitle(type), options);
+            }
         }
 
         function playNotificationSound(type) {
@@ -1465,6 +1475,78 @@
                     filters: tab.filters
                 } : null
             };
+        }
+
+        function applySharedResearchSnapshot(snapshot) {
+            if (!snapshot || !snapshot.payload) return false;
+            const payload = snapshot.payload;
+            if (!payload.tabs || !payload.tabs.length) return false;
+
+            const normalizePaper = (paper) => ({
+                title: paper.title || 'Untitled paper',
+                year: paper.year || '',
+                venue: paper.venue || '',
+                venue_type: paper.venue_type || 'other',
+                doi: paper.doi || '',
+                url: paper.url || '',
+                authors: paper.authors || [],
+                abstract: paper.abstract || '',
+                relevance_score: paper.relevance_score || 0,
+                arxiv_id: paper.arxiv_id || ''
+            });
+
+            const normalizeCitation = (citation) => ({
+                bibtex: citation.bibtex || '',
+                apa: citation.apa || '',
+                ieee: citation.ieee || '',
+                custom_format: citation.custom_format || '',
+                journal_name: citation.journal_name || '',
+                year: citation.year || ''
+            });
+
+            searchTabs.length = 0;
+            payload.tabs.slice(0, MAX_SEARCH_TABS).forEach((tabData, index) => {
+                const papers = (tabData.papers || []).map(normalizePaper);
+                const citations = (tabData.citations || []).map(normalizeCitation);
+                const tab = {
+                    id: tabData.id || `topic-tab-${index + 1}`,
+                    topic: tabData.topic || '',
+                    status: tabData.status || 'ready',
+                    error: '',
+                    results: tabData.results || { topic: tabData.topic || '', summary: { papers_analyzed: (tabData.papers || []).length, claims_extracted: 0, contradictions_found: 0, research_gaps_identified: 0 }, topic_map: { main_topic: tabData.topic || '', subtopics: [], methods: [], keywords: [] }, download_url: null },
+                    allPapers: papers,
+                    filteredPapers: papers,
+                    allCitations: citations,
+                    filteredCitations: citations,
+                    allGaps: tabData.gaps || [],
+                    filteredGaps: tabData.gaps || [],
+                    filters: tabData.filters || getDefaultFilters()
+                };
+                searchTabs.push(tab);
+            });
+
+            activeTabId = payload.activeTabId && searchTabs.find(tab => tab.id === payload.activeTabId)?.id ? payload.activeTabId : searchTabs[0].id;
+            renderSearchTabs();
+            updateTabCounter();
+            syncTopicInput();
+            displayActiveResults(false);
+            showNotification('Shared research workspace loaded.', 'success');
+            return true;
+        }
+
+        async function loadSharedResearchSnapshot() {
+            const params = new URLSearchParams(window.location.search);
+            const token = params.get('share');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/share/${token}`);
+                const snapshot = await response.json();
+                if (!response.ok) throw new Error(snapshot.error || 'Unable to load shared research workspace');
+                applySharedResearchSnapshot(snapshot);
+            } catch (error) {
+                showNotification(`Shared link could not be loaded: ${error.message}`, 'error', 5000);
+            }
         }
 
         async function generateResearchShareLink(page = 'research') {
@@ -2024,6 +2106,7 @@
         createSearchTab('', true, false);
         loadFiltersForActiveTab();
         updateFilterStats();
+        loadSharedResearchSnapshot();
     </script>
 </body>
 </html>

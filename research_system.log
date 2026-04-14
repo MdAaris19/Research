@@ -3964,3 +3964,46 @@ year
 2026-04-14 12:37:16,774 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:37:16] "POST /generate-custom-citations HTTP/1.1" 200 -
 2026-04-14 12:37:17,679 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:37:17] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
 2026-04-14 12:37:33,095 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 12:37:33] "[33mGET /.well-known/appspecific/com.chrome.devtools.json HTTP/1.1[0m" 404 -
+2026-04-14 14:26:38,616 - AutonomousResearchSystem - INFO - Autonomous Research System initialized
+2026-04-14 14:26:38,619 - AutonomousResearchSystem - INFO - Starting autonomous research on topic: Average distance
+2026-04-14 14:26:38,619 - AutonomousResearchSystem - INFO - Stage 1: Topic Expansion
+2026-04-14 14:26:38,620 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_start', 'details': {'topic': 'Average distance'}}
+2026-04-14 14:26:38,623 - agent.TopicExpansionAgent - INFO - Agent operation: {'agent': 'TopicExpansionAgent', 'operation': 'topic_expansion_complete', 'details': {'subtopics_count': 0, 'methods_count': 0, 'keywords_count': 2}}
+2026-04-14 14:26:38,623 - AutonomousResearchSystem - INFO - Detected metric query: Average distance
+2026-04-14 14:26:38,623 - AutonomousResearchSystem - INFO - Stage 2: Paper Discovery
+2026-04-14 14:26:38,624 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_start', 'details': {'main_topic': 'Average distance', 'keywords_count': 3, 'enabled_sources': ['openalex', 'arxiv', 'semantic_scholar', 'crossref', 'pubmed', 'springer', 'elsevier', 'wiley']}}
+2026-04-14 14:26:43,246 - agent.EnhancedPaperDiscoveryAgent - INFO - Agent operation: {'agent': 'EnhancedPaperDiscoveryAgent', 'operation': 'enhanced_paper_discovery_complete', 'details': {'total_papers': 96, 'source_counts': {'openalex': 50, 'crossref': 50}, 'unique_papers': 96}}
+2026-04-14 14:26:43,253 - AutonomousResearchSystem - INFO - Stage 3: Claim Extraction
+2026-04-14 14:26:43,253 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_start', 'details': {'paper_count': 96}}
+2026-04-14 14:26:43,275 - agent.ClaimExtractionAgent - INFO - Agent operation: {'agent': 'ClaimExtractionAgent', 'operation': 'claim_extraction_complete', 'details': {'total_claims': 11, 'papers_processed': 96}}
+2026-04-14 14:26:43,276 - AutonomousResearchSystem - INFO - Stage 4: Claim Normalization & Verification
+2026-04-14 14:26:43,276 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_start', 'details': {'claim_count': 11}}
+2026-04-14 14:26:43,280 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_acs_iecr_1c01413_abstract_156_1776157003.261021: list index out of range
+2026-04-14 14:26:43,280 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_acs_iecr_1c01413_abstract_95_1776157003.261021: list index out of range
+2026-04-14 14:26:43,281 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1021_ci0000981_abstract_143_1776157003.263026: list index out of range
+2026-04-14 14:26:43,282 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_3233_jifs-141219_abstract_109_1776157003.264026: list index out of range
+2026-04-14 14:26:43,283 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1137_1020073_abstract_282_1776157003.266025: list index out of range
+2026-04-14 14:26:43,283 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1177_0042098008099357_abstract_351_1776157003.266025: list index out of range
+2026-04-14 14:26:43,284 - agent.ClaimNormalizationAgent - WARNING - Failed to normalize claim 10_1109_tevc_2011_2161872_abstract_218_1776157003.272025: list index out of range
+2026-04-14 14:26:43,285 - agent.ClaimNormalizationAgent - INFO - Agent operation: {'agent': 'ClaimNormalizationAgent', 'operation': 'claim_normalization_complete', 'details': {'normalized_count': 11, 'avg_confidence': 0.41999999999999993}}
+2026-04-14 14:26:43,285 - AutonomousResearchSystem - INFO - Stage 5: Contradiction Detection
+2026-04-14 14:26:43,285 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_start', 'details': {'claim_count': 11}}
+2026-04-14 14:26:43,288 - agent.ContradictionDetectionAgent - INFO - Agent operation: {'agent': 'ContradictionDetectionAgent', 'operation': 'contradiction_detection_complete', 'details': {'contradictions_found': 0, 'pairs_analyzed': 55}}
+2026-04-14 14:26:43,289 - AutonomousResearchSystem - INFO - Stage 6: Research Gap Detection
+2026-04-14 14:26:43,289 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_start', 'details': {'subtopics': 1, 'claims': 11}}
+2026-04-14 14:26:43,291 - agent.ResearchGapDetectionAgent - INFO - Agent operation: {'agent': 'ResearchGapDetectionAgent', 'operation': 'research_gap_detection_complete', 'details': {'total_gaps': 13, 'coverage_gaps': 1, 'methodological_gaps': 6, 'dataset_gaps': 0}}
+2026-04-14 14:26:43,292 - AutonomousResearchSystem - INFO - Stage 7: Citation Building
+2026-04-14 14:26:43,292 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_start', 'details': {'paper_count': 96}}
+2026-04-14 14:26:43,298 - agent.CitationBuilderAgent - INFO - Agent operation: {'agent': 'CitationBuilderAgent', 'operation': 'citation_building_complete', 'details': {'citations_generated': 96}}
+2026-04-14 14:26:43,299 - AutonomousResearchSystem - INFO - Stage 8: Storing in Long-term Memory
+2026-04-14 14:26:43,303 - AutonomousResearchSystem - INFO - Research results stored in long-term memory
+2026-04-14 14:26:43,303 - AutonomousResearchSystem - INFO - Research completed in 4.68 seconds
+2026-04-14 14:28:23,350 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:28:23] "POST /research HTTP/1.1" 200 -
+2026-04-14 14:28:23,959 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:28:23] "GET /sw.js HTTP/1.1" 200 -
+2026-04-14 14:29:14,358 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:14] "POST /share-snapshot HTTP/1.1" 200 -
+2026-04-14 14:29:29,418 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:29] "GET /?share=ee20bb4a7ace4e01bfe1cf2e7a2a778f HTTP/1.1" 200 -
+2026-04-14 14:29:30,024 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:30] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-14 14:29:43,184 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:43] "GET /?share=ee20bb4a7ace4e01bfe1cf2e7a2a778f HTTP/1.1" 200 -
+2026-04-14 14:29:43,649 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:43] "GET /share/ee20bb4a7ace4e01bfe1cf2e7a2a778f HTTP/1.1" 200 -
+2026-04-14 14:29:44,277 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:44] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -
+2026-04-14 14:29:45,034 - werkzeug - INFO - 127.0.0.1 - - [14/Apr/2026 14:29:45] "[33mGET /favicon.ico HTTP/1.1[0m" 404 -

@@ -839,6 +839,52 @@
             };
         }
 
+        function applySharedValidatorSnapshot(snapshot) {
+            if (!snapshot || !snapshot.payload) return false;
+            const payload = snapshot.payload;
+            if (!payload.tabs || !payload.tabs.length) return false;
+
+            const normalizeResult = (result) => result || null;
+
+            validatorTabs.length = 0;
+            payload.tabs.slice(0, MAX_VALIDATOR_TABS).forEach((tabData, index) => {
+                const tab = {
+                    id: tabData.id || `validator-tab-${index + 1}`,
+                    name: tabData.name || '',
+                    input: tabData.input || '',
+                    format: tabData.format || 'bibitem',
+                    options: tabData.options || {
+                        checkFormat: true,
+                        checkSpelling: true,
+                        checkDuplicates: true,
+                        verifyPapers: true
+                    },
+                    result: normalizeResult(tabData.result)
+                };
+                validatorTabs.push(tab);
+            });
+
+            activeValidatorTabId = payload.activeTabId && validatorTabs.find(tab => tab.id === payload.activeTabId)?.id ? payload.activeTabId : validatorTabs[0].id;
+            renderValidatorTabs();
+            loadValidatorTab(getActiveValidatorTab());
+            showNotification('Shared validation workspace loaded.', 'success');
+            return true;
+        }
+
+        async function loadSharedValidatorSnapshot() {
+            const token = new URLSearchParams(window.location.search).get('share');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`/share/${token}`);
+                const snapshot = await response.json();
+                if (!response.ok) throw new Error(snapshot.error || 'Unable to load shared validation workspace');
+                applySharedValidatorSnapshot(snapshot);
+            } catch (error) {
+                showNotification(`Shared link could not be loaded: ${error.message}`, 'error', 5000);
+            }
+        }
+
         async function generateValidatorShareLink(page = 'validator') {
             try {
                 const response = await fetch('/share-snapshot', {
@@ -895,7 +941,27 @@
             }
         }
 
-        function showNotification(message, type = 'info', duration = 3200) {
+        async function ensureNotificationChannel() {
+            if (!('serviceWorker' in navigator)) return null;
+            try {
+                return await navigator.serviceWorker.register('/sw.js');
+            } catch (error) {
+                console.warn('Service worker registration failed:', error);
+                return null;
+            }
+        }
+
+        async function ensureNotificationChannel() {
+            if (!('serviceWorker' in navigator)) return null;
+            try {
+                return await navigator.serviceWorker.register('/sw.js');
+            } catch (error) {
+                console.warn('Service worker registration failed:', error);
+                return null;
+            }
+        }
+
+        async function showNotification(message, type = 'info', duration = 3200) {
             const stack = document.getElementById('notificationStack');
             const notice = document.createElement('div');
             notice.className = `site-notification ${type}`;
@@ -905,8 +971,10 @@
             stack.appendChild(notice);
             setTimeout(dismiss, duration);
             if ('Notification' in window && Notification.permission === 'granted') {
-                const n = new Notification(type === 'success' ? 'Validation Complete' : 'Validator Update', { body: message, tag: `validator-${type}`, renotify: true });
-                n.onclick = () => { window.focus(); n.close(); };
+                const sw = await ensureNotificationChannel();
+                if (sw && sw.showNotification) {
+                    await sw.showNotification(type === 'success' ? 'Validation Complete' : 'Validator Update', { body: message, tag: `validator-${type}`, renotify: true });
+                }
             }
             playNotificationSound(type);
         }
@@ -1399,6 +1467,7 @@
             applyTheme(localStorage.getItem('siteTheme') || 'light');
             createValidatorTab(false);
             restorePreviousResults();
+            loadSharedValidatorSnapshot();
         });
     </script>
 </body>
