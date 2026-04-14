@@ -12,16 +12,45 @@
             --success-color: #10b981;
             --warning-color: #f59e0b;
             --danger-color: #ef4444;
+            --page-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --content-bg: white;
+            --text-color: #111827;
+        }
+
+        body[data-theme="dark"] {
+            --page-gradient: radial-gradient(circle at top left, rgba(79,70,229,0.28), transparent 28%), radial-gradient(circle at top right, rgba(34,211,238,0.16), transparent 24%), radial-gradient(circle at bottom left, rgba(168,85,247,0.18), transparent 30%), linear-gradient(180deg, #060816 0%, #0b1230 46%, #11193d 100%);
+            --content-bg: rgba(19, 27, 58, 0.78);
+            --text-color: #e5eefc;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--page-gradient);
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+        }
+        body[data-theme="dark"]::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent), radial-gradient(2px 2px at 120px 90px, rgba(132, 214, 255, 0.7), transparent), radial-gradient(1.5px 1.5px at 220px 40px, rgba(255,255,255,0.75), transparent), radial-gradient(1.5px 1.5px at 340px 160px, rgba(167,139,250,0.65), transparent);
+            background-size: 980px 420px;
+            opacity: 0.55;
+            z-index: 0;
+        }
+        body > * { position: relative; z-index: 1; }
+        body[data-theme="dark"] .main-container,
+        body[data-theme="dark"] .correction-card,
+        body[data-theme="dark"] .stats-summary {
+            backdrop-filter: blur(16px);
+            box-shadow: 0 22px 44px rgba(4, 9, 28, 0.42), 0 0 0 1px rgba(118, 139, 255, 0.24), 0 0 26px rgba(82, 109, 255, 0.18);
         }
 
         .main-container {
-            background: white;
+            background: var(--content-bg);
             border-radius: 20px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             margin: 2rem auto;
@@ -114,6 +143,13 @@
             padding: 1.5rem;
             margin-bottom: 2rem;
         }
+        .theme-btn {
+            background: var(--primary-color);
+            border: none;
+            border-radius: 8px;
+            color: white;
+            padding: 0.75rem 1rem;
+        }
 
         @media (max-width: 768px) {
             .before-after {
@@ -139,6 +175,7 @@
                     <i class="fas fa-arrow-left"></i> Back to Results
                 </a>
                 <div>
+                    <button class="theme-btn me-2" type="button" id="themeToggleBtn"><i class="fas fa-moon"></i> Theme</button>
                     <span class="badge bg-warning fs-6" id="totalCorrections">0 Total Corrections</span>
                 </div>
             </div>
@@ -179,6 +216,17 @@
 
         document.getElementById('backToResultsBtn').addEventListener('click', function() {
             localStorage.setItem('returnToValidatorResults', 'true');
+        });
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('siteTheme', theme);
+            const icon = document.querySelector('#themeToggleBtn i');
+            if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        document.getElementById('themeToggleBtn').addEventListener('click', function() {
+            applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
         });
 
         function displayCorrections(corrections) {
@@ -240,7 +288,10 @@
         }
 
         // Load corrections when page loads
-        document.addEventListener('DOMContentLoaded', loadCorrections);
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme(localStorage.getItem('siteTheme') || 'light');
+            loadCorrections();
+        });
     </script>
 </body>
 </html>

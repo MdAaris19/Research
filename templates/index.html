@@ -7,9 +7,79 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --page-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-color: #111827;
+            --soft-bg: #f8f9fa;
+            --border-color: #dee2e6;
+            --panel-shadow: 0 18px 36px rgba(15, 23, 42, 0.08);
+            --panel-glow: none;
+            --input-bg: #ffffff;
+            --nav-bg: #0d6efd;
+            --nav-border: rgba(255,255,255,0.08);
+        }
+        body[data-theme="dark"] {
+            --page-bg: radial-gradient(circle at top left, rgba(79,70,229,0.28), transparent 28%), radial-gradient(circle at top right, rgba(34,211,238,0.16), transparent 24%), radial-gradient(circle at bottom left, rgba(168,85,247,0.18), transparent 30%), linear-gradient(180deg, #060816 0%, #0b1230 46%, #11193d 100%);
+            --card-bg: rgba(19, 27, 58, 0.78);
+            --text-color: #eef2ff;
+            --soft-bg: rgba(22, 32, 70, 0.82);
+            --border-color: rgba(121, 148, 255, 0.34);
+            --panel-shadow: 0 22px 44px rgba(4, 9, 28, 0.42);
+            --panel-glow: 0 0 0 1px rgba(118, 139, 255, 0.24), 0 0 26px rgba(82, 109, 255, 0.18);
+            --input-bg: rgba(14, 22, 48, 0.94);
+            --nav-bg: rgba(10, 16, 42, 0.82);
+            --nav-border: rgba(146,169,255,0.18);
+        }
+        body {
+            background: var(--page-bg) !important;
+            color: var(--text-color);
+            position: relative;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body[data-theme="dark"]::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent), radial-gradient(2px 2px at 120px 90px, rgba(132, 214, 255, 0.7), transparent), radial-gradient(1.5px 1.5px at 220px 40px, rgba(255,255,255,0.75), transparent), radial-gradient(1.5px 1.5px at 340px 160px, rgba(167,139,250,0.65), transparent), radial-gradient(2px 2px at 520px 120px, rgba(255,255,255,0.78), transparent), radial-gradient(1.5px 1.5px at 720px 220px, rgba(96,165,250,0.7), transparent), radial-gradient(1.5px 1.5px at 920px 80px, rgba(255,255,255,0.7), transparent);
+            background-size: 980px 420px;
+            opacity: 0.55;
+            z-index: 0;
+        }
+        body > * {
+            position: relative;
+            z-index: 1;
+        }
+        .card, .paper-card, .filter-card, .results-empty, .search-bar, .journal-filter-options {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border-color: var(--border-color);
+        }
+        body[data-theme="dark"] .card,
+        body[data-theme="dark"] .paper-card,
+        body[data-theme="dark"] .filter-card,
+        body[data-theme="dark"] .results-empty,
+        body[data-theme="dark"] .search-bar,
+        body[data-theme="dark"] .journal-filter-options,
+        body[data-theme="dark"] .site-notification,
+        body[data-theme="dark"] .topic-tab {
+            backdrop-filter: blur(16px);
+            box-shadow: var(--panel-shadow), var(--panel-glow);
+        }
+        .filter-section, .citation-box {
+            background: var(--soft-bg);
+            color: var(--text-color);
+        }
+        .text-muted {
+            color: #94a3b8 !important;
+        }
         .research-card {
             border-left: 4px solid #007bff;
             transition: all 0.3s ease;
+            border-radius: 20px;
+            box-shadow: var(--panel-shadow);
         }
         .research-card:hover {
             transform: translateY(-2px);
@@ -19,7 +89,7 @@
             display: none;
         }
         .citation-box {
-            background-color: #f8f9fa;
+            background-color: var(--soft-bg);
             border-radius: 5px;
             padding: 10px;
             margin: 5px 0;
@@ -27,7 +97,7 @@
             font-size: 0.9em;
         }
         .citation-box {
-            background-color: #f8f9fa;
+            background-color: var(--soft-bg);
             border-radius: 5px;
             padding: 10px;
             margin: 5px 0;
@@ -38,11 +108,11 @@
             font-size: 0.8em;
         }
         .paper-card {
-            border: 1px solid #dee2e6;
-            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 15px;
             margin: 10px 0;
-            background: white;
+            background: var(--card-bg);
         }
         .relevance-score {
             background: linear-gradient(45deg, #28a745, #20c997);
@@ -52,15 +122,16 @@
             font-size: 0.8em;
         }
         .filter-section {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 15px;
+            background: linear-gradient(135deg, var(--soft-bg) 0%, var(--card-bg) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 22px;
             padding: 25px;
             margin-bottom: 25px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            box-shadow: var(--panel-shadow), var(--panel-glow);
         }
         .search-bar {
-            background: white;
-            border: 2px solid #007bff;
+            background: var(--input-bg);
+            border: 1px solid rgba(87, 112, 222, 0.55);
             border-radius: 25px;
             padding: 12px 20px;
             font-size: 16px;
@@ -69,21 +140,25 @@
         }
         .search-bar:focus {
             outline: none;
-            border-color: #0056b3;
-            box-shadow: 0 0 0 3px rgba(0,123,255,0.25);
+            border-color: #6ea8ff;
+            box-shadow: 0 0 0 3px rgba(64,140,255,0.18), 0 0 18px rgba(76, 117, 255, 0.18);
         }
         .filter-card {
-            background: white;
-            border-radius: 10px;
+            background: linear-gradient(180deg, rgba(255,255,255,0.96) 0%, rgba(244,247,255,0.96) 100%);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
             padding: 15px;
             margin: 10px 0;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: var(--panel-shadow);
+        }
+        body[data-theme="dark"] .filter-card {
+            background: linear-gradient(180deg, rgba(31, 42, 88, 0.84) 0%, rgba(21, 31, 68, 0.9) 100%);
         }
         .journal-filter-options {
             display: none;
             margin-top: 10px;
             padding: 10px;
-            background: #f8f9fa;
+            background: var(--soft-bg);
             border-radius: 8px;
         }
         .journal-filter-options.show {
@@ -107,8 +182,8 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            border: 1px solid #cfd8e3;
-            background: #fff;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
             border-radius: 999px;
             padding: 8px 12px;
             cursor: pointer;
@@ -166,12 +241,18 @@
             margin-top: 15px;
         }
         .search-helper {
-            background: #eef4ff;
+            background: linear-gradient(135deg, rgba(238,244,255,0.92), rgba(225,236,255,0.88));
             border-radius: 12px;
             padding: 12px 14px;
             color: #375a8c;
             font-size: 0.95rem;
             margin-top: 14px;
+        }
+        body[data-theme="dark"] .search-helper {
+            background: linear-gradient(135deg, rgba(32, 47, 99, 0.72), rgba(20, 30, 70, 0.82));
+            color: #d7e1ff;
+            border: 1px solid rgba(116, 136, 255, 0.28);
+            box-shadow: var(--panel-glow);
         }
         .results-shell {
             display: flex;
@@ -212,6 +293,68 @@
             padding: 28px;
             text-align: center;
             color: #4c6483;
+        }
+        body[data-theme="dark"] .results-empty {
+            background: linear-gradient(135deg, rgba(20, 29, 66, 0.88) 0%, rgba(26, 40, 86, 0.84) 100%);
+            color: #d4ddff;
+            border-color: rgba(121, 148, 255, 0.34);
+        }
+        .navbar {
+            background: var(--nav-bg) !important;
+            border-bottom: 1px solid var(--nav-border);
+            box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+            backdrop-filter: blur(14px);
+        }
+        body[data-theme="dark"] .navbar-brand,
+        body[data-theme="dark"] .form-label,
+        body[data-theme="dark"] h4,
+        body[data-theme="dark"] h5,
+        body[data-theme="dark"] h6,
+        body[data-theme="dark"] .card-title,
+        body[data-theme="dark"] strong,
+        body[data-theme="dark"] label,
+        body[data-theme="dark"] .form-text,
+        body[data-theme="dark"] small,
+        body[data-theme="dark"] p,
+        body[data-theme="dark"] .btn-outline-secondary,
+        body[data-theme="dark"] .btn-outline-primary,
+        body[data-theme="dark"] .btn-outline-light {
+            color: var(--text-color);
+        }
+        body[data-theme="dark"] .btn-outline-secondary,
+        body[data-theme="dark"] .btn-outline-primary,
+        body[data-theme="dark"] .btn-outline-danger,
+        body[data-theme="dark"] .btn-outline-light,
+        body[data-theme="dark"] .form-control,
+        body[data-theme="dark"] .form-select {
+            background: rgba(18, 27, 60, 0.88);
+            border-color: rgba(110, 132, 255, 0.34);
+            color: var(--text-color);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+        }
+        body[data-theme="dark"] .btn-primary,
+        body[data-theme="dark"] .btn-success,
+        body[data-theme="dark"] .btn-danger {
+            box-shadow: 0 8px 20px rgba(10, 14, 34, 0.35), 0 0 18px rgba(82, 109, 255, 0.16);
+        }
+        body[data-theme="dark"] .btn-primary {
+            background: linear-gradient(135deg, #4f7bff 0%, #3557d7 100%);
+            border-color: #6b8cff;
+        }
+        body[data-theme="dark"] .btn-outline-primary:hover,
+        body[data-theme="dark"] .btn-outline-secondary:hover,
+        body[data-theme="dark"] .btn-outline-danger:hover,
+        body[data-theme="dark"] .btn-outline-light:hover {
+            background: rgba(84, 105, 198, 0.22);
+        }
+        body[data-theme="dark"] .badge.bg-light {
+            background: rgba(67, 92, 186, 0.28) !important;
+            color: #d9e4ff !important;
+            border: 1px solid rgba(125, 146, 255, 0.28);
+        }
+        body[data-theme="dark"] .filter-stats {
+            background: linear-gradient(135deg, rgba(26, 110, 84, 0.88), rgba(41, 157, 118, 0.88));
+            box-shadow: var(--panel-glow);
         }
         .notification-stack {
             position: fixed;
@@ -275,6 +418,9 @@
                 <i class="fas fa-microscope"></i> Autonomous Research Agent System
             </span>
             <div>
+                <button class="btn btn-outline-light me-2" id="themeToggleBtn" type="button">
+                    <i class="fas fa-moon"></i> Theme
+                </button>
                 <a href="/validator" class="btn btn-outline-light me-2">
                     <i class="fas fa-check-double"></i> Reference Validator
                 </a>
@@ -316,7 +462,7 @@
                                 <button type="button" class="btn btn-outline-secondary" id="addTopicTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new research tab (Alt+T)">
                                     <i class="fas fa-plus"></i> Add Topic Tab
                                 </button>
-                                <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Close the active tab (Alt+W)">
+                                <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Keep the active tab and close the others">
                                     <i class="fas fa-times-circle"></i> Close Extra Tabs
                                 </button>
                             </div>
@@ -686,6 +832,19 @@
                 showOnlyCitations: false,
                 journalMode: 'include'
             };
+        }
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('siteTheme', theme);
+            const icon = document.querySelector('#themeToggleBtn i');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        function toggleTheme() {
+            applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
         }
 
         function getActiveSearchTab() {
@@ -1692,6 +1851,7 @@
         }
 
         function initializeEventHandlers() {
+            document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
             document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(element => {
                 new bootstrap.Tooltip(element);
             });
@@ -1763,6 +1923,7 @@
         }
 
         initializeEventHandlers();
+        applyTheme(localStorage.getItem('siteTheme') || 'light');
         createSearchTab('', true, false);
         loadFiltersForActiveTab();
         updateFilterStats();

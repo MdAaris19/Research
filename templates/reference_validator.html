@@ -15,21 +15,62 @@
             --danger-color: #ef4444;
             --light-bg: #f8fafc;
             --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --page-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --content-bg: white;
+            --text-color: #111827;
+        }
+
+        body[data-theme="dark"] {
+            --light-bg: rgba(20, 29, 66, 0.82);
+            --page-gradient: radial-gradient(circle at top left, rgba(79,70,229,0.28), transparent 28%), radial-gradient(circle at top right, rgba(34,211,238,0.16), transparent 24%), radial-gradient(circle at bottom left, rgba(168,85,247,0.18), transparent 30%), linear-gradient(180deg, #060816 0%, #0b1230 46%, #11193d 100%);
+            --content-bg: rgba(19, 27, 58, 0.78);
+            --text-color: #e5eefc;
+            --secondary-color: #94a3b8;
+            --card-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--page-gradient);
             min-height: 100vh;
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: var(--text-color);
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body[data-theme="dark"]::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image: radial-gradient(2px 2px at 20px 30px, rgba(255,255,255,0.8), transparent), radial-gradient(2px 2px at 120px 90px, rgba(132, 214, 255, 0.7), transparent), radial-gradient(1.5px 1.5px at 220px 40px, rgba(255,255,255,0.75), transparent), radial-gradient(1.5px 1.5px at 340px 160px, rgba(167,139,250,0.65), transparent), radial-gradient(2px 2px at 520px 120px, rgba(255,255,255,0.78), transparent);
+            background-size: 980px 420px;
+            opacity: 0.55;
+            z-index: 0;
+        }
+
+        body > * {
+            position: relative;
+            z-index: 1;
         }
 
         .main-container {
-            background: white;
+            background: var(--content-bg);
             border-radius: 20px;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             margin: 2rem auto;
             max-width: 1200px;
             overflow: hidden;
+        }
+        body[data-theme="dark"] .main-container,
+        body[data-theme="dark"] .format-selector,
+        body[data-theme="dark"] .options-card,
+        body[data-theme="dark"] .result-card,
+        body[data-theme="dark"] .stat-card,
+        body[data-theme="dark"] .topic-tab,
+        body[data-theme="dark"] .site-notification {
+            backdrop-filter: blur(16px);
+            box-shadow: 0 22px 44px rgba(4, 9, 28, 0.42), 0 0 0 1px rgba(118, 139, 255, 0.24), 0 0 26px rgba(82, 109, 255, 0.18);
         }
 
         .header-section {
@@ -88,6 +129,10 @@
             border-color: var(--primary-color);
             background: #eff6ff;
         }
+        body[data-theme="dark"] .upload-card:hover,
+        body[data-theme="dark"] .format-option:hover {
+            background: rgba(51, 65, 136, 0.35);
+        }
 
         .upload-card.dragover {
             border-color: var(--primary-color);
@@ -102,7 +147,7 @@
         }
 
         .format-selector {
-            background: white;
+            background: var(--content-bg);
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: var(--card-shadow);
@@ -128,9 +173,12 @@
             border-color: var(--primary-color);
             background: #dbeafe;
         }
+        body[data-theme="dark"] .format-option.active {
+            background: rgba(65, 92, 191, 0.32);
+        }
 
         .options-card {
-            background: white;
+            background: var(--content-bg);
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: var(--card-shadow);
@@ -241,7 +289,7 @@
         }
 
         .stat-card {
-            background: white;
+            background: var(--content-bg);
             border-radius: 12px;
             padding: 1.5rem;
             text-align: center;
@@ -266,7 +314,7 @@
         }
 
         .result-card {
-            background: white;
+            background: var(--content-bg);
             border-radius: 12px;
             padding: 1.5rem;
             box-shadow: var(--card-shadow);
@@ -387,6 +435,80 @@
             background: #1d4ed8;
             transform: translateY(-1px);
         }
+        .topic-tab-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .topic-tab {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #cbd5e1;
+            background: var(--content-bg);
+            color: var(--text-color);
+            border-radius: 999px;
+            padding: 8px 12px;
+            cursor: pointer;
+        }
+        .topic-tab.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+        .topic-tab-close {
+            border: 0;
+            background: transparent;
+            color: inherit;
+            padding: 0;
+        }
+        .toolbar-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 1rem;
+        }
+        .notification-stack {
+            position: fixed;
+            top: 18px;
+            right: 18px;
+            z-index: 1080;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 360px;
+        }
+        .site-notification {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            background: var(--content-bg);
+            color: var(--text-color);
+            border: 1px solid #cbd5e1;
+            border-left: 4px solid var(--primary-color);
+            border-radius: 12px;
+            padding: 12px 14px;
+            box-shadow: 0 14px 32px rgba(15, 23, 42, 0.16);
+        }
+        .site-notification.success { border-left-color: var(--success-color); }
+        .site-notification.error { border-left-color: var(--danger-color); }
+        .site-notification.warning { border-left-color: var(--warning-color); }
+        .site-notification button { border: 0; background: transparent; color: inherit; margin-left: auto; padding: 0; }
+        body[data-theme="dark"] .nav-link,
+        body[data-theme="dark"] .form-control,
+        body[data-theme="dark"] .btn-outline-primary,
+        body[data-theme="dark"] .text-muted,
+        body[data-theme="dark"] label,
+        body[data-theme="dark"] small {
+            color: var(--text-color) !important;
+        }
+        body[data-theme="dark"] .form-control,
+        body[data-theme="dark"] .btn-outline-primary,
+        body[data-theme="dark"] .nav-link {
+            background: rgba(18, 27, 60, 0.88);
+            border-color: rgba(110, 132, 255, 0.34);
+        }
 
         @media (max-width: 768px) {
             .main-container {
@@ -409,6 +531,7 @@
     </style>
 </head>
 <body>
+    <div id="notificationStack" class="notification-stack" aria-live="polite"></div>
     <div class="main-container">
         <!-- Header -->
         <div class="header-section">
@@ -428,11 +551,20 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/citations"><i class="fas fa-quote-right"></i> Citations</a>
                 </li>
+                <li class="nav-item">
+                    <button class="nav-link" type="button" id="themeToggleBtn"><i class="fas fa-moon"></i> Theme</button>
+                </li>
             </ul>
         </div>
 
         <!-- Content -->
         <div class="content-section">
+            <div class="topic-tab-bar" id="validatorTabs"></div>
+            <div class="toolbar-row">
+                <button type="button" class="btn btn-outline-primary" id="addValidatorTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new validator tab (Alt+T)">
+                    <i class="fas fa-plus"></i> Add Tab
+                </button>
+            </div>
             <!-- Upload Section -->
             <div class="upload-card" id="uploadArea">
                 <div class="upload-icon">
@@ -614,6 +746,11 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
+        const MAX_VALIDATOR_TABS = 3;
+        const validatorTabs = [];
+        let activeValidatorTabId = null;
+        let nextValidatorTabId = 1;
+        let audioContext = null;
         let validationResult = null;
         let fileContent = '';
         let selectedFormat = 'bibitem';
@@ -625,6 +762,175 @@
         const validateBtn = document.getElementById('validateBtn');
         const loadingSpinner = document.getElementById('loadingSpinner');
         const resultsSection = document.getElementById('resultsSection');
+
+        function defaultValidatorTab() {
+            return {
+                id: `validator-tab-${nextValidatorTabId++}`,
+                name: '',
+                input: '',
+                format: 'bibitem',
+                options: {
+                    checkFormat: true,
+                    checkSpelling: true,
+                    checkDuplicates: true,
+                    verifyPapers: true
+                },
+                result: null
+            };
+        }
+
+        function getActiveValidatorTab() {
+            return validatorTabs.find(tab => tab.id === activeValidatorTabId) || null;
+        }
+
+        function applyTheme(theme) {
+            document.body.setAttribute('data-theme', theme);
+            localStorage.setItem('siteTheme', theme);
+            const icon = document.querySelector('#themeToggleBtn i');
+            if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+        }
+
+        function toggleTheme() {
+            applyTheme(document.body.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+        }
+
+        function playNotificationSound(type) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return;
+            try {
+                if (!audioContext) audioContext = new AudioContextClass();
+                if (audioContext.state === 'suspended') audioContext.resume().catch(() => null);
+                const tones = { success: [740, 988, 1175], error: [392, 311, 262], info: [659, 784, 988], warning: [554, 440, 659] };
+                const selected = tones[type] || tones.info;
+                const now = audioContext.currentTime;
+                selected.forEach((frequency, index) => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    const start = now + index * 0.12;
+                    const end = start + 0.24;
+                    oscillator.type = type === 'error' ? 'sawtooth' : 'triangle';
+                    oscillator.frequency.setValueAtTime(frequency, start);
+                    gainNode.gain.setValueAtTime(0.0001, start);
+                    gainNode.gain.exponentialRampToValueAtTime(0.14, start + 0.03);
+                    gainNode.gain.exponentialRampToValueAtTime(0.0001, end);
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    oscillator.start(start);
+                    oscillator.stop(end + 0.02);
+                });
+            } catch (_) {}
+        }
+
+        function requestNotificationPermission() {
+            if ('Notification' in window && Notification.permission === 'default') {
+                Notification.requestPermission().catch(() => null);
+            }
+        }
+
+        function showNotification(message, type = 'info', duration = 3200) {
+            const stack = document.getElementById('notificationStack');
+            const notice = document.createElement('div');
+            notice.className = `site-notification ${type}`;
+            notice.innerHTML = `<div>${message}</div><button type="button"><i class="fas fa-times"></i></button>`;
+            const dismiss = () => notice.remove();
+            notice.querySelector('button').addEventListener('click', dismiss);
+            stack.appendChild(notice);
+            setTimeout(dismiss, duration);
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const n = new Notification(type === 'success' ? 'Validation Complete' : 'Validator Update', { body: message, tag: `validator-${type}`, renotify: true });
+                n.onclick = () => { window.focus(); n.close(); };
+            }
+            playNotificationSound(type);
+        }
+
+        function renderValidatorTabs() {
+            const container = document.getElementById('validatorTabs');
+            container.innerHTML = validatorTabs.map((tab, index) => {
+                const label = tab.name || `Validator Tab ${index + 1}`;
+                return `<button type="button" class="topic-tab ${tab.id === activeValidatorTabId ? 'active' : ''}" data-tab-id="${tab.id}"><span>${label.length > 28 ? `${label.slice(0, 28)}...` : label}</span>${validatorTabs.length > 1 ? `<span class="topic-tab-close" data-close-id="${tab.id}" title="Close tab (Alt+W)"><i class="fas fa-times"></i></span>` : ''}</button>`;
+            }).join('');
+            container.querySelectorAll('[data-tab-id]').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const closeTarget = event.target.closest('[data-close-id]');
+                    if (closeTarget) {
+                        event.stopPropagation();
+                        closeValidatorTab(closeTarget.dataset.closeId);
+                        return;
+                    }
+                    switchValidatorTab(button.dataset.tabId);
+                });
+            });
+        }
+
+        function persistActiveValidatorTab() {
+            const tab = getActiveValidatorTab();
+            if (!tab) return;
+            tab.input = manualInput.value;
+            tab.name = tab.input.trim() ? tab.input.trim().split('\n')[0].slice(0, 28) : (fileInput.files[0]?.name || tab.name || '');
+            tab.format = selectedFormat;
+            tab.options = {
+                checkFormat: document.getElementById('checkFormat').checked,
+                checkSpelling: document.getElementById('checkSpelling').checked,
+                checkDuplicates: document.getElementById('checkDuplicates').checked,
+                verifyPapers: document.getElementById('verifyPapers').checked
+            };
+            tab.result = validationResult;
+        }
+
+        function loadValidatorTab(tab) {
+            fileContent = tab.input || '';
+            manualInput.value = fileContent;
+            validationResult = tab.result || null;
+            selectedFormat = tab.format || 'bibitem';
+            document.querySelectorAll('.format-option').forEach(opt => opt.classList.toggle('active', opt.dataset.format === selectedFormat));
+            document.getElementById('outputFormat').value = selectedFormat;
+            document.getElementById('checkFormat').checked = tab.options.checkFormat;
+            document.getElementById('checkSpelling').checked = tab.options.checkSpelling;
+            document.getElementById('checkDuplicates').checked = tab.options.checkDuplicates;
+            document.getElementById('verifyPapers').checked = tab.options.verifyPapers;
+            validateBtn.disabled = !fileContent.trim();
+            if (tab.result) {
+                displayResults(tab.result, false);
+            } else {
+                resultsSection.style.display = 'none';
+            }
+        }
+
+        function createValidatorTab(notify = true) {
+            if (validatorTabs.length >= MAX_VALIDATOR_TABS) {
+                showNotification('You can open up to 3 validator tabs at a time.', 'warning');
+                return;
+            }
+            const tab = defaultValidatorTab();
+            validatorTabs.push(tab);
+            activeValidatorTabId = tab.id;
+            renderValidatorTabs();
+            loadValidatorTab(tab);
+            if (notify) showNotification('New validator tab opened.', 'info', 2200);
+        }
+
+        function switchValidatorTab(tabId) {
+            persistActiveValidatorTab();
+            activeValidatorTabId = tabId;
+            renderValidatorTabs();
+            loadValidatorTab(getActiveValidatorTab());
+        }
+
+        function closeValidatorTab(tabId) {
+            const index = validatorTabs.findIndex(tab => tab.id === tabId);
+            if (index === -1) return;
+            validatorTabs.splice(index, 1);
+            if (!validatorTabs.length) {
+                createValidatorTab(false);
+                return;
+            }
+            if (activeValidatorTabId === tabId) {
+                activeValidatorTabId = validatorTabs[Math.max(0, index - 1)].id;
+            }
+            renderValidatorTabs();
+            loadValidatorTab(getActiveValidatorTab());
+            showNotification('Validator tab closed.', 'info', 2200);
+        }
 
         // File upload handling
         uploadArea.addEventListener('click', () => fileInput.click());
@@ -641,6 +947,7 @@
                 document.querySelectorAll('.format-option').forEach(opt => opt.classList.remove('active'));
                 this.classList.add('active');
                 selectedFormat = this.dataset.format;
+                persistActiveValidatorTab();
             });
         });
 
@@ -674,6 +981,8 @@
         function handleManualInput(e) {
             fileContent = e.target.value;
             validateBtn.disabled = !fileContent.trim();
+            persistActiveValidatorTab();
+            renderValidatorTabs();
         }
 
         function processFile(file) {
@@ -682,6 +991,12 @@
                 fileContent = e.target.result;
                 manualInput.value = fileContent;
                 validateBtn.disabled = false;
+                const activeTab = getActiveValidatorTab();
+                if (activeTab) {
+                    activeTab.name = file.name;
+                    persistActiveValidatorTab();
+                    renderValidatorTabs();
+                }
                 
                 // Update upload area
                 uploadArea.innerHTML = `
@@ -698,7 +1013,7 @@
         // Validation process
         validateBtn.addEventListener('click', async function() {
             if (!fileContent.trim()) {
-                alert('Please upload a file or paste references manually.');
+                showNotification('Please upload a file or paste references manually.', 'warning');
                 return;
             }
 
@@ -732,22 +1047,29 @@
                 if (response.ok) {
                     validationResult = data;
                     displayResults(data);
+                    const activeTab = getActiveValidatorTab();
+                    if (activeTab) {
+                        activeTab.result = data;
+                    }
+                    showNotification(`Reference validation finished. ${data.stats.final_count} cleaned references are ready.`, 'success');
                 } else {
-                    alert('Error: ' + data.error);
+                    showNotification('Validation failed: ' + data.error, 'error', 5000);
                 }
             } catch (error) {
-                alert('Error: ' + error.message);
+                showNotification('Validation failed: ' + error.message, 'error', 5000);
             } finally {
                 loadingSpinner.style.display = 'none';
                 validateBtn.disabled = false;
             }
         });
 
-        function displayResults(data) {
+        function displayResults(data, store = true) {
             resultsSection.style.display = 'block';
-            localStorage.setItem('referenceValidatorLastResult', JSON.stringify(data));
-            localStorage.setItem('referenceValidatorLastInput', fileContent);
-            localStorage.setItem('referenceValidatorLastFormat', selectedFormat);
+            if (store) {
+                localStorage.setItem('referenceValidatorLastResult', JSON.stringify(data));
+                localStorage.setItem('referenceValidatorLastInput', fileContent);
+                localStorage.setItem('referenceValidatorLastFormat', selectedFormat);
+            }
             
             displayStatistics(data.stats);
             displayProcessingLog(data.processing_log);
@@ -889,6 +1211,7 @@
                 .then(response => response.json())
                 .then(data => {
                     document.getElementById('correctedReferences').value = data.formatted_references;
+                    showNotification(`References reformatted as ${format}.`, 'info', 2200);
                 })
                 .catch(error => console.error('Error reformatting:', error));
             }
@@ -920,6 +1243,7 @@
             const btn = event.target;
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+            showNotification('Corrected references copied to clipboard.', 'success', 2200);
             setTimeout(() => {
                 btn.innerHTML = originalText;
             }, 2000);
@@ -960,6 +1284,14 @@
             if (shouldRestore && rawResult) {
                 try {
                     validationResult = JSON.parse(rawResult);
+                    const activeTab = getActiveValidatorTab();
+                    if (activeTab) {
+                        activeTab.input = savedInput || '';
+                        activeTab.format = savedFormat || 'bibitem';
+                        activeTab.result = validationResult;
+                        activeTab.name = (savedInput || '').trim().split('\n')[0].slice(0, 28);
+                        renderValidatorTabs();
+                    }
                     displayResults(validationResult);
                 } catch (error) {
                     console.error('Error restoring previous results:', error);
@@ -969,7 +1301,30 @@
             localStorage.removeItem('returnToValidatorResults');
         }
 
-        document.addEventListener('DOMContentLoaded', restorePreviousResults);
+        document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
+        document.getElementById('addValidatorTabBtn').addEventListener('click', () => createValidatorTab(true));
+        document.querySelectorAll('[data-bs-toggle="tooltip"]').forEach(el => new bootstrap.Tooltip(el));
+        ['click', 'keydown'].forEach(eventName => document.addEventListener(eventName, requestNotificationPermission, { once: true }));
+        document.addEventListener('keydown', function(event) {
+            const target = event.target;
+            const typing = target && (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable);
+            if (typing) return;
+            if (event.altKey && event.key.toLowerCase() === 't') {
+                event.preventDefault();
+                createValidatorTab(true);
+            }
+            if (event.altKey && event.key.toLowerCase() === 'w') {
+                event.preventDefault();
+                const active = getActiveValidatorTab();
+                if (active) closeValidatorTab(active.id);
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            applyTheme(localStorage.getItem('siteTheme') || 'light');
+            createValidatorTab(false);
+            restorePreviousResults();
+        });
     </script>
 </body>
 </html>
