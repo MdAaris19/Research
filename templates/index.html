@@ -426,71 +426,580 @@
         .hidden {
             display: none !important;
         }
+
+        /* ============================================================
+           PREMIUM VISUAL REDESIGN — ALWAYS VISIBLE SECTIONS
+           ============================================================ */
+
+        /* --- Navbar --- */
+        .navbar-premium {
+            background: linear-gradient(135deg, #0f0c29 0%, #1a1060 40%, #0d2b45 100%) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.07) !important;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 4px 30px rgba(0,0,0,0.3) !important;
+            padding: 10px 0 !important;
+        }
+        .navbar-logo-wrap {
+            display: flex; align-items: center; gap: 11px; text-decoration: none;
+        }
+        .navbar-logo-icon {
+            width: 36px; height: 36px; border-radius: 11px;
+            background: linear-gradient(135deg, #4f7bff, #22d3ee);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; color: #fff; flex-shrink: 0;
+            box-shadow: 0 4px 14px rgba(79,123,255,0.45);
+        }
+        .navbar-logo-text {
+            font-size: 1rem; font-weight: 800; letter-spacing: -0.01em;
+            background: linear-gradient(90deg, #fff 30%, rgba(167,139,250,0.85) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            line-height: 1.2;
+        }
+        .navbar-logo-sub {
+            font-size: 0.65rem; color: rgba(255,255,255,0.42); font-weight: 400;
+            letter-spacing: 0.04em; text-transform: uppercase; display: block;
+            -webkit-text-fill-color: rgba(255,255,255,0.42);
+        }
+        .nav-pill-btn {
+            background: rgba(255,255,255,0.07) !important;
+            border: 1px solid rgba(255,255,255,0.12) !important;
+            border-radius: 10px !important; color: rgba(255,255,255,0.82) !important;
+            font-size: 0.8rem !important; font-weight: 600 !important;
+            padding: 6px 13px !important; transition: all 0.2s ease !important;
+            white-space: nowrap;
+        }
+        .nav-pill-btn:hover {
+            background: rgba(255,255,255,0.15) !important; color: #fff !important;
+            transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        .nav-pill-btn.active-nav {
+            background: linear-gradient(135deg,rgba(79,123,255,0.5),rgba(109,107,255,0.4)) !important;
+            border-color: rgba(79,123,255,0.5) !important; color: #fff !important;
+        }
+
+        /* --- Hero Section --- */
+        .hero-section {
+            background: linear-gradient(155deg, #0f0c29 0%, #1a1060 38%, #0d2b45 68%, #0c1a2e 100%);
+            padding: 64px 0 72px; position: relative; overflow: hidden;
+        }
+        .hero-grid {
+            position: absolute; inset: 0; pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255,255,255,0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.035) 1px, transparent 1px);
+            background-size: 48px 48px;
+        }
+        .hero-glow {
+            position: absolute; pointer-events: none;
+            border-radius: 50%; filter: blur(80px); opacity: 0.35;
+        }
+        .hero-glow-1 { width: 500px; height: 500px; background: #4f7bff; top: -100px; left: -60px; }
+        .hero-glow-2 { width: 380px; height: 380px; background: #a855f7; bottom: -80px; right: 5%; }
+        .hero-glow-3 { width: 280px; height: 280px; background: #22d3ee; top: 30%; right: 20%; }
+        .hero-content { position: relative; z-index: 2; }
+        .hero-badge {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 999px; padding: 5px 14px 5px 8px;
+            font-size: 0.78rem; color: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px); margin-bottom: 22px;
+        }
+        .hero-badge-dot {
+            width: 8px; height: 8px; border-radius: 50%; background: #22d3ee;
+            animation: heroDot 2s ease infinite; flex-shrink: 0;
+        }
+        @keyframes heroDot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(1.5)} }
+        .hero-title {
+            font-size: clamp(2rem, 4.5vw, 3.2rem); font-weight: 900;
+            color: #fff; line-height: 1.12; margin-bottom: 16px; letter-spacing: -0.03em;
+        }
+        .hero-title .grad-text {
+            background: linear-gradient(135deg, #4f7bff 0%, #22d3ee 50%, #a855f7 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-sub {
+            font-size: 1.05rem; color: rgba(255,255,255,0.62); line-height: 1.75;
+            max-width: 560px; margin-bottom: 36px;
+        }
+        .hero-stats-row {
+            display: flex; flex-wrap: wrap; gap: 12px; margin-top: 4px;
+        }
+        .hero-stat-pill {
+            display: flex; align-items: center; gap: 9px;
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px; padding: 10px 16px; backdrop-filter: blur(8px);
+            transition: all 0.25s ease;
+        }
+        .hero-stat-pill:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .hsp-icon {
+            width: 34px; height: 34px; border-radius: 9px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; color: #fff; flex-shrink: 0;
+        }
+        .hsp-icon.blue { background: linear-gradient(135deg,#4f7bff,#3557d7); box-shadow: 0 4px 10px rgba(79,123,255,0.4); }
+        .hsp-icon.cyan { background: linear-gradient(135deg,#22d3ee,#0891b2); box-shadow: 0 4px 10px rgba(34,211,238,0.35); }
+        .hsp-icon.purple { background: linear-gradient(135deg,#a855f7,#7c3aed); box-shadow: 0 4px 10px rgba(168,85,247,0.35); }
+        .hsp-icon.green { background: linear-gradient(135deg,#20c997,#0d9488); box-shadow: 0 4px 10px rgba(32,201,151,0.35); }
+        .hsp-label strong { display: block; font-size: 0.82rem; font-weight: 700; color: #fff; }
+        .hsp-label span { font-size: 0.7rem; color: rgba(255,255,255,0.5); }
+
+        /* --- Search Card Premium --- */
+        .search-card-wrap { margin-top: -36px; position: relative; z-index: 10; }
+        .search-card-premium {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 24px; padding: 32px 36px;
+            box-shadow: 0 28px 60px rgba(10,15,40,0.18);
+            position: relative; overflow: hidden;
+        }
+        .search-card-premium::before {
+            content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+            background: linear-gradient(90deg, #4f7bff, #22d3ee, #a855f7, #4f7bff);
+            background-size: 200% 100%; animation: shimmerTopBar 4s linear infinite;
+        }
+        @keyframes shimmerTopBar { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+        body[data-theme="dark"] .search-card-premium { backdrop-filter: blur(24px); box-shadow: var(--panel-shadow), var(--panel-glow); }
+        .scp-title {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 22px;
+        }
+        .scp-icon {
+            width: 40px; height: 40px; border-radius: 12px;
+            background: linear-gradient(135deg,#4f7bff,#6d6bff);
+            display: flex; align-items: center; justify-content: center;
+            color: #fff; font-size: 16px; flex-shrink: 0;
+            box-shadow: 0 6px 16px rgba(79,123,255,0.4);
+        }
+        .scp-title h5 { margin: 0; font-size: 1.1rem; font-weight: 800; }
+        .scp-title small { display: block; font-size: 0.75rem; color: #94a3b8; font-weight: 400; margin-top: 1px; }
+        .search-input-wrap { position: relative; }
+        .search-input-premium {
+            background: var(--input-bg) !important; border: 1.5px solid rgba(87,112,222,0.35) !important;
+            border-radius: 14px !important; padding: 14px 50px 14px 18px !important;
+            font-size: 15px !important; transition: all 0.3s ease !important; width: 100%;
+            color: var(--text-color) !important;
+        }
+        .search-input-premium:focus {
+            border-color: #4f7bff !important; outline: none !important;
+            box-shadow: 0 0 0 4px rgba(79,123,255,0.12), 0 0 24px rgba(79,123,255,0.1) !important;
+        }
+        .search-input-icon {
+            position: absolute; right: 16px; top: 50%; transform: translateY(-50%);
+            color: #94a3b8; pointer-events: none; font-size: 15px;
+        }
+        .btn-launch {
+            background: linear-gradient(135deg,#4f7bff,#6d6bff) !important;
+            border: none !important; border-radius: 13px !important;
+            padding: 12px 24px !important; font-weight: 700 !important;
+            color: #fff !important; font-size: 0.9rem !important;
+            box-shadow: 0 6px 20px rgba(79,123,255,0.45) !important;
+            transition: all 0.25s ease !important;
+        }
+        .btn-launch:hover { transform: translateY(-2px) !important; box-shadow: 0 10px 28px rgba(79,123,255,0.55) !important; }
+
+        /* --- Feature Cards --- */
+        .features-wrap { padding: 48px 0 32px; }
+        .features-heading {
+            font-size: 1.6rem; font-weight: 900; letter-spacing: -0.02em;
+            margin-bottom: 6px;
+        }
+        .features-heading span {
+            background: linear-gradient(135deg,#4f7bff,#a855f7);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .features-sub { color: #94a3b8; font-size: 0.92rem; margin-bottom: 32px; }
+        .feat-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 22px; padding: 28px; height: 100%;
+            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+            position: relative; overflow: hidden;
+        }
+        .feat-card::before {
+            content: ''; position: absolute; inset: 0; border-radius: 22px; opacity: 0;
+            background: radial-gradient(ellipse at top left, rgba(79,123,255,0.08), transparent 70%);
+            transition: opacity 0.3s ease; pointer-events: none;
+        }
+        .feat-card:hover { transform: translateY(-8px); box-shadow: 0 24px 48px rgba(15,23,42,0.14); }
+        .feat-card:hover::before { opacity: 1; }
+        body[data-theme="dark"] .feat-card { backdrop-filter: blur(14px); box-shadow: var(--panel-shadow); }
+        body[data-theme="dark"] .feat-card:hover { box-shadow: var(--panel-shadow), var(--panel-glow); }
+        .feat-icon {
+            width: 54px; height: 54px; border-radius: 16px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 22px; color: #fff; margin-bottom: 20px;
+        }
+        .fi-red    { background: linear-gradient(135deg,#ef4444,#dc2626); box-shadow: 0 8px 20px rgba(239,68,68,0.35); }
+        .fi-blue   { background: linear-gradient(135deg,#4f7bff,#3b82f6); box-shadow: 0 8px 20px rgba(79,123,255,0.35); }
+        .fi-green  { background: linear-gradient(135deg,#10b981,#059669); box-shadow: 0 8px 20px rgba(16,185,129,0.35); }
+        .fi-purple { background: linear-gradient(135deg,#a855f7,#7c3aed); box-shadow: 0 8px 20px rgba(168,85,247,0.35); }
+        .feat-card h5 { font-weight: 800; font-size: 1rem; margin-bottom: 8px; }
+        .feat-card p { font-size: 0.865rem; color: #94a3b8; line-height: 1.65; margin-bottom: 20px; }
+        .feat-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 0.83rem; font-weight: 700; text-decoration: none;
+            padding: 8px 16px; border-radius: 10px; transition: all 0.22s ease;
+        }
+        .feat-link-red    { background: rgba(239,68,68,0.1);  color: #ef4444; }
+        .feat-link-red:hover    { background: #ef4444;  color: #fff; transform: translateX(2px); }
+        .feat-link-blue   { background: rgba(79,123,255,0.1); color: #4f7bff; }
+        .feat-link-blue:hover   { background: #4f7bff;  color: #fff; transform: translateX(2px); }
+        .feat-link-green  { background: rgba(16,185,129,0.1); color: #10b981; }
+        .feat-link-green:hover  { background: #10b981;  color: #fff; transform: translateX(2px); }
+        .feat-link-purple { background: rgba(168,85,247,0.1); color: #a855f7; }
+        .feat-link-purple:hover { background: #a855f7;  color: #fff; transform: translateX(2px); }
+
+        /* ===== READING PROGRESS BAR ===== */
+        #readingProgress {
+            position: fixed; top: 0; left: 0; height: 3px;
+            background: linear-gradient(90deg, #4f7bff, #22d3ee, #a855f7);
+            z-index: 9999; width: 0%; transition: width 0.1s linear;
+            pointer-events: none; border-radius: 0 2px 2px 0;
+        }
+
+        /* ===== RESEARCH PIPELINE ===== */
+        .research-pipeline { display: none; padding: 22px 4px 10px; }
+        .research-pipeline.active { display: block; }
+        .pipeline-track {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 4px; position: relative;
+        }
+        .pipeline-track::before {
+            content: ''; position: absolute; top: 17px; left: 28px; right: 28px;
+            height: 2px; background: var(--border-color); z-index: 0;
+        }
+        .pipeline-step {
+            display: flex; flex-direction: column; align-items: center; gap: 7px;
+            flex: 1; position: relative; z-index: 1;
+        }
+        .pipeline-icon {
+            width: 34px; height: 34px; border-radius: 50%;
+            background: var(--card-bg); border: 2px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 13px; color: #94a3b8; transition: all 0.5s ease;
+        }
+        .pipeline-step.active .pipeline-icon {
+            border-color: #4f7bff; background: #4f7bff; color: #fff;
+            animation: pulsePipe 1.4s ease infinite;
+            box-shadow: 0 0 0 5px rgba(79,123,255,0.18);
+        }
+        .pipeline-step.done .pipeline-icon {
+            border-color: #20c997; background: #20c997; color: #fff;
+        }
+        .pipeline-label {
+            font-size: 0.69rem; color: #94a3b8; text-align: center;
+            font-weight: 600; max-width: 68px; line-height: 1.3;
+        }
+        .pipeline-step.active .pipeline-label, .pipeline-step.done .pipeline-label { color: var(--text-color); }
+        @keyframes pulsePipe {
+            0%, 100% { box-shadow: 0 0 0 5px rgba(79,123,255,0.18); }
+            50% { box-shadow: 0 0 0 10px rgba(79,123,255,0.06); }
+        }
+
+        /* ===== SKELETON LOADERS ===== */
+        .skeleton-section { display: none; }
+        .skeleton-section.active { display: block; }
+        .skeleton-card {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 16px; padding: 16px; margin: 10px 0;
+        }
+        .skeleton-line {
+            height: 11px; border-radius: 6px; margin-bottom: 11px;
+            background: linear-gradient(90deg, var(--border-color) 25%, rgba(160,180,255,0.18) 50%, var(--border-color) 75%);
+            background-size: 400% 100%; animation: shimmerSkel 1.6s infinite;
+        }
+        .skeleton-line.w75 { width: 75%; }
+        .skeleton-line.w55 { width: 55%; }
+        .skeleton-line.w40 { width: 40%; }
+        .skeleton-line.w100 { width: 100%; }
+        @keyframes shimmerSkel {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ===== RESULTS TAB BAR ===== */
+        .results-tabs-wrap {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 18px; padding: 5px; display: flex; flex-wrap: wrap; gap: 3px;
+            box-shadow: var(--panel-shadow); margin-bottom: 18px;
+        }
+        body[data-theme="dark"] .results-tabs-wrap {
+            backdrop-filter: blur(14px);
+            box-shadow: var(--panel-shadow), var(--panel-glow);
+        }
+        .res-tab-btn {
+            background: none; border: none; border-radius: 13px;
+            padding: 9px 16px; font-size: 0.875rem; font-weight: 600;
+            color: #94a3b8; cursor: pointer; transition: all 0.22s ease;
+            display: flex; align-items: center; gap: 7px; white-space: nowrap;
+        }
+        .res-tab-btn:hover { color: var(--text-color); background: rgba(79,123,255,0.08); }
+        .res-tab-btn.active {
+            background: linear-gradient(135deg, #4f7bff, #6d6bff);
+            color: #fff; box-shadow: 0 4px 14px rgba(79,123,255,0.35);
+        }
+        .res-tab-pill {
+            border-radius: 999px; padding: 1px 7px; font-size: 0.7rem; font-weight: 800;
+            background: rgba(79,123,255,0.12); color: #4f7bff;
+        }
+        .res-tab-btn.active .res-tab-pill {
+            background: rgba(255,255,255,0.22); color: #fff;
+        }
+
+        /* ===== BOOKMARK SYSTEM ===== */
+        .bm-btn {
+            background: none; border: none; cursor: pointer; padding: 3px 6px;
+            border-radius: 6px; color: #94a3b8; transition: all 0.2s ease;
+            font-size: 1rem; line-height: 1; flex-shrink: 0;
+        }
+        .bm-btn:hover { color: #f59f00; transform: scale(1.15); }
+        .bm-btn.active { color: #f59f00; }
+        .bm-btn.active i::before { content: "\f005"; font-weight: 900; }
+        @keyframes bmPop { 0%,100% { transform: scale(1); } 50% { transform: scale(1.45); } }
+        .bm-pop { animation: bmPop 0.28s cubic-bezier(0.34,1.56,0.64,1); }
+        .bookmarks-panel {
+            background: linear-gradient(135deg, rgba(245,159,0,0.07), rgba(255,228,100,0.04));
+            border: 1px solid rgba(245,159,0,0.25); border-radius: 14px;
+            padding: 14px 16px; margin-top: 12px; display: none;
+        }
+        .bookmarks-panel.show { display: block; }
+        #bmNavBtn { display: none; }
+        #bmNavBtn.show { display: inline-flex; align-items: center; gap: 6px; }
+
+        /* ===== YEAR DISTRIBUTION CHART ===== */
+        .year-chart-section { margin-top: 18px; padding-top: 14px; border-top: 1px solid var(--border-color); }
+        .year-chart-title { font-size: 0.73rem; font-weight: 700; color: #94a3b8; margin-bottom: 8px; letter-spacing: 0.06em; text-transform: uppercase; }
+        .year-chart { display: flex; align-items: flex-end; gap: 4px; height: 54px; }
+        .year-col { display: flex; flex-direction: column; align-items: center; gap: 3px; flex: 1; min-width: 20px; max-width: 42px; }
+        .year-bar {
+            width: 100%; border-radius: 4px 4px 0 0; min-height: 4px;
+            background: linear-gradient(180deg, #4f7bff 0%, #a855f7 100%);
+            transition: height 0.8s cubic-bezier(0.34,1.56,0.64,1);
+            cursor: default; position: relative;
+        }
+        .year-bar:hover { filter: brightness(1.2); }
+        .year-bar-lbl { font-size: 0.6rem; color: #94a3b8; white-space: nowrap; transform: rotate(-50deg) translateX(-4px); transform-origin: top right; }
+
+        /* ===== KEYBOARD SHORTCUT MODAL ===== */
+        .kbd-overlay {
+            display: none; position: fixed; inset: 0; z-index: 3000;
+            background: rgba(0,0,0,0.52); backdrop-filter: blur(6px);
+            align-items: center; justify-content: center;
+        }
+        .kbd-overlay.show { display: flex; }
+        .kbd-modal {
+            background: var(--card-bg); border: 1px solid var(--border-color);
+            border-radius: 22px; padding: 28px 32px; max-width: 460px; width: 92%;
+            box-shadow: 0 32px 64px rgba(0,0,0,0.35), var(--panel-glow);
+            animation: kbdIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        @keyframes kbdIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .kbd-modal-title {
+            font-size: 1.1rem; font-weight: 800; margin-bottom: 18px;
+            display: flex; align-items: center; justify-content: space-between;
+        }
+        .kbd-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.88rem; gap: 10px;
+        }
+        .kbd-row:last-child { border-bottom: none; padding-bottom: 0; }
+        .kbd-key {
+            background: var(--soft-bg); border: 1px solid var(--border-color);
+            border-radius: 7px; padding: 3px 10px; font-family: monospace;
+            font-size: 0.8rem; font-weight: 700; color: var(--text-color);
+            box-shadow: 0 2px 0 var(--border-color); white-space: nowrap; flex-shrink: 0;
+        }
+
+        /* ===== SESSION RESTORE BANNER ===== */
+        .session-banner {
+            display: none; align-items: center; justify-content: space-between;
+            gap: 12px; flex-wrap: wrap;
+            background: linear-gradient(135deg, rgba(79,123,255,0.09), rgba(34,211,238,0.05));
+            border: 1px solid rgba(79,123,255,0.26); border-radius: 14px;
+            padding: 11px 18px; margin-bottom: 16px;
+            animation: bannerIn 0.3s ease;
+        }
+        .session-banner.show { display: flex; }
+        @keyframes bannerIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* ===== ABSTRACT EXPAND ===== */
+        .abstract-collapsed {
+            display: -webkit-box; -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical; overflow: hidden;
+        }
+        .abstract-toggle-btn {
+            background: none; border: none; color: #4f7bff; font-size: 0.78rem;
+            cursor: pointer; padding: 0; font-weight: 700; margin-top: 4px; display: block;
+        }
+        .abstract-toggle-btn:hover { text-decoration: underline; }
+
+        /* ===== RELEVANCE BAR ===== */
+        .relevance-bar-wrap { display: flex; align-items: center; gap: 6px; min-width: 100px; flex-shrink: 0; }
+        .relevance-bg { flex: 1; height: 5px; border-radius: 3px; background: var(--border-color); overflow: hidden; min-width: 50px; }
+        .relevance-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, #20c997, #4f7bff);
+            transition: width 1s cubic-bezier(0.34,1.56,0.64,1);
+        }
+        .relevance-pct { font-size: 0.72rem; font-weight: 800; color: #20c997; min-width: 28px; text-align: right; }
+
+        /* ===== CONTRADICTIONS PANEL ===== */
+        .contradiction-card {
+            border: 1px solid var(--border-color); border-left: 4px solid #ef4444;
+            background: var(--card-bg); border-radius: 12px; padding: 14px 16px; margin: 10px 0;
+        }
+        .contra-sev {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 2px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 800;
+        }
+        .contra-sev.high { background: rgba(239,68,68,0.12); color: #ef4444; }
+        .contra-sev.medium { background: rgba(245,159,0,0.12); color: #f59f00; }
+        .contra-sev.low { background: rgba(148,163,184,0.12); color: #64748b; }
     </style>
 </head>
 <body class="bg-light">
+    <!-- Reading Progress Bar -->
+    <div id="readingProgress"></div>
+
+    <!-- Keyboard Shortcut Modal -->
+    <div class="kbd-overlay" id="kbdOverlay" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
+        <div class="kbd-modal">
+            <div class="kbd-modal-title">
+                <span><i class="fas fa-keyboard me-2 text-primary"></i>Keyboard Shortcuts</span>
+                <button class="btn btn-sm btn-outline-secondary" id="kbdCloseBtn"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="kbd-row"><span>Open new research tab</span><span class="kbd-key">Alt + T</span></div>
+            <div class="kbd-row"><span>Close active tab</span><span class="kbd-key">Alt + W</span></div>
+            <div class="kbd-row"><span>Focus search input</span><span class="kbd-key">Alt + S</span></div>
+            <div class="kbd-row"><span>View Papers panel</span><span class="kbd-key">1</span></div>
+            <div class="kbd-row"><span>View Citations panel</span><span class="kbd-key">2</span></div>
+            <div class="kbd-row"><span>View Research Gaps panel</span><span class="kbd-key">3</span></div>
+            <div class="kbd-row"><span>View Contradictions panel</span><span class="kbd-key">4</span></div>
+            <div class="kbd-row"><span>Show this overlay</span><span class="kbd-key">?</span></div>
+            <div class="kbd-row"><span>Dismiss modal</span><span class="kbd-key">Esc</span></div>
+        </div>
+    </div>
+
     <div id="notificationStack" class="notification-stack" aria-live="polite" aria-atomic="true"></div>
-    <nav class="navbar navbar-dark bg-primary">
+
+    <!-- Premium Navbar -->
+    <nav class="navbar navbar-dark navbar-premium">
         <div class="container">
-            <span class="navbar-brand mb-0 h1">
-                <i class="fas fa-microscope"></i> Autonomous Research Agent System
-            </span>
-            <div>
-                <button class="btn btn-outline-light me-2" id="themeToggleBtn" type="button">
-                    <i class="fas fa-moon"></i> Theme
+            <a class="navbar-logo-wrap" href="/">
+                <div class="navbar-logo-icon"><i class="fas fa-atom"></i></div>
+                <div>
+                    <div class="navbar-logo-text">Research Agent</div>
+                    <span class="navbar-logo-sub">Autonomous AI System</span>
+                </div>
+            </a>
+            <div class="d-flex align-items-center flex-wrap gap-2">
+                <button class="nav-pill-btn btn" id="themeToggleBtn" type="button">
+                    <i class="fas fa-moon me-1"></i> Theme
                 </button>
-                <a href="/validator" class="btn btn-outline-light me-2">
-                    <i class="fas fa-check-double"></i> Reference Validator
+                <button class="nav-pill-btn btn" id="bmNavBtn" type="button">
+                    <i class="fas fa-star me-1"></i> Bookmarks
+                    <span class="badge bg-warning text-dark ms-1" id="bmNavCount">0</span>
+                </button>
+                <a href="/validator" class="nav-pill-btn btn">
+                    <i class="fas fa-check-double me-1"></i> Validator
                 </a>
-                <a href="/citations" class="btn btn-outline-light me-2">
-                    <i class="fas fa-quote-right"></i> Enhanced Citations
+                <a href="/citations" class="nav-pill-btn btn">
+                    <i class="fas fa-quote-right me-1"></i> Citations
                 </a>
+                <button class="nav-pill-btn btn" id="kbdOpenBtn" type="button" title="Keyboard Shortcuts (?)">
+                    <i class="fas fa-keyboard"></i>
+                </button>
             </div>
         </div>
     </nav>
 
-    <div class="container mt-4">
-        <!-- Research Input -->
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="hero-grid"></div>
+        <div class="hero-glow hero-glow-1"></div>
+        <div class="hero-glow hero-glow-2"></div>
+        <div class="hero-glow hero-glow-3"></div>
+        <div class="container hero-content">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="hero-badge">
+                        <span class="hero-badge-dot"></span>
+                        Powered by multi-agent AI research pipeline
+                    </div>
+                    <h1 class="hero-title">
+                        Discover Research.<br>
+                        <span class="grad-text">Automatically.</span>
+                    </h1>
+                    <p class="hero-sub">
+                        Enter any academic topic and let the AI agents expand your query, discover papers, extract key claims, detect contradictions, and build citations — all in one workflow.
+                    </p>
+                    <div class="hero-stats-row">
+                        <div class="hero-stat-pill">
+                            <div class="hsp-icon blue"><i class="fas fa-file-alt"></i></div>
+                            <div class="hsp-label"><strong>Paper Discovery</strong><span>Multi-source academic search</span></div>
+                        </div>
+                        <div class="hero-stat-pill">
+                            <div class="hsp-icon cyan"><i class="fas fa-brain"></i></div>
+                            <div class="hsp-label"><strong>Claim Extraction</strong><span>AI-powered insights</span></div>
+                        </div>
+                        <div class="hero-stat-pill">
+                            <div class="hsp-icon purple"><i class="fas fa-exclamation-triangle"></i></div>
+                            <div class="hsp-label"><strong>Contradiction Detection</strong><span>Cross-paper analysis</span></div>
+                        </div>
+                        <div class="hero-stat-pill">
+                            <div class="hsp-icon green"><i class="fas fa-quote-right"></i></div>
+                            <div class="hsp-label"><strong>Citation Building</strong><span>APA · IEEE · BibTeX</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="search-card-wrap">
+        <!-- Premium Search Card -->
         <div class="row">
-            <div class="col-md-8 mx-auto">
-                <div class="card research-card">
-                    <div class="card-body">
-                        <h5 class="card-title">
-                            <i class="fas fa-search"></i> Start New Research
-                        </h5>
-                        <div id="topicTabs" class="topic-tab-bar"></div>
-                        <form id="researchForm">
-                            <div class="mb-3">
-                                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-                                    <label for="topic" class="form-label mb-0">Active Research Topic</label>
-                                    <span class="badge bg-light text-primary" id="tabCounter">1 / 3 tabs used</span>
-                                </div>
-                                <input type="text" class="form-control" id="topic" 
+            <div class="col-lg-9 mx-auto">
+                <div class="search-card-premium">
+                    <div class="scp-title">
+                        <div class="scp-icon"><i class="fas fa-rocket"></i></div>
+                        <div>
+                            <h5>Start New Research</h5>
+                            <small>Enter a topic to begin autonomous AI research</small>
+                        </div>
+                        <span class="badge ms-auto" style="background:rgba(79,123,255,0.12);color:#4f7bff;font-size:0.75rem;padding:6px 12px;border-radius:8px;" id="tabCounter">1 / 3 tabs</span>
+                    </div>
+                    <div id="topicTabs" class="topic-tab-bar"></div>
+                    <form id="researchForm">
+                        <div class="mb-3">
+                            <label for="topic" class="form-label fw-semibold mb-2" style="font-size:0.85rem;color:#94a3b8;letter-spacing:0.04em;text-transform:uppercase;">Research Topic</label>
+                            <div class="search-input-wrap">
+                                <input type="text" class="search-input-premium" id="topic"
                                        placeholder="e.g., Machine Learning for Climate Change Prediction"
                                        required>
-                                <div class="form-text">Open up to 3 topic tabs and run them together in parallel.</div>
+                                <span class="search-input-icon"><i class="fas fa-search"></i></span>
                             </div>
-                            <div class="tab-toolbar">
-                                <button type="submit" class="btn btn-primary">
-                                    <i class="fas fa-rocket"></i> Search Active Tab
-                                </button>
-                                <button type="button" class="btn btn-outline-primary" id="searchAllTabsBtn">
-                                    <i class="fas fa-layer-group"></i> Search Open Tabs
-                                </button>
-                                <button type="button" class="btn btn-outline-secondary" id="addTopicTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new research tab (Alt+T)">
-                                    <i class="fas fa-plus"></i> Add Topic Tab
-                                </button>
-                                <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Keep the active tab and close the others">
-                                    <i class="fas fa-times-circle"></i> Close Extra Tabs
-                                </button>
-                                <button type="button" class="btn btn-outline-info" id="shareResearchBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Generate a shareable search link">
-                                    <i class="fas fa-share-nodes"></i> Share Link
-                                </button>
-                            </div>
-                        </form>
-                        <div class="search-helper" id="searchHelper">
-                            Keep different topics in separate tabs. Search the current topic only, or launch all filled tabs together.
+                            <div class="form-text mt-2">Open up to 3 topic tabs and run them together in parallel.</div>
                         </div>
+                        <div class="tab-toolbar">
+                            <button type="submit" class="btn btn-launch">
+                                <i class="fas fa-rocket me-1"></i> Launch Research
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" id="searchAllTabsBtn">
+                                <i class="fas fa-layer-group me-1"></i> Search All Tabs
+                            </button>
+                            <button type="button" class="btn btn-outline-secondary" id="addTopicTabBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Open a new research tab (Alt+T)">
+                                <i class="fas fa-plus me-1"></i> Add Tab
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" id="closeAllTabsBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Keep the active tab and close the others">
+                                <i class="fas fa-times-circle me-1"></i> Close Extra
+                            </button>
+                            <button type="button" class="btn btn-outline-info" id="shareResearchBtn" data-bs-toggle="tooltip" data-bs-placement="top" title="Generate a shareable search link">
+                                <i class="fas fa-share-nodes me-1"></i> Share
+                            </button>
+                        </div>
+                    </form>
+                    <div class="search-helper" id="searchHelper">
+                        Keep different topics in separate tabs. Search the current topic only, or launch all filled tabs together.
+                    </div>
                         <div class="share-panel d-none" id="sharePanel">
                             <div class="fw-semibold mb-2"><i class="fas fa-link"></i> Shareable Reference List</div>
                             <p class="text-muted mb-3">Generate a link to share your current search, citation, or validation workspace with your group.</p>
@@ -500,11 +1009,51 @@
                             </div>
                         </div>
                         
-                        <!-- Loading Spinner -->
-                        <div class="loading-spinner text-center mt-3">
-                            <div class="spinner-border text-primary" role="status">
-                                <span class="visually-hidden">Researching...</span>
+                        <!-- Research Pipeline Progress -->
+                        <div class="research-pipeline" id="researchPipeline">
+                            <div class="pipeline-track">
+                                <div class="pipeline-step" id="pipeStep0">
+                                    <div class="pipeline-icon"><i class="fas fa-expand-arrows-alt"></i></div>
+                                    <div class="pipeline-label">Topic Expansion</div>
+                                </div>
+                                <div class="pipeline-step" id="pipeStep1">
+                                    <div class="pipeline-icon"><i class="fas fa-search"></i></div>
+                                    <div class="pipeline-label">Paper Discovery</div>
+                                </div>
+                                <div class="pipeline-step" id="pipeStep2">
+                                    <div class="pipeline-icon"><i class="fas fa-brain"></i></div>
+                                    <div class="pipeline-label">Claim Extraction</div>
+                                </div>
+                                <div class="pipeline-step" id="pipeStep3">
+                                    <div class="pipeline-icon"><i class="fas fa-quote-left"></i></div>
+                                    <div class="pipeline-label">Citation Building</div>
+                                </div>
                             </div>
+                        </div>
+                        <!-- Skeleton Loaders -->
+                        <div class="skeleton-section" id="skeletonSection">
+                            <div class="skeleton-card mt-3">
+                                <div class="skeleton-line w75"></div>
+                                <div class="skeleton-line w55"></div>
+                                <div class="skeleton-line w100"></div>
+                                <div class="skeleton-line w40"></div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton-line w100"></div>
+                                <div class="skeleton-line w75"></div>
+                                <div class="skeleton-line w55"></div>
+                                <div class="skeleton-line w40"></div>
+                            </div>
+                            <div class="skeleton-card">
+                                <div class="skeleton-line w55"></div>
+                                <div class="skeleton-line w100"></div>
+                                <div class="skeleton-line w75"></div>
+                                <div class="skeleton-line w40"></div>
+                            </div>
+                        </div>
+                        <!-- Legacy spinner (hidden, kept for JS compat) -->
+                        <div class="loading-spinner" style="display:none;">
+                            <div class="spinner-border text-primary" role="status"></div>
                             <p class="mt-2">Analyzing topic and searching for papers...</p>
                         </div>
                     </div>
@@ -512,34 +1061,47 @@
             </div>
         </div>
 
+        </div><!-- /search-card-wrap -->
+
         <!-- Features Section -->
-        <div class="row mt-5">
-            <div class="col-12">
-                <h4 class="text-center mb-4">
-                    <i class="fas fa-tools"></i> Research Tools & Features
-                </h4>
-            </div>
-            <div class="col-md-6">
-                <div class="card h-100 border-danger">
-                    <div class="card-body text-center">
-                        <i class="fas fa-check-double fa-3x text-danger mb-3"></i>
-                        <h5 class="card-title">Reference Validator</h5>
-                        <p class="card-text">Upload reference files to fix formatting, correct spelling, remove duplicates, and verify paper authenticity.</p>
-                        <a href="/validator" class="btn btn-danger">
-                            <i class="fas fa-upload"></i> Validate References
-                        </a>
-                    </div>
+        <div class="features-wrap">
+            <div class="row">
+                <div class="col-12 mb-4">
+                    <h3 class="features-heading">Research <span>Toolkit</span></h3>
+                    <p class="features-sub">Powerful tools to validate, generate, and manage academic references</p>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card h-100 border-success">
-                    <div class="card-body text-center">
-                        <i class="fas fa-quote-right fa-3x text-success mb-3"></i>
-                        <h5 class="card-title">Enhanced Citations</h5>
-                        <p class="card-text">Generate custom formatted citations with accurate bibliographic data from CrossRef API integration.</p>
-                        <a href="/citations" class="btn btn-success">
-                            <i class="fas fa-list"></i> Generate Citations
-                        </a>
+            <div class="row g-4">
+                <div class="col-md-6 col-lg-3">
+                    <div class="feat-card">
+                        <div class="feat-icon fi-red"><i class="fas fa-check-double"></i></div>
+                        <h5>Reference Validator</h5>
+                        <p>Upload .bib files to fix formatting, correct spelling, remove duplicates, and verify paper authenticity against live APIs.</p>
+                        <a href="/validator" class="feat-link feat-link-red"><i class="fas fa-arrow-right"></i> Open Validator</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feat-card">
+                        <div class="feat-icon fi-blue"><i class="fas fa-quote-right"></i></div>
+                        <h5>Enhanced Citations</h5>
+                        <p>Generate APA, IEEE, MLA, and BibTeX citations with accurate bibliographic data from CrossRef API integration.</p>
+                        <a href="/citations" class="feat-link feat-link-blue"><i class="fas fa-arrow-right"></i> Build Citations</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feat-card">
+                        <div class="feat-icon fi-purple"><i class="fas fa-exclamation-triangle"></i></div>
+                        <h5>Contradiction Detector</h5>
+                        <p>Automatically cross-reference claims across papers and surface conflicting findings with severity scoring.</p>
+                        <a href="#" class="feat-link feat-link-purple" onclick="document.getElementById('topic').focus();return false;"><i class="fas fa-arrow-right"></i> Run Research</a>
+                    </div>
+                </div>
+                <div class="col-md-6 col-lg-3">
+                    <div class="feat-card">
+                        <div class="feat-icon fi-green"><i class="fas fa-lightbulb"></i></div>
+                        <h5>Research Gap Finder</h5>
+                        <p>Identify under-explored areas in the literature, with prioritized questions and potential research directions.</p>
+                        <a href="#" class="feat-link feat-link-green" onclick="document.getElementById('topic').focus();return false;"><i class="fas fa-arrow-right"></i> Explore Gaps</a>
                     </div>
                 </div>
             </div>
@@ -716,8 +1278,33 @@
                     </div>
                 </div>
             </div>
+            <!-- Session Restore Banner -->
+            <div class="session-banner" id="sessionBanner">
+                <div style="font-size:0.9rem;">
+                    <i class="fas fa-clock-rotate-left me-2 text-primary"></i>
+                    <strong>Previous session found.</strong> <span id="sessionBannerMeta">Restore your last workspace?</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" id="restoreSessionBtn"><i class="fas fa-rotate-left me-1"></i>Restore</button>
+                    <button class="btn btn-outline-secondary btn-sm" id="dismissSessionBtn">Dismiss</button>
+                </div>
+            </div>
+
+            <!-- Results Tab Navigation -->
+            <div class="row mt-4" id="resultsTabsRow" style="display:none;">
+                <div class="col-12">
+                    <div class="results-tabs-wrap">
+                        <button class="res-tab-btn active" data-panel="overview"><i class="fas fa-chart-bar"></i> Overview</button>
+                        <button class="res-tab-btn" data-panel="papers"><i class="fas fa-file-alt"></i> Papers <span class="res-tab-pill" id="tabPillPapers">0</span></button>
+                        <button class="res-tab-btn" data-panel="citations"><i class="fas fa-quote-right"></i> Citations <span class="res-tab-pill" id="tabPillCitations">0</span></button>
+                        <button class="res-tab-btn" data-panel="gaps"><i class="fas fa-lightbulb"></i> Gaps <span class="res-tab-pill" id="tabPillGaps">0</span></button>
+                        <button class="res-tab-btn" data-panel="contradictions"><i class="fas fa-exclamation-triangle"></i> Contradictions <span class="res-tab-pill" id="tabPillContradictions">0</span></button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Summary -->
-            <div class="row mt-4">
+            <div class="row mt-4" id="summaryStatsRow">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
@@ -727,13 +1314,18 @@
                             <div class="row" id="summaryStats">
                                 <!-- Stats will be populated here -->
                             </div>
+                            <!-- Year Distribution Chart -->
+                            <div class="year-chart-section" id="yearChartSection" style="display:none;">
+                                <div class="year-chart-title"><i class="fas fa-calendar-alt me-1"></i> Papers by Year</div>
+                                <div class="year-chart" id="yearChart"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
             <!-- Topic Analysis -->
-            <div class="row mt-4">
+            <div class="row mt-4" id="topicAnalysisRow">
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
@@ -753,10 +1345,23 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">
-                            <h5 class="card-title">
-                                <i class="fas fa-file-alt"></i> Papers Discovered
-                                <span class="badge bg-primary ms-2" id="papersCount">0</span>
-                            </h5>
+                            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                                <h5 class="card-title mb-0">
+                                    <i class="fas fa-file-alt"></i> Papers Discovered
+                                    <span class="badge bg-primary ms-2" id="papersCount">0</span>
+                                </h5>
+                                <button class="btn btn-sm btn-outline-warning" id="showBookmarksBtn" style="display:none;">
+                                    <i class="fas fa-star me-1"></i><span id="showBookmarksBtnLabel">Bookmarks</span>
+                                </button>
+                            </div>
+                            <!-- Bookmarks Panel -->
+                            <div class="bookmarks-panel" id="bookmarksPanel">
+                                <div class="d-flex align-items-center justify-content-between mb-2">
+                                    <strong><i class="fas fa-star text-warning me-2"></i>Bookmarked Papers</strong>
+                                    <button class="btn btn-sm btn-outline-secondary" id="clearBookmarksBtn">Clear All</button>
+                                </div>
+                                <div id="bookmarksList"></div>
+                            </div>
                             <div id="papersSection">
                                 <!-- Papers will be populated here -->
                             </div>
@@ -794,6 +1399,23 @@
                             </h5>
                             <div id="gapsSection">
                                 <!-- Research gaps will be populated here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contradictions -->
+            <div class="row mt-4" id="contradictionsRow" style="display:none;">
+                <div class="col-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-exclamation-triangle text-danger"></i> Contradictions Found
+                                <span class="badge bg-danger ms-2" id="contradictionsCount">0</span>
+                            </h5>
+                            <div id="contradictionsSection">
+                                <!-- Contradictions will be populated here -->
                             </div>
                         </div>
                     </div>
@@ -1279,15 +1901,17 @@
 
         function showLoading(message) {
             activeRequests += 1;
-            const spinner = document.querySelector('.loading-spinner');
-            spinner.style.display = 'block';
-            spinner.querySelector('p').textContent = message || 'Analyzing topic and searching for papers...';
+            document.getElementById('researchPipeline').classList.add('active');
+            document.getElementById('skeletonSection').classList.add('active');
+            startPipelineAnimation();
         }
 
         function hideLoading() {
             activeRequests = Math.max(0, activeRequests - 1);
             if (activeRequests === 0) {
-                document.querySelector('.loading-spinner').style.display = 'none';
+                document.getElementById('researchPipeline').classList.remove('active');
+                document.getElementById('skeletonSection').classList.remove('active');
+                stopPipelineAnimation();
             }
         }
 
@@ -1633,6 +2257,12 @@
                 document.getElementById('downloadLink').href = data.download_url;
             }
 
+            // Show results tabs and render new features
+            document.getElementById('resultsTabsRow').style.display = 'block';
+            renderYearChart(tab.allPapers);
+            displayContradictions(data.contradictions || []);
+            saveSession();
+
             applyAllFilters();
 
             if (!skipScroll) {
@@ -1755,40 +2385,67 @@
             const tab = getActiveSearchTab();
             const papers = tab ? tab.filteredPapers : [];
             document.getElementById('papersCount').textContent = papers.length;
+            if (document.getElementById('tabPillPapers')) document.getElementById('tabPillPapers').textContent = papers.length;
 
             if (!papers.length) {
-                document.getElementById('papersSection').innerHTML = '<p class="text-muted">No papers match the current filters.</p>';
+                document.getElementById('papersSection').innerHTML = '<div class="results-empty p-4 text-center"><i class="fas fa-file-alt fa-2x mb-2 text-muted"></i><br><span class="text-muted">No papers match the current filters.</span></div>';
                 return;
             }
 
-            document.getElementById('papersSection').innerHTML = papers.map(paper => {
+            const bookmarks = getBookmarks();
+            document.getElementById('papersSection').innerHTML = papers.map((paper, idx) => {
                 const venueType = getVenueType(paper);
                 const paperLink = paper.doi ? (paper.doi.startsWith('http') ? paper.doi : `https://doi.org/${paper.doi}`) : paper.url;
+                const pct = ((paper.relevance_score || 0) * 100).toFixed(0);
+                const abstract = paper.abstract || 'No abstract available.';
+                const isLong = abstract.length > 200;
+                const isBookmarked = bookmarks.some(b => b.title === paper.title);
+                const uid = `paper-${idx}-${(paper.title||'').replace(/\s+/g,'').slice(0,12)}`;
 
                 return `
-                    <div class="paper-card">
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div class="paper-card" id="pc-${uid}">
+                        <div class="d-flex justify-content-between align-items-start gap-2">
                             <div class="flex-grow-1">
                                 <div class="d-flex flex-wrap gap-2 align-items-center mb-2">
-                                    <h6 class="mb-0">${paper.title}</h6>
+                                    <h6 class="mb-0 me-1">${paper.title}</h6>
                                     <span class="venue-pill ${venueType}">${formatVenueLabel(venueType)}</span>
                                 </div>
-                                <p class="text-muted mb-1"><strong>Authors:</strong> ${(paper.authors || []).join(', ')}</p>
-                                <p class="text-muted mb-2"><strong>Year:</strong> ${paper.year} | <strong>Venue:</strong> ${getVenueName(paper)}</p>
-                                <p class="small">${paper.abstract || 'No abstract available.'}</p>
+                                <p class="text-muted mb-1 small"><strong>Authors:</strong> ${(paper.authors || []).join(', ') || 'Unknown'}</p>
+                                <p class="text-muted mb-2 small"><strong>Year:</strong> ${paper.year || '?'} &nbsp;|&nbsp; <strong>Venue:</strong> ${getVenueName(paper)}</p>
+                                <p class="small abstract-text abstract-collapsed" id="abs-${uid}">${abstract}</p>
+                                ${isLong ? `<button class="abstract-toggle-btn" onclick="toggleAbstract('${uid}')"><i class="fas fa-chevron-down me-1"></i>Read more</button>` : ''}
                                 ${paperLink ? `
                                     <div class="mt-2">
-                                        <a href="${paperLink}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                        <a href="${paperLink}" target="_blank" rel="noopener" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-external-link-alt"></i> View Paper
                                         </a>
                                     </div>
                                 ` : ''}
                             </div>
-                            <span class="relevance-score ms-3">${((paper.relevance_score || 0) * 100).toFixed(0)}%</span>
+                            <div class="d-flex flex-column align-items-end gap-2 ms-2">
+                                <button class="bm-btn ${isBookmarked ? 'active' : ''}" onclick="toggleBookmark(${idx})" title="${isBookmarked ? 'Remove bookmark' : 'Bookmark this paper'}">
+                                    <i class="fa${isBookmarked ? 's' : 'r'} fa-star"></i>
+                                </button>
+                                <div class="relevance-bar-wrap" title="Relevance: ${pct}%">
+                                    <div class="relevance-bg"><div class="relevance-fill" style="width:${pct}%"></div></div>
+                                    <span class="relevance-pct">${pct}%</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function toggleAbstract(uid) {
+            const el = document.getElementById('abs-' + uid);
+            const btn = el ? el.nextElementSibling : null;
+            if (!el || !btn) return;
+            const collapsed = el.classList.contains('abstract-collapsed');
+            el.classList.toggle('abstract-collapsed', !collapsed);
+            btn.innerHTML = collapsed
+                ? '<i class="fas fa-chevron-up me-1"></i>Read less'
+                : '<i class="fas fa-chevron-down me-1"></i>Read more';
         }
 
         function displayCitations() {
@@ -1796,6 +2453,7 @@
             const citations = tab ? tab.filteredCitations : [];
             const format = document.getElementById('formatFilter').value;
             document.getElementById('citationCount').textContent = citations.length;
+            if (document.getElementById('tabPillCitations')) document.getElementById('tabPillCitations').textContent = citations.length;
 
             if (!citations.length) {
                 document.getElementById('citationsSection').innerHTML = '<p class="text-muted">No citations match the current filters.</p>';
@@ -1833,6 +2491,7 @@
             const tab = getActiveSearchTab();
             const gaps = tab ? tab.filteredGaps : [];
             document.getElementById('gapsCount').textContent = gaps.length;
+            if (document.getElementById('tabPillGaps')) document.getElementById('tabPillGaps').textContent = gaps.length;
 
             if (!gaps.length) {
                 document.getElementById('gapsSection').innerHTML = '<p class="text-muted">No research gaps match the current filters.</p>';
@@ -1861,6 +2520,11 @@
         }
 
         function toggleContentVisibility() {
+            // If a results tab other than overview is active, let switchResultsTab control visibility
+            if (window._activeResultsPanel && window._activeResultsPanel !== 'overview') {
+                updateFilterStats();
+                return;
+            }
             const showPapers = document.getElementById('showPapers').checked;
             const showCitations = document.getElementById('showCitations').checked;
             const showGaps = document.getElementById('showGaps').checked;
@@ -2032,6 +2696,282 @@
             }
         }
 
+        // ===== PIPELINE ANIMATION =====
+        let _pipeTimer = null;
+        let _pipeStep = 0;
+        const PIPE_STEPS = 4;
+        const PIPE_INTERVAL = 2200;
+
+        function startPipelineAnimation() {
+            _pipeStep = 0;
+            stopPipelineAnimation();
+            advancePipeline();
+            _pipeTimer = setInterval(advancePipeline, PIPE_INTERVAL);
+        }
+
+        function stopPipelineAnimation() {
+            if (_pipeTimer) { clearInterval(_pipeTimer); _pipeTimer = null; }
+            for (let i = 0; i < PIPE_STEPS; i++) {
+                const el = document.getElementById('pipeStep' + i);
+                if (el) { el.classList.remove('active', 'done'); }
+            }
+            _pipeStep = 0;
+        }
+
+        function advancePipeline() {
+            for (let i = 0; i < PIPE_STEPS; i++) {
+                const el = document.getElementById('pipeStep' + i);
+                if (!el) continue;
+                if (i < _pipeStep) { el.classList.remove('active'); el.classList.add('done'); }
+                else if (i === _pipeStep) { el.classList.add('active'); el.classList.remove('done'); }
+                else { el.classList.remove('active', 'done'); }
+            }
+            _pipeStep = (_pipeStep + 1) % PIPE_STEPS;
+        }
+
+        // ===== RESULTS TAB SWITCHING =====
+        window._activeResultsPanel = 'overview';
+
+        function switchResultsTab(panel) {
+            window._activeResultsPanel = panel;
+            document.querySelectorAll('.res-tab-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.panel === panel);
+            });
+
+            const isOverview = panel === 'overview';
+            const show = id => { const el = document.getElementById(id); if (el) el.style.display = 'block'; };
+            const hide = id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; };
+
+            // Summary & topic analysis only in overview
+            document.getElementById('summaryStatsRow') && (document.getElementById('summaryStatsRow').style.display = isOverview ? 'block' : 'none');
+            document.getElementById('topicAnalysisRow') && (document.getElementById('topicAnalysisRow').style.display = isOverview ? 'block' : 'none');
+
+            // Panels
+            const tab = getActiveSearchTab();
+            const hasPapers = tab && tab.filteredPapers && tab.filteredPapers.length > 0;
+            const hasCitations = tab && tab.filteredCitations && tab.filteredCitations.length > 0;
+            const hasGaps = tab && tab.filteredGaps && tab.filteredGaps.length > 0;
+            const hasContradictions = tab && tab.results && tab.results.contradictions && tab.results.contradictions.length > 0;
+
+            document.getElementById('papersRow').style.display = (isOverview || panel === 'papers') ? 'block' : 'none';
+            document.getElementById('citationsRow').style.display = (isOverview || panel === 'citations') ? 'block' : 'none';
+            document.getElementById('gapsRow').style.display = (isOverview || panel === 'gaps') ? 'block' : 'none';
+            document.getElementById('contradictionsRow').style.display = (isOverview || panel === 'contradictions') ? 'block' : 'none';
+        }
+
+        function initResultsTabs() {
+            document.querySelectorAll('.res-tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => switchResultsTab(btn.dataset.panel));
+            });
+        }
+
+        // ===== YEAR DISTRIBUTION CHART =====
+        function renderYearChart(papers) {
+            if (!papers || !papers.length) { document.getElementById('yearChartSection').style.display = 'none'; return; }
+            const yearMap = {};
+            papers.forEach(p => { if (p.year) yearMap[p.year] = (yearMap[p.year] || 0) + 1; });
+            const years = Object.keys(yearMap).sort();
+            if (years.length < 2) { document.getElementById('yearChartSection').style.display = 'none'; return; }
+            const maxCount = Math.max(...Object.values(yearMap));
+            const chartEl = document.getElementById('yearChart');
+            const maxHeight = 50;
+            chartEl.innerHTML = years.map(yr => {
+                const count = yearMap[yr];
+                const h = Math.max(4, Math.round((count / maxCount) * maxHeight));
+                return `<div class="year-col"><div class="year-bar" style="height:${h}px" title="${yr}: ${count} paper${count>1?'s':''}"></div><div class="year-bar-lbl">${yr}</div></div>`;
+            }).join('');
+            document.getElementById('yearChartSection').style.display = 'block';
+        }
+
+        // ===== CONTRADICTIONS DISPLAY =====
+        function displayContradictions(contradictions) {
+            const count = contradictions ? contradictions.length : 0;
+            const el = document.getElementById('contradictionsCount');
+            if (el) el.textContent = count;
+            const pill = document.getElementById('tabPillContradictions');
+            if (pill) pill.textContent = count;
+
+            const section = document.getElementById('contradictionsSection');
+            if (!section) return;
+
+            if (!count) {
+                section.innerHTML = '<div class="results-empty p-4 text-center"><i class="fas fa-check-circle fa-2x mb-2 text-success"></i><br><span class="text-muted">No contradictions detected in the literature.</span></div>';
+                return;
+            }
+
+            section.innerHTML = contradictions.map(c => {
+                const sev = (c.severity || 'low').toLowerCase();
+                return `
+                    <div class="contradiction-card">
+                        <div class="d-flex align-items-start justify-content-between gap-2 mb-2">
+                            <p class="mb-0 flex-grow-1">${c.explanation || c.description || 'Contradiction identified.'}</p>
+                            <span class="contra-sev ${sev}"><i class="fas fa-circle-exclamation me-1"></i>${sev.charAt(0).toUpperCase()+sev.slice(1)}</span>
+                        </div>
+                        ${c.type ? `<span class="badge bg-secondary">${c.type}</span>` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ===== BOOKMARK SYSTEM =====
+        const BM_KEY = 'research_bookmarks_v1';
+
+        function getBookmarks() {
+            try { return JSON.parse(localStorage.getItem(BM_KEY) || '[]'); } catch { return []; }
+        }
+
+        function saveBookmarks(bms) {
+            try { localStorage.setItem(BM_KEY, JSON.stringify(bms)); } catch {}
+        }
+
+        function toggleBookmark(paperIdx) {
+            const tab = getActiveSearchTab();
+            if (!tab || !tab.filteredPapers[paperIdx]) return;
+            const paper = tab.filteredPapers[paperIdx];
+            const bms = getBookmarks();
+            const existing = bms.findIndex(b => b.title === paper.title);
+            const uid = `paper-${paperIdx}-${(paper.title||'').replace(/\s+/g,'').slice(0,12)}`;
+
+            if (existing > -1) {
+                bms.splice(existing, 1);
+                showNotification('Bookmark removed.', 'info', 2000);
+            } else {
+                bms.push({ title: paper.title, authors: paper.authors, year: paper.year, doi: paper.doi, url: paper.url, venue: getVenueName(paper) });
+                showNotification('Paper bookmarked!', 'success', 2200);
+                // Animate button
+                const btn = document.querySelector(`#pc-${uid} .bm-btn`);
+                if (btn) { btn.classList.add('bm-pop'); setTimeout(() => btn.classList.remove('bm-pop'), 300); }
+            }
+            saveBookmarks(bms);
+            updateBookmarkUI();
+            displayPapers(); // re-render to update star state
+        }
+
+        function updateBookmarkUI() {
+            const bms = getBookmarks();
+            const count = bms.length;
+            const navBtn = document.getElementById('bmNavBtn');
+            const navCount = document.getElementById('bmNavCount');
+            const showBtn = document.getElementById('showBookmarksBtn');
+            const label = document.getElementById('showBookmarksBtnLabel');
+
+            if (navBtn) { navBtn.classList.toggle('show', count > 0); }
+            if (navCount) navCount.textContent = count;
+            if (showBtn) { showBtn.style.display = count > 0 ? '' : 'none'; }
+            if (label) label.textContent = `Bookmarks (${count})`;
+        }
+
+        function renderBookmarksPanel() {
+            const bms = getBookmarks();
+            const listEl = document.getElementById('bookmarksList');
+            if (!listEl) return;
+            if (!bms.length) { listEl.innerHTML = '<p class="text-muted small">No bookmarks yet. Click the star on any paper.</p>'; return; }
+            listEl.innerHTML = bms.map((b, i) => {
+                const link = b.doi ? (b.doi.startsWith('http') ? b.doi : `https://doi.org/${b.doi}`) : b.url;
+                return `
+                    <div class="d-flex align-items-start gap-2 mb-2 pb-2 border-bottom" style="font-size:.875rem;">
+                        <div class="flex-grow-1">
+                            <strong>${b.title}</strong><br>
+                            <span class="text-muted">${(b.authors||[]).slice(0,2).join(', ')} · ${b.year||'?'} · ${b.venue||'Unknown venue'}</span>
+                        </div>
+                        <div class="d-flex gap-1 flex-shrink-0">
+                            ${link ? `<a href="${link}" target="_blank" rel="noopener" class="btn btn-xs btn-outline-primary" style="padding:2px 7px;font-size:.75rem;"><i class="fas fa-external-link-alt"></i></a>` : ''}
+                            <button class="btn btn-xs btn-outline-danger" style="padding:2px 7px;font-size:.75rem;" onclick="removeBookmarkByIndex(${i})"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function removeBookmarkByIndex(i) {
+            const bms = getBookmarks();
+            bms.splice(i, 1);
+            saveBookmarks(bms);
+            renderBookmarksPanel();
+            updateBookmarkUI();
+            displayPapers();
+            showNotification('Bookmark removed.', 'info', 1800);
+        }
+
+        // ===== SESSION SAVE / RESTORE =====
+        const SESSION_KEY = 'research_session_v1';
+
+        function saveSession() {
+            try {
+                const tab = getActiveSearchTab();
+                if (!tab || !tab.results) return;
+                const payload = {
+                    savedAt: new Date().toISOString(),
+                    topic: tab.topic,
+                    tabsCount: searchTabs.length,
+                    tabs: searchTabs.map(t => ({
+                        id: t.id, topic: t.topic, status: t.status, results: t.results,
+                        allPapers: t.allPapers, filteredPapers: t.filteredPapers,
+                        allCitations: t.allCitations, filteredCitations: t.filteredCitations,
+                        allGaps: t.allGaps, filteredGaps: t.filteredGaps, filters: t.filters
+                    })),
+                    activeTabId: activeTabId
+                };
+                localStorage.setItem(SESSION_KEY, JSON.stringify(payload));
+            } catch {}
+        }
+
+        function tryRestoreSession() {
+            try {
+                const raw = localStorage.getItem(SESSION_KEY);
+                if (!raw) return;
+                const payload = JSON.parse(raw);
+                if (!payload || !payload.topic) return;
+                const savedAt = new Date(payload.savedAt);
+                const hoursAgo = Math.round((Date.now() - savedAt.getTime()) / 3600000);
+                const timeLabel = hoursAgo < 1 ? 'just now' : hoursAgo === 1 ? '1 hour ago' : `${hoursAgo} hours ago`;
+                const banner = document.getElementById('sessionBanner');
+                const meta = document.getElementById('sessionBannerMeta');
+                if (meta) meta.textContent = `"${payload.topic}" — saved ${timeLabel}.`;
+                if (banner) banner.classList.add('show');
+            } catch {}
+        }
+
+        function doRestoreSession() {
+            try {
+                const raw = localStorage.getItem(SESSION_KEY);
+                if (!raw) return;
+                const payload = JSON.parse(raw);
+                if (!payload || !payload.tabs) return;
+                searchTabs.length = 0;
+                payload.tabs.slice(0, MAX_SEARCH_TABS).forEach((t, idx) => {
+                    searchTabs.push({
+                        id: t.id || `topic-tab-${idx+1}`,
+                        topic: t.topic || '', status: t.status || 'ready', error: t.error || '',
+                        results: t.results || null, allPapers: t.allPapers || [],
+                        filteredPapers: t.filteredPapers || [], allCitations: t.allCitations || [],
+                        filteredCitations: t.filteredCitations || [], allGaps: t.allGaps || [],
+                        filteredGaps: t.filteredGaps || [], filters: t.filters || getDefaultFilters()
+                    });
+                });
+                activeTabId = payload.activeTabId && searchTabs.find(t => t.id === payload.activeTabId)
+                    ? payload.activeTabId : searchTabs[0].id;
+                renderSearchTabs(); updateTabCounter(); syncTopicInput(); displayActiveResults(false);
+                document.getElementById('sessionBanner').classList.remove('show');
+                showNotification('Session restored successfully!', 'success', 2800);
+            } catch (e) {
+                showNotification('Could not restore session.', 'error', 3000);
+            }
+        }
+
+        // ===== READING PROGRESS BAR =====
+        function updateReadingProgress() {
+            const scrollTop = window.scrollY || document.documentElement.scrollTop;
+            const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+            const pct = docHeight > 0 ? Math.min(100, (scrollTop / docHeight) * 100) : 0;
+            const bar = document.getElementById('readingProgress');
+            if (bar) bar.style.width = pct + '%';
+        }
+
+        // ===== KEYBOARD SHORTCUT MODAL =====
+        function openKbdModal() { document.getElementById('kbdOverlay').classList.add('show'); }
+        function closeKbdModal() { document.getElementById('kbdOverlay').classList.remove('show'); }
+
         function initializeEventHandlers() {
             document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
             document.getElementById('shareResearchBtn').addEventListener('click', () => generateResearchShareLink('research'));
@@ -2072,15 +3012,51 @@
                     target.tagName === 'TEXTAREA' ||
                     target.isContentEditable
                 );
+                const kbdOpen = document.getElementById('kbdOverlay').classList.contains('show');
 
-                if (event.altKey && event.key.toLowerCase() === 't' && !isTypingTarget) {
-                    event.preventDefault();
-                    createSearchTab('', true);
+                // Dismiss kbd modal
+                if (event.key === 'Escape') {
+                    if (kbdOpen) { closeKbdModal(); return; }
                 }
 
-                if (event.altKey && event.key.toLowerCase() === 'w' && !isTypingTarget) {
+                if (isTypingTarget) return;
+
+                // Show keyboard shortcut modal
+                if (event.key === '?' && !event.altKey && !event.ctrlKey && !event.metaKey) {
+                    event.preventDefault();
+                    openKbdModal();
+                    return;
+                }
+
+                // Alt + T — new tab
+                if (event.altKey && event.key.toLowerCase() === 't') {
+                    event.preventDefault();
+                    createSearchTab('', true);
+                    return;
+                }
+                // Alt + W — close tab
+                if (event.altKey && event.key.toLowerCase() === 'w') {
                     event.preventDefault();
                     closeActiveTab();
+                    return;
+                }
+                // Alt + S — focus search input
+                if (event.altKey && event.key.toLowerCase() === 's') {
+                    event.preventDefault();
+                    const topicInput = document.getElementById('topic');
+                    if (topicInput) { topicInput.focus(); topicInput.select(); }
+                    return;
+                }
+
+                // Number keys 1-4 — switch result panel (only when results visible)
+                const resultsEl = document.getElementById('results');
+                if (resultsEl && resultsEl.style.display !== 'none') {
+                    const panelMap = { '1': 'papers', '2': 'citations', '3': 'gaps', '4': 'contradictions' };
+                    if (panelMap[event.key] && !event.altKey && !event.ctrlKey && !event.metaKey) {
+                        event.preventDefault();
+                        switchResultsTab(panelMap[event.key]);
+                        return;
+                    }
                 }
             });
 
@@ -2109,6 +3085,55 @@
             document.querySelectorAll('input[name="journalMode"]').forEach(radio => {
                 radio.addEventListener('change', applyAllFilters);
             });
+
+            // === NEW FEATURE HANDLERS ===
+
+            // Keyboard shortcut modal open/close
+            document.getElementById('kbdOpenBtn').addEventListener('click', openKbdModal);
+            document.getElementById('kbdCloseBtn').addEventListener('click', closeKbdModal);
+            document.getElementById('kbdOverlay').addEventListener('click', function(e) {
+                if (e.target === this) closeKbdModal();
+            });
+
+            // Results tab bar
+            initResultsTabs();
+
+            // Session restore/dismiss
+            document.getElementById('restoreSessionBtn').addEventListener('click', doRestoreSession);
+            document.getElementById('dismissSessionBtn').addEventListener('click', function() {
+                document.getElementById('sessionBanner').classList.remove('show');
+            });
+
+            // Bookmarks nav button
+            document.getElementById('bmNavBtn').addEventListener('click', function() {
+                const panel = document.getElementById('bookmarksPanel');
+                const showBtn = document.getElementById('showBookmarksBtn');
+                if (panel) {
+                    panel.classList.toggle('show');
+                    if (panel.classList.contains('show')) renderBookmarksPanel();
+                }
+            });
+
+            // Show bookmarks button (in papers header)
+            document.getElementById('showBookmarksBtn').addEventListener('click', function() {
+                const panel = document.getElementById('bookmarksPanel');
+                if (panel) {
+                    panel.classList.toggle('show');
+                    if (panel.classList.contains('show')) renderBookmarksPanel();
+                }
+            });
+
+            // Clear all bookmarks
+            document.getElementById('clearBookmarksBtn').addEventListener('click', function() {
+                saveBookmarks([]);
+                renderBookmarksPanel();
+                updateBookmarkUI();
+                displayPapers();
+                showNotification('All bookmarks cleared.', 'info', 2000);
+            });
+
+            // Reading progress bar
+            window.addEventListener('scroll', updateReadingProgress, { passive: true });
         }
 
         initializeEventHandlers();
@@ -2116,6 +3141,8 @@
         createSearchTab('', true, false);
         loadFiltersForActiveTab();
         updateFilterStats();
+        updateBookmarkUI();
+        tryRestoreSession();
         loadSharedResearchSnapshot();
     </script>
 </body>

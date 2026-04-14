@@ -14,7 +14,12 @@ import concurrent.futures
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), 'src'))
 
 from src.research_system import AutonomousResearchSystem
-from src.agents.literature_builder_agent import LiteratureBuilderAgent
+
+# Lazy import — module may not be present in all deployments
+try:
+    from src.agents.literature_builder_agent import LiteratureBuilderAgent
+except ModuleNotFoundError:
+    LiteratureBuilderAgent = None
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'research-system-secret-key'
@@ -176,6 +181,8 @@ def run_literature_generation(topic: str, filters: dict):
         
         # Generate literature
         app.logger.info("Starting literature generation...")
+        if LiteratureBuilderAgent is None:
+            raise RuntimeError("LiteratureBuilderAgent is not available in this installation.")
         literature_agent = LiteratureBuilderAgent()
         literature_document = loop.run_until_complete(literature_agent.process(research_results))
         
@@ -239,6 +246,12 @@ def literature_page():
 def reference_validator_page():
     """Reference validator page."""
     return render_template('reference_validator.html')
+
+
+@app.route('/citations')
+def citations_page():
+    """Enhanced citations page."""
+    return render_template('enhanced_citations.html')
 
 
 @app.route('/corrections-details')
