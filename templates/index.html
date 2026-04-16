@@ -777,34 +777,32 @@
         .year-bar:hover { filter: brightness(1.2); }
         .year-bar-lbl { font-size: 0.6rem; color: #94a3b8; white-space: nowrap; transform: rotate(-50deg) translateX(-4px); transform-origin: top right; }
 
-        /* ===== KEYBOARD SHORTCUT MODAL ===== */
-        .kbd-overlay {
-            display: none; position: fixed; inset: 0; z-index: 3000;
-            background: rgba(0,0,0,0.52); backdrop-filter: blur(6px);
-            align-items: center; justify-content: center;
-        }
-        .kbd-overlay.show { display: flex; }
-        .kbd-modal {
-            background: var(--card-bg); border: 1px solid var(--border-color);
-            border-radius: 22px; padding: 28px 32px; max-width: 460px; width: 92%;
-            box-shadow: 0 32px 64px rgba(0,0,0,0.35), var(--panel-glow);
-            animation: kbdIn 0.22s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        @keyframes kbdIn { from { transform: scale(0.88); opacity: 0; } to { transform: scale(1); opacity: 1; } }
-        .kbd-modal-title {
-            font-size: 1.1rem; font-weight: 800; margin-bottom: 18px;
-            display: flex; align-items: center; justify-content: space-between;
-        }
-        .kbd-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 0; border-bottom: 1px solid var(--border-color); font-size: 0.88rem; gap: 10px;
-        }
-        .kbd-row:last-child { border-bottom: none; padding-bottom: 0; }
-        .kbd-key {
-            background: var(--soft-bg); border: 1px solid var(--border-color);
-            border-radius: 7px; padding: 3px 10px; font-family: monospace;
-            font-size: 0.8rem; font-weight: 700; color: var(--text-color);
-            box-shadow: 0 2px 0 var(--border-color); white-space: nowrap; flex-shrink: 0;
+        /* ===== MOBILE RESPONSIVE ===== */
+        @media (max-width: 767px) {
+            .container { padding-left: 14px !important; padding-right: 14px !important; }
+            .search-card-premium { padding: 20px 16px !important; }
+            .filter-section { padding: 16px !important; }
+            .hero-section { padding: 40px 0 50px !important; }
+            .navbar-premium .container { padding-left: 12px !important; padding-right: 12px !important; }
+            .paper-card { padding: 12px !important; overflow: visible !important; }
+            .paper-card .d-flex.justify-content-between { flex-wrap: wrap !important; }
+            .paper-card .d-flex.flex-column.align-items-end {
+                flex-direction: row !important; align-items: center !important;
+                width: 100% !important; margin-left: 0 !important; margin-top: 10px !important;
+                justify-content: space-between !important;
+            }
+            .relevance-bar-wrap { min-width: 80px !important; }
+            .feat-card { padding: 20px !important; }
+            .filter-card { margin-bottom: 10px !important; }
+            .tab-toolbar { flex-wrap: wrap !important; gap: 8px !important; }
+            .tab-toolbar .btn { font-size: 0.8rem !important; padding: 7px 11px !important; }
+            .results-tabs-wrap { gap: 2px !important; padding: 4px !important; }
+            .res-tab-btn { padding: 7px 10px !important; font-size: 0.78rem !important; }
+            .features-wrap { padding: 28px 0 20px !important; }
+            .hero-stats-row { gap: 8px !important; }
+            .hero-stat-pill { padding: 8px 12px !important; }
+            .row.mt-4 { margin-top: 14px !important; }
+            .card-body { padding: 14px !important; }
         }
 
         /* ===== SESSION RESTORE BANNER ===== */
@@ -858,26 +856,7 @@
     <!-- Reading Progress Bar -->
     <div id="readingProgress"></div>
 
-    <!-- Keyboard Shortcut Modal -->
-    <div class="kbd-overlay" id="kbdOverlay" role="dialog" aria-modal="true" aria-label="Keyboard Shortcuts">
-        <div class="kbd-modal">
-            <div class="kbd-modal-title">
-                <span><i class="fas fa-keyboard me-2 text-primary"></i>Keyboard Shortcuts</span>
-                <button class="btn btn-sm btn-outline-secondary" id="kbdCloseBtn"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="kbd-row"><span>Open new research tab</span><span class="kbd-key">Alt + T</span></div>
-            <div class="kbd-row"><span>Close active tab</span><span class="kbd-key">Alt + W</span></div>
-            <div class="kbd-row"><span>Focus search input</span><span class="kbd-key">Alt + S</span></div>
-            <div class="kbd-row"><span>View Papers panel</span><span class="kbd-key">1</span></div>
-            <div class="kbd-row"><span>View Citations panel</span><span class="kbd-key">2</span></div>
-            <div class="kbd-row"><span>View Research Gaps panel</span><span class="kbd-key">3</span></div>
-            <div class="kbd-row"><span>View Contradictions panel</span><span class="kbd-key">4</span></div>
-            <div class="kbd-row"><span>Show this overlay</span><span class="kbd-key">?</span></div>
-            <div class="kbd-row"><span>Dismiss modal</span><span class="kbd-key">Esc</span></div>
-        </div>
-    </div>
-
-    <div id="notificationStack" class="notification-stack" aria-live="polite" aria-atomic="true"></div>
+<div id="notificationStack" class="notification-stack" aria-live="polite" aria-atomic="true"></div>
 
     <!-- Premium Navbar -->
     <nav class="navbar navbar-dark navbar-premium">
@@ -903,9 +882,6 @@
                 <a href="/citations" class="nav-pill-btn btn">
                     <i class="fas fa-quote-right me-1"></i> Citations
                 </a>
-                <button class="nav-pill-btn btn" id="kbdOpenBtn" type="button" title="Keyboard Shortcuts (?)">
-                    <i class="fas fa-keyboard"></i>
-                </button>
             </div>
         </div>
     </nav>
@@ -2968,11 +2944,7 @@
             if (bar) bar.style.width = pct + '%';
         }
 
-        // ===== KEYBOARD SHORTCUT MODAL =====
-        function openKbdModal() { document.getElementById('kbdOverlay').classList.add('show'); }
-        function closeKbdModal() { document.getElementById('kbdOverlay').classList.remove('show'); }
-
-        function initializeEventHandlers() {
+function initializeEventHandlers() {
             document.getElementById('themeToggleBtn').addEventListener('click', toggleTheme);
             document.getElementById('shareResearchBtn').addEventListener('click', () => generateResearchShareLink('research'));
             document.getElementById('copyShareLinkBtn').addEventListener('click', async () => {
@@ -3012,21 +2984,8 @@
                     target.tagName === 'TEXTAREA' ||
                     target.isContentEditable
                 );
-                const kbdOpen = document.getElementById('kbdOverlay').classList.contains('show');
-
-                // Dismiss kbd modal
-                if (event.key === 'Escape') {
-                    if (kbdOpen) { closeKbdModal(); return; }
-                }
 
                 if (isTypingTarget) return;
-
-                // Show keyboard shortcut modal
-                if (event.key === '?' && !event.altKey && !event.ctrlKey && !event.metaKey) {
-                    event.preventDefault();
-                    openKbdModal();
-                    return;
-                }
 
                 // Alt + T — new tab
                 if (event.altKey && event.key.toLowerCase() === 't') {
@@ -3039,24 +2998,6 @@
                     event.preventDefault();
                     closeActiveTab();
                     return;
-                }
-                // Alt + S — focus search input
-                if (event.altKey && event.key.toLowerCase() === 's') {
-                    event.preventDefault();
-                    const topicInput = document.getElementById('topic');
-                    if (topicInput) { topicInput.focus(); topicInput.select(); }
-                    return;
-                }
-
-                // Number keys 1-4 — switch result panel (only when results visible)
-                const resultsEl = document.getElementById('results');
-                if (resultsEl && resultsEl.style.display !== 'none') {
-                    const panelMap = { '1': 'papers', '2': 'citations', '3': 'gaps', '4': 'contradictions' };
-                    if (panelMap[event.key] && !event.altKey && !event.ctrlKey && !event.metaKey) {
-                        event.preventDefault();
-                        switchResultsTab(panelMap[event.key]);
-                        return;
-                    }
                 }
             });
 
@@ -3086,15 +3027,6 @@
                 radio.addEventListener('change', applyAllFilters);
             });
 
-            // === NEW FEATURE HANDLERS ===
-
-            // Keyboard shortcut modal open/close
-            document.getElementById('kbdOpenBtn').addEventListener('click', openKbdModal);
-            document.getElementById('kbdCloseBtn').addEventListener('click', closeKbdModal);
-            document.getElementById('kbdOverlay').addEventListener('click', function(e) {
-                if (e.target === this) closeKbdModal();
-            });
-
             // Results tab bar
             initResultsTabs();
 
@@ -3107,10 +3039,19 @@
             // Bookmarks nav button
             document.getElementById('bmNavBtn').addEventListener('click', function() {
                 const panel = document.getElementById('bookmarksPanel');
-                const showBtn = document.getElementById('showBookmarksBtn');
                 if (panel) {
+                    // Ensure results section is visible so panel can be seen
+                    const resultsEl = document.getElementById('results');
+                    if (resultsEl && resultsEl.style.display === 'none') {
+                        showNotification('Run a research search first to see bookmarks here.', 'info', 3000);
+                        return;
+                    }
+                    const wasHidden = !panel.classList.contains('show');
                     panel.classList.toggle('show');
-                    if (panel.classList.contains('show')) renderBookmarksPanel();
+                    if (panel.classList.contains('show')) {
+                        renderBookmarksPanel();
+                        panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
                 }
             });
 
