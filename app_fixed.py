@@ -389,6 +389,12 @@ def _get_paper_url(paper):
         return ""
 
 
+@app.route('/ping')
+def ping():
+    """Health check endpoint for uptime monitoring."""
+    return jsonify({'status': 'ok'}), 200
+
+
 @app.route('/')
 def index():
     """Main page."""
